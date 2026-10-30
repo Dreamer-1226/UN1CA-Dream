@@ -47,14 +47,27 @@ final class ApiProviderClient {
         }
     }
 
-    String generate(String prompt, int maxTokens, long deadline, String requestId) throws Exception {
+    String route(boolean screening) throws IOException {
+        if(!available())return "default";
+        try{Bundle b=context.getContentResolver().call(URI,"backend_config",null,null);
+            if(b==null)throw new IOException("backend_unavailable");
+            return b.getString(screening?"screening_backend":"backend","default");
+        }catch(Exception e){throw new IOException("backend_unavailable",e);}
+    }
+
+    String generate(String prompt, int maxTokens, long deadline, String requestId, String backend) throws Exception {
         if (SystemClock.elapsedRealtime() >= deadline) throw new IOException("deadline");
         Bundle extras = new Bundle();
+        extras.putString("backend",backend);
         extras.putString("prompt", prompt);
         extras.putString("request_id", requestId);
         extras.putLong("deadline", deadline);
         extras.putInt("max_tokens", maxTokens);
-        Bundle result = context.getContentResolver().call(URI, "generate", null, extras);
+        java.util.concurrent.Future<Bundle> pending=REQUESTS.submit(()->context.getContentResolver().call(URI,"generate",null,extras));
+        Bundle result;
+        try{result=pending.get(Math.max(1,deadline-SystemClock.elapsedRealtime()),java.util.concurrent.TimeUnit.MILLISECONDS);}
+        catch(java.util.concurrent.TimeoutException e){pending.cancel(true);cancel(requestId);throw new IOException("deadline");}
+        catch(InterruptedException e){pending.cancel(true);cancel(requestId);Thread.currentThread().interrupt();throw new IOException("cancelled");}
         if (result == null) throw new IOException("api_unavailable");
         String status = result.getString("status", "api_unavailable");
         String content = result.getString("content");
@@ -62,11 +75,12 @@ final class ApiProviderClient {
         return content;
     }
 
+    private static final java.util.concurrent.ExecutorService REQUESTS=new java.util.concurrent.ThreadPoolExecutor(0,2,30,java.util.concurrent.TimeUnit.SECONDS,new java.util.concurrent.SynchronousQueue<Runnable>());
+    private static final java.util.concurrent.ExecutorService CANCEL=java.util.concurrent.Executors.newSingleThreadExecutor();
     void cancel(String requestId) {
         if (requestId == null || requestId.isEmpty()) return;
         Bundle extras = new Bundle();
         extras.putString("request_id", requestId);
-        try { context.getContentResolver().call(URI, "cancel", null, extras); }
-        catch (Exception ignored) { }
+        CANCEL.execute(()->{try { context.getContentResolver().call(URI, "cancel", null, extras); } catch (Exception ignored) { }});
     }
 }

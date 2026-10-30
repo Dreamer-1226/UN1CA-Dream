@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 /** OpenAI-compatible, non-streaming chat completion transport. Prompts and keys are never logged. */
 final class ApiClient {
+    private static final java.util.concurrent.ScheduledExecutorService TIMER=java.util.concurrent.Executors.newSingleThreadScheduledExecutor();
     private static final int MAX_RESPONSE_BYTES = 262144;
     private static final int MAX_OUTPUT_CHARS = 8192;
     private static final Map<String, HttpURLConnection> ACTIVE = new HashMap<>();
@@ -29,7 +30,7 @@ final class ApiClient {
     }
 
     static String complete(Context context, String systemPrompt, String userPrompt,
-            int maxTokens, long deadline, String requestId) throws Exception {
+            int maxTokens, long deadline, String requestId, String backend) throws Exception {
         if (userPrompt == null || userPrompt.isEmpty() || userPrompt.length() > 16000
                 || maxTokens < 1 || maxTokens > 2048 || requestId == null || requestId.isEmpty())
             throw new ApiException("invalid_request");
@@ -37,7 +38,7 @@ final class ApiClient {
         long remaining = deadline - SystemClock.elapsedRealtime();
         if (remaining < 1) throw new ApiException("deadline");
 
-        ApiSettingsStore.Settings settings = ApiSettingsStore.read(context);
+        ApiSettingsStore.Settings settings = ApiSettingsStore.forBackend(context,backend);
         if (!settings.ready()) throw new ApiException("api_unconfigured");
         ApiSettingsStore.validateEndpoint(settings.endpoint);
 
@@ -57,7 +58,9 @@ final class ApiClient {
             if (ACTIVE.containsKey(requestId)) throw new ApiException("duplicate_request");
             ACTIVE.put(requestId, connection);
         }
+        java.util.concurrent.ScheduledFuture<?> expiry=TIMER.schedule(()->connection.disconnect(),Math.max(1,deadline-SystemClock.elapsedRealtime()),java.util.concurrent.TimeUnit.MILLISECONDS);
         try {
+            if(SystemClock.elapsedRealtime()>=deadline)throw new ApiException("deadline");
             connection.setInstanceFollowRedirects(false);
             connection.setConnectTimeout((int) Math.max(1, Math.min(10000, remaining)));
             connection.setReadTimeout((int) Math.max(1, Math.min(45000, remaining)));
@@ -88,6 +91,8 @@ final class ApiClient {
             JSONObject result = new JSONObject(new String(response, StandardCharsets.UTF_8));
             JSONArray choices = result.optJSONArray("choices");
             JSONObject choice = choices == null || choices.length() == 0 ? null : choices.optJSONObject(0);
+            if(choice==null||!"stop".equals(choice.optString("finish_reason")))throw new ApiException("incomplete_output");
+            if(SystemClock.elapsedRealtime()>=deadline)throw new ApiException("deadline");
             JSONObject message = choice == null ? null : choice.optJSONObject("message");
             String content = message == null ? null : message.optString("content", null);
             if (content == null) throw new ApiException("invalid_response");
@@ -104,6 +109,7 @@ final class ApiClient {
         } catch (Exception failure) {
             throw new ApiException("invalid_response");
         } finally {
+            expiry.cancel(false);
             synchronized (ACTIVE) { if (ACTIVE.get(requestId) == connection) ACTIVE.remove(requestId); }
             connection.disconnect();
         }

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Sourced by Rezoss customize.sh only for the opt-in dm3q configuration.
 NUDGE_ROOT="$MODPATH/aioskernel/native-now-nudge"
-LOG "- Build AIOS V73 runtime for the user-configured API backend"
+LOG "- Build AIOS V73 runtime for the local Qwen default and optional API backend"
 NUDGE_BUILD=$(mktemp -d "$TMP_DIR/native-nudge.XXXXXX") || return 1
 EVAL "bash \"$NUDGE_ROOT/build_rom_backend.sh\" \"$NUDGE_BUILD/AIOSKernelService.apk\"" || return 1
 mkdir -p "$NUDGE_BUILD/system/priv-app/AIOSKernelService" || return 1
@@ -28,7 +28,7 @@ ADD_TO_WORK_DIR "pa2qxxx" "system" "system/etc/sysconfig/aioskernelservice.xml" 
 LOG "- Native Now Nudge requires the later OfflineLanguageModel 4.0.01.24 update"
 # Remove the previous bundled weights when rebuilding an existing work tree.
 DELETE_FROM_WORK_DIR "system" "system/etc/unica/now-nudge-v73" || return 1
-LOG "- Install and configure QWEN_LLM_rezoss.apk (io.mesalabs.rezoss.qwen) before generating"
+LOG "- Combined QWEN package supplies verified local assets and optional API settings"
 SET_PROP "system" "ro.unica.now_nudge_v73" "1" || return 1
 SET_PROP "system" "persist.sys.unica.enable_aioskernelservice" "1" || return 1
 unset NUDGE_ROOT NUDGE_BUILD NUDGE_LIB NUDGE_DIR

@@ -991,7 +991,17 @@ ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/priv-app/RezossAI/
 SET_METADATA "system" "system/priv-app/RezossAI" 0 0 755 "u:object_r:system_file:s0"
 SET_METADATA "system" "system/priv-app/RezossAI/RezossAI.apk" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/etc/default-permissions/default-permissions-unica-local-summary.xml" 0 0 644 "u:object_r:system_file:s0"
-LOG "- Build updatable Rezoss AI permission stub (API app uses the same package)"
+if [[ "$UNICA_ENABLE_NATIVE_NOW_NUDGE" == true ]]; then
+    LOG "- Build local Qwen model and optional API settings app"
+    QWEN_COMBINED_DIR=$(mktemp -d "$TMP_DIR/qwen-combined.XXXXXX") || return 1
+    EVAL "bash \"$MODPATH/qwen-llm/app/build.sh\" \"$QWEN_COMBINED_DIR/QWEN_LLM_rezoss_stub.apk\"" || return 1
+    mkdir -p "$QWEN_COMBINED_DIR/system/priv-app/QWEN_LLM_rezoss_stub" || return 1
+    mv "$QWEN_COMBINED_DIR/QWEN_LLM_rezoss_stub.apk" "$QWEN_COMBINED_DIR/system/priv-app/QWEN_LLM_rezoss_stub/" || return 1
+    ADD_TO_WORK_DIR "$QWEN_COMBINED_DIR" "system" "system/priv-app/QWEN_LLM_rezoss_stub/QWEN_LLM_rezoss_stub.apk" 0 0 644 "u:object_r:system_file:s0" || return 1
+    SET_METADATA "system" "system/priv-app/QWEN_LLM_rezoss_stub" 0 0 755 "u:object_r:system_file:s0"
+    unset QWEN_COMBINED_DIR
+else
+LOG "- Build updatable Rezoss AI permission stub (local model and API app use the same package)"
 QWEN_STUB_DIR="$MODPATH/qwen-llm/system-stub"
 QWEN_STUB_APK="$MODPATH/qwen-llm/system/priv-app/QWEN_LLM_rezoss_stub/QWEN_LLM_rezoss_stub.apk"
 EVAL "bash \"$QWEN_STUB_DIR/build.sh\" \"$QWEN_STUB_APK\""
@@ -999,13 +1009,14 @@ ADD_TO_WORK_DIR "$MODPATH/qwen-llm" "system" "system/priv-app/QWEN_LLM_rezoss_st
 SET_METADATA "system" "system/priv-app/QWEN_LLM_rezoss_stub" 0 0 755 "u:object_r:system_file:s0"
 SET_METADATA "system" "system/priv-app/QWEN_LLM_rezoss_stub/QWEN_LLM_rezoss_stub.apk" 0 0 644 "u:object_r:system_file:s0"
 unset QWEN_STUB_APK QWEN_STUB_DIR
-# The separately installed API app stores the user's endpoint, model, and key.
+fi
+# The combined app holds local model assets and private optional API settings.
 # Remove legacy payloads from incremental builds; keep only the bridge.
 DELETE_FROM_WORK_DIR "system" "system/bin/unica-summary-llama"
 DELETE_FROM_WORK_DIR "system" "system/bin/unica-summary-llama-server"
 DELETE_FROM_WORK_DIR "system" "system/etc/unica/local-summary/qwen2.5-0.5b-instruct-q4_k_m.gguf"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/sysconfig/rezoss-ai-associations.xml" 0 0 644 "u:object_r:system_file:s0"
-LOG "- Install out/archived/QWEN_LLM/QWEN_LLM_rezoss.apk, then open Rezoss AI to configure the API"
+LOG "- Native dm3q: local Qwen included; optional APIs in UN1CA Extra Settings > AI backend settings"
 LOCAL_SUMMARY_ALLOWLIST="$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml"
 if ! grep -q -F 'package="io.mesalabs.unica.localsummary"' "$LOCAL_SUMMARY_ALLOWLIST"; then
     EVAL "LC_ALL=C patch --batch --fuzz=0 -p1 -d \"$WORK_DIR/system/system/etc/sysconfig\" < \"$LOCAL_SUMMARY_SERVICE_DIR/allowed-system-preload-apps.xml/0001-Allow-UN1CA-local-summary-provider.patch\"" \
