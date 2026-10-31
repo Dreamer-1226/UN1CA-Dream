@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
@@ -30,6 +31,15 @@ public final class SettingsActivity extends Activity {
     private EditText apiKey;
     private TextView keyState;
     private Spinner provider;
+    private Switch local;
+    private TextView localState;
+    private final Runnable refreshLocal = new Runnable() {
+        @Override public void run() {
+            if (isFinishing() || localState == null) return;
+            localState.setText(localStatus());
+            main.postDelayed(this, 1000);
+        }
+    };
     private final ExecutorService storage = Executors.newSingleThreadExecutor();
     private final Handler main = new Handler(Looper.getMainLooper());
 
@@ -54,6 +64,21 @@ public final class SettingsActivity extends Activity {
         description.setTextSize(14);
         description.setPadding(0, dp(12), 0, dp(18));
         page.addView(description, matchWrap());
+
+        local = new Switch(this);
+        local.setText("Run on this device (Qwen2.5-1.5B, no API)");
+        local.setTextSize(16);
+        local.setPadding(0, dp(4), 0, dp(4));
+        page.addView(local, matchWrap());
+        localState = new TextView(this);
+        localState.setTextSize(12);
+        localState.setPadding(0, 0, 0, dp(12));
+        page.addView(localState, matchWrap());
+        local.setChecked(ApiSettingsStore.local(this));
+        local.setOnCheckedChangeListener((button, enabled) -> {
+            storage.execute(() -> ApiSettingsStore.setLocal(this, enabled));
+            localState.setText(localStatus());
+        });
 
         addLabel(page, "Provider");
         provider = new Spinner(this);
@@ -106,6 +131,30 @@ public final class SettingsActivity extends Activity {
             }
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
+    }
+
+    private String localStatus() {
+        LocalEngine engine = LocalEngine.get(this);
+        String status = engine.status();
+        String text;
+        if (status.equals("ready") || status.equals("running")) text = "On-device model ready.";
+        else if (status.startsWith("preparing")) text = "Preparing the on-device model (" + status.substring(10) + "). Keep the app open.";
+        else if (status.equals("not_prepared")) text = "Model pack installed. Turn this on to prepare it (about 1.1 GB).";
+        else if (status.equals("model_missing")) text = "Install QWEN_LLM_rezoss_model.apk to use the on-device model. After it is prepared you can uninstall the pack.";
+        else text = "On-device model unavailable (" + status + ").";
+        boolean on = local != null && local.isChecked();
+        return (on ? "Replies and summaries run on this device; nothing is sent to an API. "
+                : "Off: the API below is used. ") + text;
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        main.post(refreshLocal);
+    }
+
+    @Override protected void onPause() {
+        main.removeCallbacks(refreshLocal);
+        super.onPause();
     }
 
     private static String endpointFor(int position) {

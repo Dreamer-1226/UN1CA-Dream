@@ -37,7 +37,7 @@ public final class ApiProvider extends ContentProvider {
             return result;
         }
         if ("cancel".equals(method)) {
-            ApiClient.cancel(extras == null ? null : extras.getString("request_id"));
+            ApiClient.cancel(getContext(), extras == null ? null : extras.getString("request_id"));
             result.putBoolean("cancelled", true);
             return result;
         }

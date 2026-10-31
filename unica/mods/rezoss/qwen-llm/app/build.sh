@@ -13,11 +13,16 @@ javac -source 8 -target 8 -Xlint:-options -classpath "$SDK/platforms/android-37.
     -d "$WORK/classes" "$ROOT"/java/io/mesalabs/rezoss/qwen/*.java
 jar cf "$WORK/classes.jar" -C "$WORK/classes" .
 "$TOOLS/d8" --min-api 30 --lib "$SDK/platforms/android-37.0/android.jar" --output "$WORK/dex" "$WORK/classes.jar"
-"$TOOLS/aapt2" link --manifest "$ROOT/AndroidManifest.xml" -I "$SDK/platforms/android-37.0/android.jar" -o "$WORK/base.apk"
+"$TOOLS/aapt2" compile --dir "$ROOT/res" -o "$WORK/res.zip"
+"$TOOLS/aapt2" link --manifest "$ROOT/AndroidManifest.xml" -I "$SDK/platforms/android-37.0/android.jar" \
+    -R "$WORK/res.zip" -o "$WORK/base.apk"
 cp "$WORK/dex/classes.dex" "$WORK/"
+# On-device backend: the same llama.cpp server the ROM's summary service ships.
+mkdir -p "$WORK/lib/arm64-v8a"
+cp "$ROOT/../../local-summary-service/system/bin/unica-summary-llama-server" "$WORK/lib/arm64-v8a/librezoss_llama.so"
 (
     cd "$WORK"
-    zip -q -0 base.apk classes.dex
+    zip -q -0 base.apk classes.dex lib/arm64-v8a/librezoss_llama.so
 )
 "$TOOLS/zipalign" -P 16 -f 4 "$WORK/base.apk" "$WORK/aligned.apk"
 CERT=aosp
@@ -42,12 +47,12 @@ GIT_COMMIT=$(git -C "$SRC_DIR" rev-parse --short=12 HEAD 2>/dev/null || true)
 VERSION_FILE="$OUTPUT.version"
 {
     printf "package=io.mesalabs.rezoss.qwen\n"
-    printf "versionCode=7\n"
-    printf "versionName=3.0-api\n"
+    printf "versionCode=8\n"
+    printf "versionName=3.1-api-local\n"
     printf "apk=%s\n" "$OUTPUT"
     printf "sizeBytes=%s\n" "$APK_SIZE"
     printf "sha256=%s\n" "$APK_SHA256"
-    printf "backend=openai-compatible-chat-completions\n"
+    printf "backend=openai-compatible-chat-completions,local-llama-cpp\n"
     printf "credentialStorage=android-keystore-aes-gcm\n"
     printf "builtAtUtc=%s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     [[ -n "$GIT_COMMIT" ]] && printf "sourceCommit=%s\n" "$GIT_COMMIT"

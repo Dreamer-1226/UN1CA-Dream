@@ -36,7 +36,8 @@ public final class EngineService extends Service {
             input = data.getString("input", "");
             summary = data.getBoolean("summary");
             foreground = data.getBoolean("foreground");
-            deadline = Math.min(data.getLong("deadline", 0), SystemClock.elapsedRealtime() + 30000);
+            // Summaries get more time so the on-device model can finish long threads.
+            deadline = Math.min(data.getLong("deadline", 0), SystemClock.elapsedRealtime() + (summary ? 75000 : 30000));
         }
         void cancel(String reason) {
             if (cancellation != null) return;

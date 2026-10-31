@@ -42,7 +42,7 @@ final class ApiEngine {
             user = messages.toString().replace("<|", "< |").replace("|>", "| >");
             maxTokens = REPLY_OUTPUT_TOKENS;
         }
-        String raw = ApiClient.complete(context, system, user, maxTokens, deadline, requestId).trim();
+        String raw = ApiClient.complete(context, system, user, maxTokens, !summary, deadline, requestId).trim();
         if (raw.contains("<|") || raw.contains("<think>")) throw new ApiClient.ApiException("invalid_output");
         if (summary) {
             String result = raw.replaceAll("\\s+", " ");
@@ -67,7 +67,7 @@ final class ApiEngine {
         return replies.toString();
     }
 
-    void cancel(String requestId) { ApiClient.cancel(requestId); }
-    void cancel() { ApiClient.cancelAll(); }
-    void close() { ApiClient.cancelAll(); }
+    void cancel(String requestId) { ApiClient.cancel(context, requestId); }
+    void cancel() { ApiClient.cancelAll(context); }
+    void close() { ApiClient.cancelAll(context); }
 }

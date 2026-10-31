@@ -45,7 +45,19 @@ final class ApiSettingsStore {
                 prefs.getString("model", ""), "");
     }
 
+    /** True when generation should run on the device instead of the configured API. */
+    static boolean local(Context context) {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("local", false);
+    }
+
+    static void setLocal(Context context, boolean enabled) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean("local", enabled).apply();
+        if (enabled) LocalEngine.get(context).prepareAsync();
+        else LocalEngine.get(context).stop();
+    }
+
     static boolean configured(Context context) {
+        if (local(context)) return LocalEngine.get(context).usable();
         try {
             Settings settings = read(context);
             validateEndpoint(settings.endpoint);

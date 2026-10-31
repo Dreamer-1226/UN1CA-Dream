@@ -30,12 +30,20 @@ final class ApiClient {
 
     static String complete(Context context, String systemPrompt, String userPrompt,
             int maxTokens, long deadline, String requestId) throws Exception {
+        return complete(context, systemPrompt, userPrompt, maxTokens, false, deadline, requestId);
+    }
+
+    /** jsonReplies constrains the on-device model to the reply JSON object; APIs ignore it. */
+    static String complete(Context context, String systemPrompt, String userPrompt,
+            int maxTokens, boolean jsonReplies, long deadline, String requestId) throws Exception {
         if (userPrompt == null || userPrompt.isEmpty() || userPrompt.length() > 16000
                 || maxTokens < 1 || maxTokens > 2048 || requestId == null || requestId.isEmpty())
             throw new ApiException("invalid_request");
         if (Thread.currentThread().isInterrupted()) throw new ApiException("cancelled");
         long remaining = deadline - SystemClock.elapsedRealtime();
         if (remaining < 1) throw new ApiException("deadline");
+        if (ApiSettingsStore.local(context))
+            return LocalEngine.get(context).complete(systemPrompt, userPrompt, maxTokens, jsonReplies, deadline, requestId);
 
         ApiSettingsStore.Settings settings = ApiSettingsStore.read(context);
         if (!settings.ready()) throw new ApiException("api_unconfigured");
@@ -107,6 +115,16 @@ final class ApiClient {
             synchronized (ACTIVE) { if (ACTIVE.get(requestId) == connection) ACTIVE.remove(requestId); }
             connection.disconnect();
         }
+    }
+
+    static void cancel(Context context, String requestId) {
+        LocalEngine.get(context).cancel(requestId);
+        cancel(requestId);
+    }
+
+    static void cancelAll(Context context) {
+        LocalEngine.get(context).cancelAll();
+        cancelAll();
     }
 
     static void cancel(String requestId) {
