@@ -1,26 +1,51 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Build the user-configured API app used by the ROM inference bridge.
+# Build the settings/API app, with model assets only for the separate user APK.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 : "${SRC_DIR:?Source buildenv.sh dm3q first}"
-OUTPUT=${1:-$SRC_DIR/out/archived/QWEN_LLM/QWEN_LLM_rezoss.apk}
+OUTPUT=${1:-$SRC_DIR/out/archived/QWEN_LLM/QWEN_LLM_rezoss_v9.apk}
+MODE=${2:-full}
+[[ "$MODE" == full || "$MODE" == --stub ]] || { echo "Usage: build.sh [OUTPUT_APK] [--stub]" >&2; exit 1; }
 SDK=${ANDROID_HOME:-$HOME/Android/Sdk}; TOOLS=$SDK/build-tools/37.0.0
 WORK=$(mktemp -d /tmp/rezoss-api-app.XXXXXX)
 trap 'rm -rf "$WORK"' EXIT
 PAYLOAD=$ROOT/../../aioskernel/native-now-nudge/payload
-python3 "$ROOT/../../aioskernel/native-now-nudge/verify_payload.py" "$PAYLOAD"
+if [[ "$MODE" == full ]]; then
+    python3 "$ROOT/../../aioskernel/native-now-nudge/verify_payload.py" "$PAYLOAD"
+fi
 mkdir -p "$WORK/classes" "$WORK/dex"
 javac -source 8 -target 8 -Xlint:-options -classpath "$SDK/platforms/android-37.0/android.jar" \
     -d "$WORK/classes" "$ROOT"/java/io/mesalabs/rezoss/qwen/*.java
 jar cf "$WORK/classes.jar" -C "$WORK/classes" .
 "$TOOLS/d8" --min-api 30 --lib "$SDK/platforms/android-37.0/android.jar" --output "$WORK/dex" "$WORK/classes.jar"
-"$TOOLS/aapt2" link --manifest "$ROOT/AndroidManifest.xml" -I "$SDK/platforms/android-37.0/android.jar" -o "$WORK/base.apk"
+MANIFEST="$WORK/AndroidManifest.xml"
+python3 - "$ROOT/AndroidManifest.xml" "$MANIFEST" "$MODE" "${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}" "${TARGET_CODENAME:-dm3q}" "${UNICA_ENABLE_NATIVE_NOW_NUDGE:-true}" <<'MANIFEST_PY'
+from pathlib import Path
+import sys, xml.etree.ElementTree as ET
+source, output, mode, backend, target, native = sys.argv[1:]
+ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
+tree = ET.parse(source)
+if mode == '--stub':
+    root = tree.getroot()
+    root.set('{http://schemas.android.com/apk/res/android}versionCode', '1')
+    root.set('{http://schemas.android.com/apk/res/android}versionName', '3.2-stub')
+    if backend == 'gemma-gpu' and target == 'dm3q' and native == 'true':
+        root.set('{http://schemas.android.com/apk/res/android}versionCode', '10')
+        root.set('{http://schemas.android.com/apk/res/android}versionName', '3.3-gemma-api')
+    app = root.find('application')
+    for provider in list(app.findall('provider')):
+        if provider.get('{http://schemas.android.com/apk/res/android}name') == '.ModelProvider':
+            app.remove(provider)
+tree.write(output, encoding='utf-8', xml_declaration=True)
+MANIFEST_PY
+"$TOOLS/aapt2" link --manifest "$MANIFEST" -I "$SDK/platforms/android-37.0/android.jar" -o "$WORK/base.apk"
 cp "$WORK/dex/classes.dex" "$WORK/"
 (
     cd "$WORK"
     zip -q -0 base.apk classes.dex
 )
+if [[ "$MODE" == full ]]; then
 python3 - "$WORK" "$PAYLOAD" <<'PY'
 from pathlib import Path
 import json, shutil, sys, zipfile
@@ -39,6 +64,7 @@ with zipfile.ZipFile(work/'base.apk', 'a', compression=zipfile.ZIP_STORED, allow
         info[key+'_sha256'] = contents[prefix+filename]['sha256']
     z.writestr('assets/v73/model-info.json', json.dumps(info, sort_keys=True))
 PY
+fi
 "$TOOLS/zipalign" -P 16 -f 4 "$WORK/base.apk" "$WORK/aligned.apk"
 CERT=aosp
 if ${ROM_IS_OFFICIAL:-false}; then CERT=unica; fi
@@ -60,14 +86,28 @@ APK_SHA256=${APK_SHA256_LINE%% *}
 APK_SIZE=$(stat -c %s "$OUTPUT")
 GIT_COMMIT=$(git -C "$SRC_DIR" rev-parse --short=12 HEAD 2>/dev/null || true)
 VERSION_FILE="$OUTPUT.version"
+read -r VERSION_CODE VERSION_NAME < <(python3 - "$MANIFEST" <<'VERSION_PY'
+import sys, xml.etree.ElementTree as ET
+root = ET.parse(sys.argv[1]).getroot()
+ns = '{http://schemas.android.com/apk/res/android}'
+print(root.get(ns+'versionCode'), root.get(ns+'versionName'))
+VERSION_PY
+)
 {
     printf "package=io.mesalabs.rezoss.qwen\n"
-    printf "versionCode=8\n"
-    printf "versionName=3.1-local-api\n"
+    printf "versionCode=%s\n" "$VERSION_CODE"
+    printf "versionName=%s\n" "$VERSION_NAME"
     printf "apk=%s\n" "$OUTPUT"
     printf "sizeBytes=%s\n" "$APK_SIZE"
     printf "sha256=%s\n" "$APK_SHA256"
     printf "backend=local-v73-or-explicit-api\n"
+    printf "packaging=%s\n" "${MODE#--}"
+    printf "model=Qwen3-0.6B-SM8550-V73\n"
+    if [[ "$MODE" == full ]]; then
+        printf "modelAssets=included\n"
+    else
+        printf "modelAssets=separate-install-required\n"
+    fi
     printf "credentialStorage=android-keystore-aes-gcm\n"
     printf "builtAtUtc=%s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     [[ -n "$GIT_COMMIT" ]] && printf "sourceCommit=%s\n" "$GIT_COMMIT"

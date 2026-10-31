@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 /** Grouped, theme-aware settings launched from UN1CA Extra Settings. Keys stay in this app. */
 public final class SettingsActivity extends Activity {
     private static final String[] IDS={"default","openai","gemini","openrouter","custom"};
-    private static final String[] LABELS={"ROM default (local Qwen)","OpenAI API","Google Gemini API","OpenRouter API","Custom API"};
+    private final String[] LABELS={"ROM default (offline)","OpenAI API","Google Gemini API","OpenRouter API","Custom API"};
     private static final String[] URLS={"","https://api.openai.com/v1/chat/completions","https://generativelanguage.googleapis.com/v1beta/openai/chat/completions","https://openrouter.ai/api/v1/chat/completions",""};
     private final ExecutorService storage=Executors.newSingleThreadExecutor();
     private final Handler main=new Handler(Looper.getMainLooper());
@@ -28,10 +28,18 @@ public final class SettingsActivity extends Activity {
     private TextView active,backend,screening,endpointRow,modelRow,keyState;
     private String endpoint,model;
     private boolean dark;
+    private String localModelName(){
+        try{
+            android.content.pm.ApplicationInfo app=getPackageManager().getApplicationInfo("com.samsung.android.aioskernelservice",android.content.pm.PackageManager.GET_META_DATA);
+            if(app.metaData!=null){String name=app.metaData.getString("unica.local_model_name");if(name!=null&&!name.isEmpty())return name;}
+        }catch(android.content.pm.PackageManager.NameNotFoundException ignored){}
+        return "Qwen3";
+    }
     @Override public void onCreate(Bundle state){
         boolean night=(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES;
         setTheme(night?android.R.style.Theme_Material_NoActionBar:android.R.style.Theme_Material_Light_NoActionBar);
         super.onCreate(state);
+        String localModel=localModelName();LABELS[0]="ROM default ("+localModel+")";
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         dark=(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES;
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
@@ -45,7 +53,14 @@ public final class SettingsActivity extends Activity {
         active=row(routing,"",null);
         backend=row(routing,"Now Nudge, replies and summaries",()->choose(false));
         screening=row(routing,"Call Screening",()->choose(true));
-        note("ROM default uses Qwen3 on this phone, including offline. Cloud providers receive conversation or notification text only after you explicitly select an API backend. Call Screening has a short response deadline.");
+        if(localModel.startsWith("Gemma")){
+            row(routing,"Local model setup\nImport or prepare "+localModel,()->{
+                try{startActivity(new android.content.Intent().setClassName("com.samsung.android.aioskernelservice","io.mesalabs.rezoss.nudge.GemmaSetupActivity"));}
+                catch(android.content.ActivityNotFoundException e){error("Local model setup is unavailable. Check the AIOS installation.");}
+            });
+            note("ROM default runs "+localModel+" offline after importing the separate model file. First GPU preparation can take over ten seconds; prepare it before testing.");
+        }else note("ROM default uses Qwen3 offline after installing the separate QWEN model APK.");
+        note("Cloud providers receive conversation or notification text only after you explicitly select an API backend. Call Screening has a short response deadline.");
         LinearLayout config=card(transparent);
         row(config,"Configure API provider",this::provider);
         endpointRow=row(config,"",()->edit(false));modelRow=row(config,"",()->edit(true));

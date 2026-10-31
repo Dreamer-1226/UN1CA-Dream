@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.mesalabs.rezoss.qwen" android:versionCode="8" android:versionName="3.1-local-api">
+    package="io.mesalabs.rezoss.qwen" android:versionCode="9" android:versionName="3.2-local-api">
     <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="36" />
     <permission android:name="io.mesalabs.rezoss.permission.QWEN_ENGINE" android:protectionLevel="signature|knownSigner" android:knownCerts="34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42" />
     <permission android:name="io.mesalabs.rezoss.permission.QWEN_API" android:protectionLevel="signature|knownSigner" android:knownCerts="34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42" />
