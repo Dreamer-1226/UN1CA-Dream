@@ -115,6 +115,11 @@ final class ApiClient {
         }
     }
 
+    static void cancel(Context context, String requestId) {
+        LocalEngine.get(context).cancel(requestId);
+        cancel(requestId);
+    }
+
     static void cancel(String requestId) {
         if (requestId == null || requestId.isEmpty()) return;
         HttpURLConnection connection;

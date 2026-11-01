@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Build the default local GPU backend; retain an explicit Qwen source rollback.
+# Build the local AIOS backend: runtime-selectable Gemma/Qwen by default,
+# with single-engine Gemma GPU and Qwen builds kept for rollback.
 set -euo pipefail
 : "${SRC_DIR:?Source buildenv.sh <target> first}"
 OUTPUT=${1:?Usage: build_rom_backend.sh NEW_OUTPUT_APK}
 [[ ! -e "$OUTPUT" ]] || { echo "Refusing existing output: $OUTPUT" >&2; exit 1; }
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-case "${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}" in
+case "${UNICA_LOCAL_LLM_BACKEND:-hybrid}" in
+    hybrid) exec bash "$ROOT/hybrid/build.sh" "$OUTPUT" ;;
     gemma-gpu)
         STAGE=$(mktemp -d /tmp/unica-gemma-rom.XXXXXX)
         bash "$ROOT/gemma/build.sh" "$STAGE/build"

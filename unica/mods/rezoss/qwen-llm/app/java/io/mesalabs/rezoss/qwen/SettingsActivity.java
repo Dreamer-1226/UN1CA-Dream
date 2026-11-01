@@ -25,21 +25,23 @@ public final class SettingsActivity extends Activity {
     private final ExecutorService storage=Executors.newSingleThreadExecutor();
     private final Handler main=new Handler(Looper.getMainLooper());
     private LinearLayout page;
-    private TextView active,backend,screening,endpointRow,modelRow,keyState;
+    private TextView active,backend,screening,endpointRow,modelRow,keyState,offlineRow,accelRow,offlineSetup;
     private String endpoint,model;
     private boolean dark;
+    private boolean gemma(){return "gemma".equals(ApiSettingsStore.localModel(this));}
+    private String qwenLabel(){return Hardware.v73()?"Qwen3 0.6B (NPU, Hexagon V73)":"Qwen3 0.6B (CPU, llama.cpp)";}
     private String localModelName(){
-        try{
-            android.content.pm.ApplicationInfo app=getPackageManager().getApplicationInfo("com.samsung.android.aioskernelservice",android.content.pm.PackageManager.GET_META_DATA);
-            if(app.metaData!=null){String name=app.metaData.getString("unica.local_model_name");if(name!=null&&!name.isEmpty())return name;}
-        }catch(android.content.pm.PackageManager.NameNotFoundException ignored){}
-        return "Qwen3";
+        return gemma()?"Gemma 4 E2B "+ApiSettingsStore.gemmaBackend(this).toUpperCase(java.util.Locale.ROOT):qwenLabel();
+    }
+    private boolean gemmaInstalled(){
+        android.content.Intent probe=new android.content.Intent().setClassName("com.samsung.android.aioskernelservice","io.mesalabs.rezoss.nudge.GemmaSetupActivity");
+        return probe.resolveActivity(getPackageManager())!=null;
     }
     @Override public void onCreate(Bundle state){
         boolean night=(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES;
         setTheme(night?android.R.style.Theme_Material_NoActionBar:android.R.style.Theme_Material_Light_NoActionBar);
         super.onCreate(state);
-        String localModel=localModelName();LABELS[0]="ROM default ("+localModel+")";
+        LABELS[0]="ROM default ("+localModelName()+")";
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         dark=(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES;
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
@@ -53,13 +55,12 @@ public final class SettingsActivity extends Activity {
         active=row(routing,"",null);
         backend=row(routing,"Now Nudge, replies and summaries",()->choose(false));
         screening=row(routing,"Call Screening",()->choose(true));
-        if(localModel.startsWith("Gemma")){
-            row(routing,"Local model setup\nImport or prepare "+localModel,()->{
-                try{startActivity(new android.content.Intent().setClassName("com.samsung.android.aioskernelservice","io.mesalabs.rezoss.nudge.GemmaSetupActivity"));}
-                catch(android.content.ActivityNotFoundException e){error("Local model setup is unavailable. Check the AIOS installation.");}
-            });
-            note("ROM default runs "+localModel+" offline after importing the separate model file. First GPU preparation can take over ten seconds; prepare it before testing.");
-        }else note("ROM default uses Qwen3 offline after installing the separate QWEN model APK.");
+        note("Cloud providers receive conversation or notification text only after you explicitly select an API backend.");
+        LinearLayout offline=card(transparent);
+        offlineRow=row(offline,"",this::chooseModel);
+        accelRow=row(offline,"",this::chooseAccelerator);
+        offlineSetup=row(offline,"",this::setupModel);
+        note("ROM default runs the selected model offline. Gemma 4 E2B needs the separate .litertlm file imported once; the first GPU preparation can take over ten seconds. Qwen3 uses the separate QWEN model APK. Call Screening has a short response deadline, so prepare the model before testing.");
         note("Cloud providers receive conversation or notification text only after you explicitly select an API backend. Call Screening has a short response deadline.");
         LinearLayout config=card(transparent);
         row(config,"Configure API provider",this::provider);
@@ -93,13 +94,39 @@ public final class SettingsActivity extends Activity {
         view.setText(styled);
     }
     private String label(String id){for(int i=0;i<IDS.length;i++)if(IDS[i].equals(id))return LABELS[i];return "Unavailable backend";}
+    private void chooseModel(){
+        String[] labels={"Gemma 4 E2B (LiteRT)",qwenLabel()};String[] ids={"gemma","qwen"};
+        new AlertDialog.Builder(this).setTitle("Offline model").setSingleChoiceItems(labels,gemma()?0:1,(d,i)->{
+            d.dismiss();
+            if("gemma".equals(ids[i])&&!gemmaInstalled()){error("Gemma is not included in this ROM's AIOS backend.");return;}
+            storage.execute(()->{try{ApiSettingsStore.setLocalModel(this,ids[i]);main.post(this::refresh);}catch(Exception e){error(e.getMessage());}});
+        }).setNegativeButton("Cancel",null).show();
+    }
+    private void chooseAccelerator(){
+        if(!gemma())return;
+        String[] labels={"GPU (OpenCL, faster)","CPU (slower, lower memory)"};String[] ids={"gpu","cpu"};
+        new AlertDialog.Builder(this).setTitle("Gemma accelerator").setSingleChoiceItems(labels,"cpu".equals(ApiSettingsStore.gemmaBackend(this))?1:0,(d,i)->{
+            d.dismiss();storage.execute(()->{try{ApiSettingsStore.setGemmaBackend(this,ids[i]);main.post(this::refresh);}catch(Exception e){error(e.getMessage());}});
+        }).setNegativeButton("Cancel",null).show();
+    }
+    private void setupModel(){
+        if(gemma()){
+            try{startActivity(new android.content.Intent().setClassName("com.samsung.android.aioskernelservice","io.mesalabs.rezoss.nudge.GemmaSetupActivity"));}
+            catch(android.content.ActivityNotFoundException e){error("Local model setup is unavailable. Check the AIOS installation.");}
+        }else if(!Hardware.v73()){LocalEngine.get(this).prepareAsync();main.postDelayed(this::refresh,500);}
+    }
     private void refresh(){
+        LABELS[0]="ROM default ("+localModelName()+")";
         ApiSettingsStore.Settings s=ApiSettingsStore.display(this);endpoint=s.endpoint;model=s.model;
         String host;try{host=URI.create(endpoint).getHost();}catch(Exception e){host="Not configured";}
         setRow(active,"Selected providers\n"+label(ApiSettingsStore.backend(this,false))+"\nCall Screening: "+label(ApiSettingsStore.backend(this,true)));
         setRow(backend,"Now Nudge, replies and summaries\n"+label(ApiSettingsStore.backend(this,false)));
         setRow(screening,"Call Screening\n"+label(ApiSettingsStore.backend(this,true)));
         setRow(endpointRow,"API endpoint\n"+host+"\n"+endpoint);setRow(modelRow,"API model\n"+(model.isEmpty()?"Not configured":model));
+        setRow(offlineRow,"Offline model\n"+(gemma()?"Gemma 4 E2B":qwenLabel()));
+        setRow(accelRow,"Gemma accelerator\n"+(gemma()?ApiSettingsStore.gemmaBackend(this).toUpperCase(java.util.Locale.ROOT):"Only used by Gemma 4 E2B"));
+        accelRow.setEnabled(gemma());accelRow.setAlpha(gemma()?1f:0.5f);
+        setRow(offlineSetup,gemma()?"Gemma model setup\nImport or prepare Gemma 4 E2B":Hardware.v73()?"Qwen3 model\nInstall the QWEN model APK for the V73 runner":"Qwen3 model\n"+LocalEngine.get(this).status());
         setRow(keyState,"Save API configuration / key\n"+(ApiSettingsStore.hasSavedKey(this)?"Key saved; never displayed":"No API key saved"));
     }
     private void choose(boolean call){

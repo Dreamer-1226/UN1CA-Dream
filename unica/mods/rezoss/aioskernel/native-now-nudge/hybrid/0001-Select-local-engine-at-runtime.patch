@@ -1,0 +1,194 @@
+Subject: [PATCH] Select the local AIOS engine at runtime
+
+Applied by hybrid/build.sh to a temporary copy of backend/ plus gemma/java.
+The Rezoss AI settings app chooses Gemma 4 E2B (LiteRT, GPU or CPU) or Qwen3:
+the QNN V73 runner on SM8550, the Rezoss AI llama.cpp engine elsewhere.
+API routes, Samsung IPC, output validation and deadlines are unchanged.
+
+--- a/backend/java/io/mesalabs/rezoss/nudge/GemmaRuntime.java
++++ b/backend/java/io/mesalabs/rezoss/nudge/GemmaRuntime.java
+@@ -21,7 +21,16 @@
+         return instance;
+     }
+     private final Context context;
+-    private final File model,marker,cache;
++    private final File model,marker;
++    private static volatile String backend=GemmaBuild.BACKEND;
++    /** Select "gpu" or "cpu"; a loaded engine on the other accelerator is released first. */
++    static void backend(String value){
++        String next="cpu".equals(value)?"cpu":"gpu";
++        if(next.equals(backend))return;
++        backend=next;GemmaRuntime r=instance;
++        if(r!=null)try{r.nativeWorker.execute(r::unload);}catch(RejectedExecutionException ignored){}
++    }
++    private String loadedBackend;
+     private final ThreadPoolExecutor nativeWorker=new ThreadPoolExecutor(1,1,0,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(2));
+     private final ScheduledExecutorService idle=Executors.newSingleThreadScheduledExecutor(r->{Thread t=new Thread(r,"gemma-idle");t.setDaemon(true);return t;});
+     private volatile long lastUse=SystemClock.elapsedRealtime();
+@@ -31,7 +40,6 @@
+     private GemmaRuntime(Context c){
+         context=c;File dir=new File(c.getFilesDir(),"gemma4-e2b");
+         model=new File(dir,"gemma-4-E2B-it.litertlm");marker=new File(dir,"verified.json");
+-        cache=new File(c.getCacheDir(),"gemma4-"+GemmaBuild.BACKEND);
+         idle.scheduleAtFixedRate(()->{
+             if(loaded&&SystemClock.elapsedRealtime()-lastUse>60000&&nativeWorker.getActiveCount()==0){
+                 try{nativeWorker.execute(()->{if(SystemClock.elapsedRealtime()-lastUse>60000)unload();});}catch(RejectedExecutionException ignored){}
+@@ -45,16 +53,18 @@
+             return HASH.equals(m.getString("sha256"))&&m.getLong("size")==SIZE&&m.getLong("modified")==model.lastModified();
+         }catch(Exception e){return false;}
+     }
+-    String status(){return "Gemma 4 E2B · "+GemmaBuild.BACKEND.toUpperCase()+"\n"+(filesPresent()?(loaded?"Model verified · engine ready":"Model verified · engine not loaded"):"Import the model to enable local inference");}
++    String status(){return "Gemma 4 E2B · "+backend.toUpperCase()+"\n"+(filesPresent()?(loaded?"Model verified · engine ready":"Model verified · engine not loaded"):"Import the model to enable local inference");}
+     private void load()throws Exception{
+-        if(engine!=0)return;
++        if(engine!=0&&backend.equals(loadedBackend))return;
++        unload();
++        String selected=backend;File cache=new File(context.getCacheDir(),"gemma4-"+selected);
+         if(!filesPresent())throw new IOException("gemma_model_missing");
+         if(!cache.isDirectory()&&!cache.mkdirs())throw new IOException("gemma_cache_unavailable");
+         jni=LiteRtLmJni.INSTANCE;jni.nativeSetMinLogSeverity(2);
+         long started=SystemClock.elapsedRealtime();
+-        engine=jni.nativeCreateEngine(model.toString(),GemmaBuild.BACKEND,"","",1024,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
++        engine=jni.nativeCreateEngine(model.toString(),selected,"","",1024,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
+         if(engine==0)throw new IOException("gemma_load_failed");
+-        loaded=true;Log.i("RezossGemma","engine_ready backend="+GemmaBuild.BACKEND+" loadMs="+(SystemClock.elapsedRealtime()-started));
++        loaded=true;loadedBackend=selected;Log.i("RezossGemma","engine_ready backend="+selected+" loadMs="+(SystemClock.elapsedRealtime()-started));
+     }
+     private void unload(){if(engine!=0){jni.nativeDeleteEngine(engine);engine=0;loaded=false;Log.i("RezossGemma","engine_unloaded");}}
+     private abstract class Job<T> implements Callable<T> {
+@@ -114,7 +124,7 @@
+         if(prompt==null||prompt.isEmpty()||prompt.length()>20000)throw new IOException("gemma_prompt_size");
+         long started=SystemClock.elapsedRealtime();
+         String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens);}});
+-        Log.i("RezossGemma","generation backend="+GemmaBuild.BACKEND+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
++        Log.i("RezossGemma","generation backend="+loadedBackend+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
+         return out;
+     }
+     int count(String prompt,TextBackend.Control control)throws Exception{
+--- a/backend/java/io/mesalabs/rezoss/nudge/GemmaSetupActivity.java
++++ b/backend/java/io/mesalabs/rezoss/nudge/GemmaSetupActivity.java
+@@ -37,7 +37,7 @@
+         status=text(runtime.status(),19);card.addView(status);
+         importButton=new Button(this);importButton.setText("Import Gemma model");importButton.setAllCaps(false);importButton.setOnClickListener(v->{Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(pick,1);});card.addView(importButton);
+         warmButton=new Button(this);warmButton.setText("Prepare local engine");warmButton.setAllCaps(false);warmButton.setOnClickListener(v->run(null));card.addView(warmButton);
+-        TextView note=text("Gemma "+GemmaBuild.BACKEND.toUpperCase()+" backend · AIOS 1.4.28\n\nImport gemma-4-E2B-it.litertlm from Download. Its size and SHA-256 are checked before use. CPU and GPU builds share this imported model.\n\nUse ROM default in AI backend settings for Gemma. Existing cloud selections and API keys are preserved.\n\nPrepare the engine after switching builds. First GPU preparation may take over ten seconds. The engine releases model memory after a minute idle.",16);note.setPadding(dp(8),dp(24),dp(8),0);page.addView(note);setContentView(scroll);
++        TextView note=text("Gemma 4 E2B (accelerator selected in AI backend settings) · AIOS 1.4.28\n\nImport gemma-4-E2B-it.litertlm from Download. Its size and SHA-256 are checked before use. CPU and GPU builds share this imported model.\n\nUse ROM default in AI backend settings for Gemma. Existing cloud selections and API keys are preserved.\n\nPrepare the engine after switching builds. First GPU preparation may take over ten seconds. The engine releases model memory after a minute idle.",16);note.setPadding(dp(8),dp(24),dp(8),0);page.addView(note);setContentView(scroll);
+     }
+     private int dp(int x){return Math.round(x*getResources().getDisplayMetrics().density);}
+     private TextView text(String value,int size){TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(dark?0xffeeeeee:0xff202124);t.setPadding(0,0,0,dp(12));return t;}
+--- a/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
++++ b/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
+@@ -18,6 +18,7 @@
+     private static TextBackend shared;
+     private final Context context;
+     private final ModelStore store;
++    private final GemmaRuntime gemma;
+     private final ApiProviderClient api;
+     private File modelDirectory;
+     private final java.util.concurrent.locks.ReentrantLock runnerLock=new java.util.concurrent.locks.ReentrantLock(true);
+@@ -27,12 +28,12 @@
+     private final Set<Task> tasks=Collections.synchronizedSet(new HashSet<Task>());
+     private volatile boolean validated;
+     private volatile Process auxiliary;
+-    private TextBackend(Service service) { context=service.getApplicationContext(); store=new ModelStore(context); api=new ApiProviderClient(context); }
++    private TextBackend(Service service) { context=service.getApplicationContext(); store=new ModelStore(context); api=new ApiProviderClient(context); gemma=GemmaRuntime.get(context); }
+     public static synchronized boolean create(Service service) {
+         if(Settings.Global.getInt(service.getContentResolver(),"rezoss_aios_v73_backend",1)!=1) return false;
+         if(shared==null)shared=new TextBackend(service);
+         INSTANCES.put(service,shared);
+-        Log.i(TAG,"Replacement Qwen3 V73 profile enabled; Samsung weights are not used"); return true;
++        Log.i(TAG,"Runtime-selected local engine (Gemma 4 E2B / Qwen3) enabled; Samsung weights are not used"); return true;
+     }
+     public static synchronized IBinder bind(Service service) { TextBackend b=INSTANCES.get(service); return b==null?null:b.endpoint; }
+     static synchronized TextBackend local(Service service) { return INSTANCES.get(service); }
+@@ -55,11 +56,29 @@
+         if(modelDirectory==null)throw new IllegalStateException("Model package not imported");
+         return modelDirectory;
+     }
+-    boolean filesPresent(){return store.info()!=null;}
++    /** SM8550 with an imported V73 model pack can run the bundled QNN Qwen3 runner. */
++    private static boolean v73Soc(){String soc=Build.SOC_MODEL;return soc!=null&&soc.toUpperCase(Locale.ROOT).startsWith("SM8550");}
++    /** "gemma", "v73" (QNN Qwen3) or "llama" (Qwen3 through the Rezoss AI llama.cpp engine). */
++    private String engine(){
++        Bundle c=api.config();String model=c==null?null:c.getString("local_model");
++        if("qwen".equals(model))return v73Soc()?"v73":"llama";
++        GemmaRuntime.backend(c==null?"gpu":c.getString("gemma_backend","gpu"));
++        return "gemma";
++    }
++    boolean filesPresent(){
++        switch(engine()){
++            case "gemma":return gemma.filesPresent();
++            case "v73":return store.info()!=null;
++            default:{Bundle c=api.config();return c!=null&&c.getBoolean("local_qwen_ready",false);}
++        }
++    }
+     boolean configured(){try{return "default".equals(api.route(false))?filesPresent():api.configured();}catch(Exception e){return false;}}
+     void cancel(String id){api.cancel(id);}
+     private boolean ready(String route){return "default".equals(route)?filesPresent():api.configured();}
+     private void prepareModel(long deadline)throws Exception {
++        String engine=engine();
++        if("gemma".equals(engine)){gemma.prepare(deadline);return;}
++        if(!"v73".equals(engine))return;
+         File next=store.ensure(deadline);
+         if(!next.equals(modelDirectory)){validated=false;modelDirectory=next;}
+     }
+@@ -83,6 +102,12 @@
+     }
+     private boolean validate() {
+         if(!filesPresent())return false;
++        String engine=engine();
++        if("gemma".equals(engine)){
++            try{gemma.prepare(SystemClock.elapsedRealtime()+45000);return true;}
++            catch(Exception e){Log.e(TAG,"Gemma preparation failed",e);return false;}
++        }
++        if(!"v73".equals(engine))return true;
+         runnerLock.lock();
+         try {
+             prepareModel(SystemClock.elapsedRealtime()+45000);
+@@ -98,6 +123,10 @@
+         return count(prompt,null);
+     }
+     private int count(String prompt,Control control)throws Exception {
++        String engine=engine();
++        if("gemma".equals(engine))return gemma.count(prompt,control);
++        // llama.cpp trims its own 4096-token window; keep the 850-token checks inert.
++        if(!"v73".equals(engine))return 0;
+         if(control!=null&&(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline()))throw new IOException("deadline");
+         File job=Files.createTempDirectory(context.getCacheDir().toPath(),"count-").toFile();
+         try{auxiliary=launch(job,prompt,"--count_only");
+@@ -197,6 +226,18 @@
+                     if(done.done()||SystemClock.elapsedRealtime()>=deadline)throw new IOException("deadline");
+                     finish(1,result(ids,name,text));return;
+                 }
++                String engine=engine();
++                if(!"v73".equals(engine)){
++                    String localPrompt=screening!=null?screening.prompt:replyContract!=null?replyContract.prompt:PromptAdapter.adapt(source);
++                    int tokens=screening==null?96:CallScreeningContract.MAX_NEW_TOKENS;String text;
++                    if("gemma".equals(engine))text=gemma.generate(localPrompt,tokens,control);
++                    else{requestId=UUID.randomUUID().toString();text=api.generate(localPrompt,tokens,deadline,requestId,"local-qwen");}
++                    text=screening==null?(replyContract==null?ReplyText.validated(text,source):replyContract.output(text)):screening.output(text);
++                    if(text.isEmpty()||text.contains("<think>"))throw new IOException("invalid_output");
++                    if(done.done()||SystemClock.elapsedRealtime()>=deadline)throw new IOException("deadline");
++                    Log.i(TAG,"VALIDATED engine="+engine+" uid="+owner+" chars="+text.length()+" ageMs="+(SystemClock.elapsedRealtime()-submitted));
++                    finish(1,result(ids,name,text));return;
++                }
+                 Log.i(TAG,"reply route=local queueMs="+(SystemClock.elapsedRealtime()-submitted)+" structured="+PromptAdapter.structured(source));
+                 if(replyContract!=null){
+                     prepareModel(deadline);String[] replies=new String[3];
+@@ -271,6 +312,16 @@
+                     return recall?ActionContract.output(raw):LocalFormat.output(raw,summary);
+                 }finally{control.request(null);}
+             }
++            String engine=engine();
++            if(!"v73".equals(engine)){
++                int tokens=recall?48:summary?64:96;String raw;
++                if("gemma".equals(engine))raw=gemma.generate(prompt,tokens,control);
++                else{String id=UUID.randomUUID().toString();control.request(id);
++                    try{raw=api.generate(prompt,tokens,control.deadline(),id,"local-qwen");}finally{control.request(null);}}
++                String output=recall?ActionContract.output(raw):LocalFormat.output(raw,summary);
++                if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
++                return output;
++            }
+             prepareModel(control.deadline());
+             long countStarted=SystemClock.elapsedRealtime();
+             int tokens=count(prompt,control);

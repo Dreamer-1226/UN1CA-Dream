@@ -18,13 +18,15 @@ Custom endpoints must accept a Bearer API key and OpenAI-style `chat/completions
 
 ## On-device mode
 
-Turn on **Run on this device** in Rezoss AI to generate replies and summaries locally with Qwen3-0.6B (Q4_0, thinking off) instead of an API. Nothing is sent to a provider in this mode.
+**AI backend settings > Offline model** selects the engine used by the ROM default route. Nothing is sent to a provider in this mode.
 
-1. Install `QWEN_LLM_rezoss_model.apk` (about 470 MB, built by `model/build.sh` and signed with the same certificate as the app).
-2. Open Rezoss AI and turn on **Run on this device**. The app copies the model into its private storage and verifies its SHA-256 (about 470 MB of free space is needed).
-3. Once it shows "On-device model ready", the model pack can be uninstalled.
+| Model | Engine | Setup |
+|---|---|---|
+| Gemma 4 E2B | LiteRT in AIOS, **Gemma accelerator** GPU or CPU | Import `gemma-4-E2B-it.litertlm` with **Gemma model setup** |
+| Qwen3 0.6B on SM8550 | QNN runner on the Hexagon V73 NPU (AIOS) | Install the full `QWEN_LLM_rezoss.apk` (V73 assets) |
+| Qwen3 0.6B elsewhere (SM8250) | llama.cpp in this app (Q4_0, thinking off) | Install `QWEN_LLM_rezoss_model.apk` (about 470 MB), then tap **Qwen3 model** |
 
-The app starts the bundled llama.cpp server on loopback with a per-launch random key, stops it after two idle minutes or when the device gets hot, and trims the oldest input to fit a 4096-token context. Summaries can take longer than with an API; the ROM allows up to 75 seconds for them.
+SM8550 starts on Gemma, other SoCs on Qwen3. The llama.cpp engine runs on loopback with a per-launch random key, stops after two idle minutes or when the device gets hot, and trims the oldest input to fit a 4096-token context.
 
 ## Data flow
 

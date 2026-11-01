@@ -986,11 +986,18 @@ unset REZOSS_SCS_POLICY_XML
 LOG "- Build opt-in UN1CA local notification-summary provider"
 LOCAL_SUMMARY_SERVICE_DIR="$MODPATH/local-summary-service"
 LOCAL_SUMMARY_SERVICE_APK="$LOCAL_SUMMARY_SERVICE_DIR/system/priv-app/RezossAI/RezossAI.apk"
-EVAL "bash \"$LOCAL_SUMMARY_SERVICE_DIR/build.sh\" \"$LOCAL_SUMMARY_SERVICE_APK\""
-ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/priv-app/RezossAI/RezossAI.apk" 0 0 644 "u:object_r:system_file:s0"
-SET_METADATA "system" "system/priv-app/RezossAI" 0 0 755 "u:object_r:system_file:s0"
-SET_METADATA "system" "system/priv-app/RezossAI/RezossAI.apk" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/etc/default-permissions/default-permissions-unica-local-summary.xml" 0 0 644 "u:object_r:system_file:s0"
+# EVAL under `set -e` exits before printing anything when the command fails,
+# so run the build inside `if` and dump its output ourselves.
+if REZOSS_AI_BUILD_LOG="$(bash "$LOCAL_SUMMARY_SERVICE_DIR/build.sh" "$LOCAL_SUMMARY_SERVICE_APK" 2>&1)"; then
+    ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/priv-app/RezossAI/RezossAI.apk" 0 0 644 "u:object_r:system_file:s0"
+    SET_METADATA "system" "system/priv-app/RezossAI" 0 0 755 "u:object_r:system_file:s0"
+    SET_METADATA "system" "system/priv-app/RezossAI/RezossAI.apk" 0 0 644 "u:object_r:system_file:s0"
+    ADD_TO_WORK_DIR "$LOCAL_SUMMARY_SERVICE_DIR" "system" "system/etc/default-permissions/default-permissions-unica-local-summary.xml" 0 0 644 "u:object_r:system_file:s0"
+else
+    LOGW "RezossAI build failed; skipping the local notification-summary provider"
+    echo -e '\033[0;33m'"$(tail -n 60 <<< "$REZOSS_AI_BUILD_LOG")"'\033[0m' >&2
+fi
+unset REZOSS_AI_BUILD_LOG
 # Ship the lightweight API/settings app; users install model assets as an update.
 # Build in a temporary directory so a previous combined APK cannot be reused.
 LOG "- Build small Qwen settings stub (offline model APK installed separately)"
@@ -1006,7 +1013,7 @@ DELETE_FROM_WORK_DIR "system" "system/bin/unica-summary-llama"
 DELETE_FROM_WORK_DIR "system" "system/bin/unica-summary-llama-server"
 DELETE_FROM_WORK_DIR "system" "system/etc/unica/local-summary/qwen2.5-0.5b-instruct-q4_k_m.gguf"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/sysconfig/rezoss-ai-associations.xml" 0 0 644 "u:object_r:system_file:s0"
-LOG "- Native dm3q local backend: $UNICA_LOCAL_LLM_BACKEND; separate model and optional APIs in UN1CA Extra Settings > AI backend settings"
+LOG "- Native local backend ($TARGET_CODENAME): $UNICA_LOCAL_LLM_BACKEND; separate model and optional APIs in UN1CA Extra Settings > AI backend settings"
 LOCAL_SUMMARY_ALLOWLIST="$WORK_DIR/system/system/etc/sysconfig/allowed-system-preload-apps.xml"
 if ! grep -q -F 'package="io.mesalabs.unica.localsummary"' "$LOCAL_SUMMARY_ALLOWLIST"; then
     EVAL "LC_ALL=C patch --batch --fuzz=0 -p1 -d \"$WORK_DIR/system/system/etc/sysconfig\" < \"$LOCAL_SUMMARY_SERVICE_DIR/allowed-system-preload-apps.xml/0001-Allow-UN1CA-local-summary-provider.patch\"" \

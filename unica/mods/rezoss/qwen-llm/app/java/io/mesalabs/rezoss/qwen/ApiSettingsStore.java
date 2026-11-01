@@ -67,19 +67,32 @@ final class ApiSettingsStore {
                 prefs.getString("model", ""), "");
     }
 
-    /** True when generation should run on the device instead of the configured API. */
-    static boolean local(Context context) {
-        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("local", false);
+    /** Offline model used by the ROM default route: "gemma" (LiteRT) or "qwen". */
+    static String localModel(Context context) {
+        String value = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("local_model", "");
+        if ("gemma".equals(value) || "qwen".equals(value)) return value;
+        return Hardware.gemmaDefault() ? "gemma" : "qwen";
     }
 
-    static void setLocal(Context context, boolean enabled) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean("local", enabled).apply();
-        if (enabled) LocalEngine.get(context).prepareAsync();
+    static void setLocalModel(Context context, String model) {
+        if (!"gemma".equals(model) && !"qwen".equals(model)) throw new IllegalArgumentException("Invalid local model");
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("local_model", model).apply();
+        if ("qwen".equals(model) && !Hardware.v73()) LocalEngine.get(context).prepareAsync();
         else LocalEngine.get(context).stop();
     }
 
+    /** LiteRT accelerator for Gemma: "gpu" or "cpu". */
+    static String gemmaBackend(Context context) {
+        String value = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("gemma_backend", "gpu");
+        return "cpu".equals(value) ? "cpu" : "gpu";
+    }
+
+    static void setGemmaBackend(Context context, String backend) {
+        if (!"gpu".equals(backend) && !"cpu".equals(backend)) throw new IllegalArgumentException("Invalid Gemma backend");
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("gemma_backend", backend).apply();
+    }
+
     static boolean configured(Context context) {
-        if (local(context)) return LocalEngine.get(context).usable();
         try {
             Settings settings = read(context);
             validateEndpoint(settings.endpoint);

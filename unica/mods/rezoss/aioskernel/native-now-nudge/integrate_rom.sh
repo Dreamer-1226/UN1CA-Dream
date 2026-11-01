@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Sourced by Rezoss customize.sh for the opt-in SM8550/SM8250 configuration.
 NUDGE_ROOT="$MODPATH/aioskernel/native-now-nudge"
-LOG "- Build AIOS local backend: ${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}; retain optional APIs"
+LOG "- Build AIOS local backend: ${UNICA_LOCAL_LLM_BACKEND:-hybrid}; retain optional APIs"
 NUDGE_BUILD=$(mktemp -d "$TMP_DIR/native-nudge.XXXXXX") || return 1
 EVAL "bash \"$NUDGE_ROOT/build_rom_backend.sh\" \"$NUDGE_BUILD/AIOSKernelService.apk\"" || return 1
 mkdir -p "$NUDGE_BUILD/system/priv-app/AIOSKernelService" || return 1
@@ -28,12 +28,14 @@ ADD_TO_WORK_DIR "pa2qxxx" "system" "system/etc/sysconfig/aioskernelservice.xml" 
 LOG "- Native Now Nudge requires the later OfflineLanguageModel 4.0.01.24 update"
 # Remove the previous bundled weights when rebuilding an existing work tree.
 DELETE_FROM_WORK_DIR "system" "system/etc/unica/now-nudge-v73" || return 1
-if [[ "${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}" == "gemma-gpu" ]]; then
+if [[ "${UNICA_LOCAL_LLM_BACKEND:-hybrid}" == "hybrid" ]]; then
+    LOG "- Choose Gemma 4 E2B or Qwen3 in AI backend settings > Offline model"
+elif [[ "${UNICA_LOCAL_LLM_BACKEND:-hybrid}" == "gemma-gpu" ]]; then
     LOG "- Import the separate Gemma 4 E2B model in AI backend settings > Local model setup"
 else
     LOG "- Separate QWEN model APK supplies verified local assets for the rollback backend"
 fi
-SET_PROP "system" "ro.unica.local_llm" "${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}" || return 1
+SET_PROP "system" "ro.unica.local_llm" "${UNICA_LOCAL_LLM_BACKEND:-hybrid}" || return 1
 SET_PROP "system" "ro.unica.now_nudge_v73" "1" || return 1
 SET_PROP "system" "persist.sys.unica.enable_aioskernelservice" "1" || return 1
 unset NUDGE_ROOT NUDGE_BUILD NUDGE_LIB NUDGE_DIR

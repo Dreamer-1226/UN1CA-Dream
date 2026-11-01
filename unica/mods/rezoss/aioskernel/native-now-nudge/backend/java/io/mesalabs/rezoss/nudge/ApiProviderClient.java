@@ -47,6 +47,13 @@ final class ApiProviderClient {
         }
     }
 
+    /** Offline engine selection saved in the Rezoss AI settings app; null when unavailable. */
+    Bundle config() {
+        if (!available()) return null;
+        try { return context.getContentResolver().call(URI, "backend_config", null, null); }
+        catch (Exception unavailable) { return null; }
+    }
+
     String route(boolean screening) throws IOException {
         if(!available())return "default";
         try{Bundle b=context.getContentResolver().call(URI,"backend_config",null,null);

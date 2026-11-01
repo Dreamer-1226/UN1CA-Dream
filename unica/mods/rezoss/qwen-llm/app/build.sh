@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Build the settings/API app, with model assets only for the separate user APK.
+# Build the settings/API app. The full user APK also carries the V73 Qwen assets
+# (SM8550 runner) and the llama.cpp engine used for Qwen3 on other SoCs.
 set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-: "${SRC_DIR:?Source buildenv.sh dm3q first}"
+: "${SRC_DIR:?Source buildenv.sh <target> first}"
 OUTPUT=${1:-$SRC_DIR/out/archived/QWEN_LLM/QWEN_LLM_rezoss_v9.apk}
 MODE=${2:-full}
 [[ "$MODE" == full || "$MODE" == --stub ]] || { echo "Usage: build.sh [OUTPUT_APK] [--stub]" >&2; exit 1; }
@@ -20,7 +21,7 @@ javac -source 8 -target 8 -Xlint:-options -classpath "$SDK/platforms/android-37.
 jar cf "$WORK/classes.jar" -C "$WORK/classes" .
 "$TOOLS/d8" --min-api 30 --lib "$SDK/platforms/android-37.0/android.jar" --output "$WORK/dex" "$WORK/classes.jar"
 MANIFEST="$WORK/AndroidManifest.xml"
-python3 - "$ROOT/AndroidManifest.xml" "$MANIFEST" "$MODE" "${UNICA_LOCAL_LLM_BACKEND:-gemma-gpu}" "${TARGET_CODENAME:-dm3q}" "${UNICA_ENABLE_NATIVE_NOW_NUDGE:-true}" <<'MANIFEST_PY'
+python3 - "$ROOT/AndroidManifest.xml" "$MANIFEST" "$MODE" "${UNICA_LOCAL_LLM_BACKEND:-hybrid}" "${TARGET_CODENAME:-dm3q}" "${UNICA_ENABLE_NATIVE_NOW_NUDGE:-true}" <<'MANIFEST_PY'
 from pathlib import Path
 import sys, xml.etree.ElementTree as ET
 source, output, mode, backend, target, native = sys.argv[1:]
@@ -30,7 +31,7 @@ if mode == '--stub':
     root = tree.getroot()
     root.set('{http://schemas.android.com/apk/res/android}versionCode', '1')
     root.set('{http://schemas.android.com/apk/res/android}versionName', '3.2-stub')
-    if backend == 'gemma-gpu' and target == 'dm3q' and native == 'true':
+    if backend in ('gemma-gpu', 'hybrid') and native == 'true':
         root.set('{http://schemas.android.com/apk/res/android}versionCode', '10')
         root.set('{http://schemas.android.com/apk/res/android}versionName', '3.3-gemma-api')
     app = root.find('application')
@@ -39,12 +40,21 @@ if mode == '--stub':
             app.remove(provider)
 tree.write(output, encoding='utf-8', xml_declaration=True)
 MANIFEST_PY
-"$TOOLS/aapt2" link --manifest "$MANIFEST" -I "$SDK/platforms/android-37.0/android.jar" -o "$WORK/base.apk"
+"$TOOLS/aapt2" compile --dir "$ROOT/res" -o "$WORK/res.zip"
+"$TOOLS/aapt2" link --manifest "$MANIFEST" -I "$SDK/platforms/android-37.0/android.jar" \
+    -R "$WORK/res.zip" -o "$WORK/base.apk"
 cp "$WORK/dex/classes.dex" "$WORK/"
 (
     cd "$WORK"
     zip -q -0 base.apk classes.dex
 )
+if [[ "$MODE" == full ]]; then
+    # Qwen3 on SoCs without the V73 runner: the same llama.cpp server the
+    # ROM's summary service ships, launched by LocalEngine.
+    mkdir -p "$WORK/lib/arm64-v8a"
+    cp "$ROOT/../../local-summary-service/system/bin/unica-summary-llama-server" "$WORK/lib/arm64-v8a/librezoss_llama.so"
+    (cd "$WORK" && zip -q -0 base.apk lib/arm64-v8a/librezoss_llama.so)
+fi
 if [[ "$MODE" == full ]]; then
 python3 - "$WORK" "$PAYLOAD" <<'PY'
 from pathlib import Path
@@ -100,9 +110,9 @@ VERSION_PY
     printf "apk=%s\n" "$OUTPUT"
     printf "sizeBytes=%s\n" "$APK_SIZE"
     printf "sha256=%s\n" "$APK_SHA256"
-    printf "backend=local-v73-or-explicit-api\n"
+    printf "backend=local-gemma-or-qwen(v73|llama.cpp)-or-explicit-api\n"
     printf "packaging=%s\n" "${MODE#--}"
-    printf "model=Qwen3-0.6B-SM8550-V73\n"
+    printf "model=Qwen3-0.6B (SM8550 V73 runner, llama.cpp elsewhere); Gemma 4 E2B via AIOS\n"
     if [[ "$MODE" == full ]]; then
         printf "modelAssets=included\n"
     else
