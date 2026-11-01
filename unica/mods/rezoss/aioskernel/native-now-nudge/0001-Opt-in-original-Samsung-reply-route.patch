@@ -21,9 +21,7 @@ rezoss_now_nudge_native. This does not make incompatible model binaries work.
      invoke-static {p1}, Lio/mesalabs/rezoss/ai/InAppReplies;->supports(Ljava/lang/String;)Z
  
      move-result v0
-@@ -1821,6 +1830,17 @@
-     .locals 12
- 
+@@ -1823,4 +1832,15 @@
      .line 94
 +    invoke-static {p0}, Lio/mesalabs/rezoss/ai/NativeNowNudgeRoute;->enabled(Landroid/content/Context;)Z
 +

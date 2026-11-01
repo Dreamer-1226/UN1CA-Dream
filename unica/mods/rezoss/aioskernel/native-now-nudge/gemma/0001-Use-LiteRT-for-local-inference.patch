@@ -140,7 +140,7 @@ The normal ROM backend uses Gemma GPU; build_qwen_backend.sh remains available f
 -            if(tokens>850)throw new IllegalArgumentException("context_limit");
 -            if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new InterruptedIOException();
 -            job=Files.createTempDirectory(context.getCacheDir().toPath(),"local-").toFile();
--            Process process=launch(job,prompt,null,recall?48:96);control.process(process);
+-            Process process=launch(job,prompt,null,recall?ActionContract.MAX_NEW_TOKENS:96);control.process(process);
 -            try{
 -                if(control.cancelled()){process.destroyForcibly();throw new InterruptedIOException();}
 -                if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");
@@ -153,7 +153,7 @@ The normal ROM backend uses Gemma GPU; build_qwen_backend.sh remains available f
 -                if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
 -                return output;
 -            }finally{process.destroyForcibly();control.process(null);}
-+            String raw=gemma.generate(prompt,recall?48:summary?64:96,control);
++            String raw=gemma.generate(prompt,recall?ActionContract.MAX_NEW_TOKENS:summary?64:96,control);
 +            String output=recall?ActionContract.output(raw):LocalFormat.output(raw,summary);
 +            if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
 +            return output;

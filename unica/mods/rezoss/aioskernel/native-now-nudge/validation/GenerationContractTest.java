@@ -1,5 +1,6 @@
 package io.mesalabs.rezoss.nudge;
 import io.mesalabs.rezoss.ai.RecallPrediction;
+import io.mesalabs.rezoss.ai.RecallSession;
 /** Wire/protocol tests; actual model quality requires a separate direct replay. */
 public final class GenerationContractTest {
  static int checks;
@@ -33,6 +34,52 @@ public final class GenerationContractTest {
   check(PromptAdapter.latestIncoming("Others: send beach photos\nUser: Already sent",true)==null);
   check(PromptAdapter.latestIncoming("Others: send kids photos\nOthers: send beach photos",true).equals("send beach photos"));
   check(ActionContract.prompt("Others: send kids photos\nOthers: send beach photos").contains("Message: \"send beach photos\""));
+  String[][] textActions={
+   {"Directions to 10 Downing Street, London","{\"action\":\"Browse Location\",\"location\":\"10 Downing Street, London\"}"},
+   {"Call +33 1 42 68 53 00","{\"action\":\"Call\",\"number\":\"+33 1 42 68 53 00\"}"},
+   {"Email alex@example.com","{\"action\":\"Mail\",\"mail\":\"alex@example.com\"}"},
+   {"Remind me to buy milk tomorrow at noon","{\"action\":\"Set Reminder\",\"title\":\"buy milk\",\"start\":\"tomorrow at noon\"}"},
+   {"Remind me to buy milk","{\"action\":\"Set Reminder\",\"title\":\"buy milk\"}"}
+  };
+  for(String[] example:textActions){
+   String wire=ActionContract.output(example[1]);
+   RecallPrediction prediction=RecallPrediction.parse(example[0],wire);
+   check(prediction!=null);
+   RecallSession.put(example[0],prediction,200);
+   check(RecallSession.consume(example[0]+" <Action> "+prediction.action+" <상대> Others",100).equals(prediction.parameters));
+   check(RecallSession.consume(example[0]+" <Action> "+prediction.action,100).isEmpty());
+  }
+  check(RecallPrediction.parse("Directions to London",ActionContract.output(textActions[0][1]))==null);
+  check(RecallPrediction.parse("Call 12345",ActionContract.output(textActions[1][1]))==null);
+  check(RecallPrediction.parse("Email other@example.com",ActionContract.output(textActions[2][1]))==null);
+  check(RecallPrediction.parse("Call 12",ActionContract.output("{\"action\":\"Call\",\"number\":\"12\"}"))==null);
+  check(RecallPrediction.parse("Call tel:12345",ActionContract.output("{\"action\":\"Call\",\"number\":\"tel:12345\"}"))==null);
+  check(RecallPrediction.parse("Email alex@localhost",ActionContract.output("{\"action\":\"Mail\",\"mail\":\"alex@localhost\"}"))==null);
+  check(RecallPrediction.parse("Call Alice","Call\tname Alice")==null);
+  check(RecallPrediction.parse("Email alex@example.com?subject=x","Mail\tmail alex@example.com?subject=x")==null);
+  check(RecallPrediction.parse("Remind me to buy milk tomorrow","Set Reminder\ttitle buy eggs|start tomorrow")==null);
+  check(RecallPrediction.parse("Adresse : 12 rue de Rivoli, Paris","Browse Location\tlocation 12 rue de Rivoli, Paris")!=null);
+  check(RecallPrediction.parse("Rappelle-moi acheter du lait demain","Set Reminder\ttitle acheter du lait|start demain")!=null);
+  java.util.Map<String,java.util.Set<String>> schema=new java.util.LinkedHashMap<>();
+  schema.put("Call",java.util.Collections.singleton("number"));
+  RecallPrediction.addMailSchema(schema);
+  check(schema.get("Mail").equals(java.util.Collections.singleton("mail")));
+  check(schema.get("Call").equals(java.util.Collections.singleton("number")));
+  schema.put("Mail",java.util.Collections.singleton("existing"));
+  RecallPrediction.addMailSchema(schema);
+  check(schema.get("Mail").equals(java.util.Collections.singleton("existing")));
+  try{ActionContract.prompt("Others: Call 12345\nUser: Already called");throw new AssertionError("stale action");}catch(IllegalArgumentException expected){checks++;}
+  for(String invalid:new String[]{
+   "{\"action\":\"Browse Location\"}",
+   "{\"action\":\"Call\",\"name\":\"Alice\"}",
+   "{\"action\":\"Mail\",\"email\":\"alex@example.com\"}",
+   "{\"action\":\"Set Reminder\",\"start\":\"tomorrow\"}",
+   "{\"action\":\"Set Reminder\",\"title\":\"buy milk\",\"location\":\"Paris\"}",
+   "{\"action\":\"Browse Location\",\"location\":\"Paris|number 12345\"}",
+   "{\"action\":\"Mail\",\"mail\":\"a@example.com\",\"mail\":\"b@example.com\"}",
+   "{\"action\":\"Send Payment\",\"account\":\"12345\"}"}){
+   try{ActionContract.output(invalid);throw new AssertionError("accepted invalid text action");}catch(org.json.JSONException expected){checks++;}
+  }
   for(String invalid:new String[]{"{\"action\":\"Unsafe\",\"photo\":\"beach\"}","{\"action\":\"Share Photo\"}","{\"action\":\"Unknown\"}","{\"action\":\"Share Photo\",\"photo\":\"beach\",\"photo\":\"kids\"}"}){
    try{ActionContract.output(invalid);throw new AssertionError("accepted invalid action");}catch(org.json.JSONException expected){checks++;}
   }

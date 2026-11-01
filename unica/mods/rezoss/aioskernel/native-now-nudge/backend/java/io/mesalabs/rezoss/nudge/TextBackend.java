@@ -266,7 +266,7 @@ public final class TextBackend {
             Log.i(TAG,"local task="+(recall?"recall":summary?"summary":"replies")+" route="+route+" lockMs="+(SystemClock.elapsedRealtime()-queued)+" remainingMs="+(control.deadline()-SystemClock.elapsedRealtime()));
             if(!"default".equals(route)){
                 String id=UUID.randomUUID().toString();control.request(id);
-                try{String raw=api.generate(prompt,recall?48:summary?64:96,control.deadline(),id,route);
+                try{String raw=api.generate(prompt,recall?ActionContract.MAX_NEW_TOKENS:summary?64:96,control.deadline(),id,route);
                     if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
                     return recall?ActionContract.output(raw):LocalFormat.output(raw,summary);
                 }finally{control.request(null);}
@@ -278,7 +278,7 @@ public final class TextBackend {
             if(tokens>850)throw new IllegalArgumentException("context_limit");
             if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new InterruptedIOException();
             job=Files.createTempDirectory(context.getCacheDir().toPath(),"local-").toFile();
-            Process process=launch(job,prompt,null,recall?48:96);control.process(process);
+            Process process=launch(job,prompt,null,recall?ActionContract.MAX_NEW_TOKENS:96);control.process(process);
             try{
                 if(control.cancelled()){process.destroyForcibly();throw new InterruptedIOException();}
                 if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");
