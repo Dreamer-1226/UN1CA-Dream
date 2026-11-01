@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Sourced by Rezoss customize.sh only for the opt-in dm3q configuration.
+# Sourced by Rezoss customize.sh for the opt-in SM8550/SM8250 configuration.
 NUDGE_ROOT="$MODPATH/aioskernel/native-now-nudge"
 LOG "- Build AIOS V73 runtime for the user-configured API backend"
 NUDGE_BUILD=$(mktemp -d "$TMP_DIR/native-nudge.XXXXXX") || return 1

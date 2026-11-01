@@ -29,10 +29,12 @@ elif ! grep -q 'name="rezoss_pd_main_title"' "$REZOSS_PD_KO"; then
 fi
 unset REZOSS_PD_KO
 
-# This POC is restricted to SM8550/V73 targets and retains Qwen fallback.
+# Now Nudge generates through the Rezoss AI provider, not the NPU, so it runs
+# on the SM8550 and SM8250 targets.
 source "$MODPATH/aioskernel/native-now-nudge/config.sh" || return 1
 if [[ "$UNICA_ENABLE_NATIVE_NOW_NUDGE" == "true" ]]; then
-    $REZOSS_SM8550_TARGET || ABORT "Native Now Nudge is supported only on SM8550 targets (dm1q/dm2q/dm3q/b5q/q5q)"
+    [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q|c1q|c2q|r8q)$ ]] \
+        || ABORT "Native Now Nudge is supported only on SM8550/SM8250 targets"
     [[ "${UNICA_ENABLE_SAMSUNG_AICORE:-true}" == "true" ]] || ABORT "Native Now Nudge requires SamsungAiCore"
     [[ "${UNICA_ENABLE_UNSAFE_S26U_QNN_EXPERIMENT:-false}" != "true" ]] || ABORT "Do not combine native Now Nudge with the donor QNN experiment"
 fi
