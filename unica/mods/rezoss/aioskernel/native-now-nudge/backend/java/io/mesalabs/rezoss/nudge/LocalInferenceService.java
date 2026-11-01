@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.*;
 import android.util.Log;
 import java.io.IOException;
+import java.lang.Process;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -16,16 +17,18 @@ public final class LocalInferenceService extends Service {
     private TextBackend backend;
     private Messenger endpoint;
     private final class Job implements Runnable,TextBackend.Control,IBinder.DeathRecipient {
-        final Messenger callback;final int uid;final String input;final boolean summary,recall;final long deadline;
-        volatile String cancellation;volatile String requestId;volatile Thread thread;
-        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:(summary?75000:45000)));}
+        final Messenger callback;final int uid;final String input;final boolean summary,recall;final long deadline,submitted=SystemClock.elapsedRealtime();
+        volatile Process process;volatile String cancellation;volatile String requestId;volatile Thread thread;
+        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
         public boolean cancelled(){return cancellation!=null;}
         public long deadline(){return deadline;}
+        public void process(Process p){process=p;if(p!=null&&cancelled())p.destroyForcibly();}
         public void request(String id){requestId=id;if(id!=null&&cancelled())backend.cancel(id);}
-        synchronized void cancel(String reason){if(cancellation!=null)return;cancellation=reason;if(requestId!=null)backend.cancel(requestId);if(thread!=null)thread.interrupt();}
+        synchronized void cancel(String reason){if(cancellation!=null)return;cancellation=reason;if(process!=null)process.destroyForcibly();if(requestId!=null)backend.cancel(requestId);if(thread!=null)thread.interrupt();}
         public void binderDied(){main.post(()->cancel("client_died"));}
         public void run(){
             thread=Thread.currentThread();long started=SystemClock.elapsedRealtime();String value=null,status="unavailable";
+            Log.i("RezossV73Local","task="+(recall?"recall":summary?"summary":"replies")+" queueMs="+(started-submitted)+" remainingMs="+(deadline-started));
             try{if(!cancelled()){value=recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
             catch(Exception e){
                 if(SystemClock.elapsedRealtime()>=deadline)status="deadline";
@@ -61,7 +64,7 @@ public final class LocalInferenceService extends Service {
                     if(recall){
                         if(!recallCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
                     }else if(!summaryCaller||request.containsKey("task"))throw new SecurityException("task_denied");
-                    if(backend==null||!backend.configured()){respond(message.replyTo,null,"api_unconfigured");return;}
+                    if(backend==null||!backend.configured()){respond(message.replyTo,null,"backend_unavailable");return;}
                     if(!jobs.isEmpty()){respond(message.replyTo,null,"busy");return;}
                     Job job=new Job(message);
                     if(job.input.isEmpty()||job.input.length()>12000||job.deadline<=SystemClock.elapsedRealtime()){respond(message.replyTo,null,"invalid_or_expired");return;}

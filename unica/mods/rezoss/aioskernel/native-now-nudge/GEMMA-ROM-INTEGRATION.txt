@@ -1,0 +1,62 @@
+Gemma 4 E2B GPU local backend for dm3q
+
+The normal ROM integration now selects UNICA_LOCAL_LLM_BACKEND=gemma-gpu.
+build_rom_backend.sh builds gemma/build.sh and installs its APK/native libraries
+through integrate_rom.sh. It does not copy the model into the ROM. The GPU
+runtime, prompts, cancellation and deadlines match the tested GPU experiment.
+SDK artifacts are pinned by size and SHA-256 in gemma/runtime-lock.json.
+
+AIOS: version name 1.4.28, version code 142801211, label AIOS Gemma GPU.
+Settings/API stub: version name 3.3-gemma-api, version code 10 on native dm3q.
+The io.mesalabs.rezoss.qwen package name and permissions remain for API/bridge
+compatibility. The stub has no Qwen or Gemma model assets. Its higher system
+version supersedes the older full Qwen v8/v9 APK when PackageManager reconciles
+updates. Private API preferences are not intentionally cleared or rewritten.
+Existing explicit API provider selections are preserved, not forced to local.
+
+ROM default uses Gemma GPU for Now Nudge, photo/calendar recognition, replies,
+summaries and Call Screening through the existing native AIOS IPC routing.
+API settings reads the model name from AIOS manifest metadata and offers
+Local model setup to open the import/preparation screen. Existing One UI grouped
+settings and Now Nudge menu visibility are preserved.
+
+Model file: gemma-4-E2B-it.litertlm, 2588147712 bytes.
+SHA-256: 181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c.
+Import this separate file using Local model setup. The importer verifies the
+exact size/hash. Keep the setup screen open until the engine is ready. First
+GPU preparation may take about ten seconds. The tested runtime releases model
+memory after 60 seconds idle; cold preparation and short inference deadlines
+remain different operations. No deadline is extended and no cloud fallback is
+silently selected. Process death/reboot can require preparation again.
+
+The sysconfig association correction permits the Android external-storage
+provider for the import screen after the new ROM is booted. The current GPU
+trial's imported model and verification marker use the same private AIOS path
+and are reused; no model re-import is required solely by this backend update.
+No boot script, system-server smali, device contact, or Phone APK change is added.
+
+The unfinished saved-contact/caller-name bridge is retained only under
+experimental/caller-identity. It is not included in the default AIOS backend.
+Call Screening retains its tested strict schema; an occasional invalid-schema
+response was observed with both tested CPU/GPU models and remains unresolved.
+
+Build:
+source buildenv.sh dm3q
+bash unica/mods/rezoss/aioskernel/native-now-nudge/build_rom_backend.sh NEW_AIOS_APK
+bash unica/mods/rezoss/qwen-llm/system-stub/build.sh NEW_SETTINGS_APK
+
+Validation:
+bash unica/mods/rezoss/aioskernel/native-now-nudge/tests/run_gemma_rom_integration_test.sh NEW_AIOS_APK
+JSON_JAR=/path/to/json.jar bash unica/mods/rezoss/aioskernel/native-now-nudge/tests/run_callscreen_contract_test.sh
+bash unica/mods/rezoss/aioskernel/native-now-nudge/tests/run_screening_deadline_test.sh
+
+Qwen source/assets and build_qwen_backend.sh are retained as a build-time
+rollback. Export UNICA_LOCAL_LLM_BACKEND=qwen for a matching Qwen ROM build.
+This is not an in-app engine selector. Returning a phone to Qwen also requires
+a compatible full Qwen model APK/version; do not assume the lower-code v9 APK
+can upgrade the new version-10 settings stub or a data update.
+
+Validation boundary: source, APK and isolated ROM-staging checks. This change
+does not itself perform a full ROM build, flash, reboot or install an update.
+Installed system-APK GPU native-library behavior remains to be verified after
+flashing; the previous on-device trials used the installed data-update APK.

@@ -1,0 +1,47 @@
+Now Nudge source/direct-model validation, 2026-10-31
+
+No APK built or installed for this investigation. Existing installed runner
+was invoked with synthetic prompts in /data/local/tmp/unica-nudge-contract-20261031.
+Host prompts/results/runner logs are under /tmp/unica-nudge-contract-fix.
+Production package settings, weights and native libraries were unchanged.
+
+Observed failures:
+- One long prompt for three tones gave copied requests or incomplete JSON.
+- Token-by-token mode also failed; a hybrid-prefill-only cause was not established.
+- The previous exactly-three guard was temporarily relaxed. That relaxation is
+  reverted. One positive, one neutral, one negative are required atomically.
+- Raw decoder EOS markers are not valid Samsung action fields; normalize only
+  terminal markers before parsing, preserving protocol-significant tabs.
+
+Source design:
+- Local contextual reply: one short model request per tone, returning all three
+  together through Samsung's existing ordered line callback. No canned replies,
+  one-line success, partial callback or extra retry outside the submission budget.
+- Latest incoming speaker is explicit; trailing owner turns are not reused.
+- API contextual reply retains one JSON request, parsed to the same three lines.
+- Photo/calendar: short model JSON request, then strict conversion to existing
+  tab/pipe wire format. SamsungRecallInference retains grounding/session checks.
+- Topic/intent is model-generated, not a new keyword classifier.
+
+Direct source-prompt results, temperature zero:
+positive: Sure, I'd be happy to help with that!
+neutral: Please clarify what you're asking about the beach photos.
+negative: Sorry, I can't send photos.
+photo: Share Photo<TAB>photo beach
+negated photo request: Unsafe<TAB>
+unrelated greeting: Unsafe<TAB>
+calendar: Create Calendar<TAB>type event|title dinner|start tomorrow at noon
+
+These actual outputs passed the source reply parser and RecallPrediction.
+Photo runner wall time was about 3.36 s; calendar about 5.06 s, excluding
+AIOS IPC, queue and separate token-count overhead. Replies now need three
+inference passes; Samsung UI responsiveness/cancellation still requires runtime
+verification. The backend submission deadlines have not been extended.
+
+Limits:
+- Synthetic English cases only; multilingual quality and real captured context
+  are not established by these tests.
+- Host parser checks cannot prove tone semantics for arbitrary generations.
+- This does not prove gallery suggestion display/click routing on the phone.
+- Existing UNKNOWN input-field logs remain a separate unresolved UI observation.
+- Existing temporary APKs predate these source fixes.

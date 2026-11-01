@@ -30,6 +30,28 @@ final class ApiSettingsStore {
         boolean ready() { return !endpoint.isEmpty() && !model.isEmpty() && !apiKey.isEmpty(); }
     }
 
+    static String backend(Context context, boolean screening) {
+        return context.getSharedPreferences(PREFS,Context.MODE_PRIVATE).getString(screening?"screening_backend":"backend","default");
+    }
+    static synchronized void select(Context context,String backend,boolean screening) {
+        if(!backend.matches("default|openai|gemini|openrouter|custom"))throw new IllegalArgumentException("Invalid backend");
+        if(!"default".equals(backend)&&!configured(context))throw new IllegalArgumentException("Save API settings first.");
+        if(!"default".equals(backend)&&!matchesEndpoint(backend,display(context).endpoint))throw new IllegalArgumentException("Save the selected provider endpoint first.");
+        context.getSharedPreferences(PREFS,Context.MODE_PRIVATE).edit().putString(screening?"screening_backend":"backend",backend).apply();
+    }
+    static boolean matchesEndpoint(String backend,String endpoint){
+        String host=URI.create(endpoint).getHost();
+        return "custom".equals(backend)||("openai".equals(backend)&&"api.openai.com".equalsIgnoreCase(host))
+            ||("gemini".equals(backend)&&"generativelanguage.googleapis.com".equalsIgnoreCase(host))
+            ||("openrouter".equals(backend)&&"openrouter.ai".equalsIgnoreCase(host));
+    }
+    static synchronized Settings forBackend(Context context,String backend) throws Exception {
+        if("default".equals(backend)||(!backend.equals(backend(context,false))&&!backend.equals(backend(context,true))))
+            throw new IllegalArgumentException("backend_changed");
+        Settings settings=read(context);
+        if(!matchesEndpoint(backend,settings.endpoint))throw new IllegalArgumentException("provider_mismatch");
+        return settings;
+    }
     static Settings read(Context context) throws Exception {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String endpoint = prefs.getString("endpoint", "https://api.openai.com/v1/chat/completions");
@@ -72,7 +94,7 @@ final class ApiSettingsStore {
                 .getString("api_key", "").isEmpty();
     }
 
-    static void save(Context context, String endpoint, String model, String apiKey) throws Exception {
+    static synchronized void save(Context context, String endpoint, String model, String apiKey) throws Exception {
         String cleanEndpoint = endpoint == null ? "" : endpoint.trim();
         String cleanModel = model == null ? "" : model.trim();
         String cleanKey = apiKey == null ? "" : apiKey.trim();
@@ -84,15 +106,17 @@ final class ApiSettingsStore {
 
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String encrypted = prefs.getString("api_key", "");
+        if(!cleanEndpoint.equals(prefs.getString("endpoint","")) && cleanKey.isEmpty())
+            throw new IllegalArgumentException("Enter an API key when changing the endpoint.");
         if (!cleanKey.isEmpty()) encrypted = encrypt(cleanKey);
         else if (!encrypted.isEmpty()) decrypt(encrypted);
         if (encrypted.isEmpty()) throw new IllegalArgumentException("Enter an API key first.");
         prefs.edit().putString("endpoint", cleanEndpoint).putString("model", cleanModel)
-                .putString("api_key", encrypted).apply();
+                .putString("api_key", encrypted).putString("backend","default").putString("screening_backend","default").apply();
     }
 
-    static void clearKey(Context context) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove("api_key").apply();
+    static synchronized void clearKey(Context context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove("api_key").putString("backend","default").putString("screening_backend","default").apply();
         try {
             KeyStore store = KeyStore.getInstance("AndroidKeyStore");
             store.load(null);

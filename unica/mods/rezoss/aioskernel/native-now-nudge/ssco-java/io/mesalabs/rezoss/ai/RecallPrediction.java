@@ -25,12 +25,16 @@ public final class RecallPrediction {
         else return null;
         Map<String,String> fields=new LinkedHashMap<>();
         for(String segment:raw.split("\\|",-1)) {
+            if(segment.matches("(?s).*[\\p{Cc}\\p{Cf}].*"))return null;
             int space=segment.indexOf(' ');
             if(space<1)return null;
             String key=segment.substring(0,space),value=segment.substring(space+1).trim();
             if(!allowed.contains(key)||fields.containsKey(key)||value.isEmpty()||value.length()>256)return null;
             // The stock schema checks names, but does not ground photo/title/start.
-            if(!key.equals("type")&&!key.equals("per")&&!input.toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT)))return null;
+            if(value.indexOf('\t')>=0||value.matches("(?s).*[\\p{Cc}\\p{Cf}].*"))return null;
+            // Photo values are model-proposed Gallery search terms, including spelling
+            // corrections and translations. Calendar fields still require exact grounding.
+            if(!action.equals("Share Photo")&&!key.equals("type")&&!key.equals("per")&&!input.toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT)))return null;
             if(key.equals("type")&&!value.equals("event"))return null;
             fields.put(key,value);
         }

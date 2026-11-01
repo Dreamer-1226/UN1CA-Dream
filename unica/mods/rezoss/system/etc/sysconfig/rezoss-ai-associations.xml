@@ -19,4 +19,7 @@
     <allow-association target="com.samsung.android.ssco" allowed="com.samsung.android.smartsuggestions" />
     <!-- Settings search reads SemanticDataProvider while indexing device Q&A. -->
     <allow-association target="com.samsung.android.ssco" allowed="com.android.settings.intelligence" />
+    <!-- Experimental AIOS model import uses Android's user-selected storage provider. -->
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.android.externalstorage" />
+    <allow-association target="com.android.externalstorage" allowed="com.samsung.android.aioskernelservice" />
 </config>

@@ -31,6 +31,10 @@ public final class ApiProvider extends ContentProvider {
     @Override public Bundle call(String method, String arg, Bundle extras) {
         authorize();
         Bundle result = new Bundle();
+        if("backend_config".equals(method)){
+            result.putString("backend",ApiSettingsStore.backend(getContext(),false));
+            result.putString("screening_backend",ApiSettingsStore.backend(getContext(),true));return result;
+        }
         if ("api_ready".equals(method)) {
             try { result.putBoolean("configured", ApiSettingsStore.configured(getContext())); }
             catch (Exception unavailable) { result.putBoolean("configured", false); }
@@ -51,7 +55,11 @@ public final class ApiProvider extends ContentProvider {
         long deadline = extras.getLong("deadline", 0);
         int maxTokens = extras.getInt("max_tokens", 96);
         try {
-            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId);
+            String backend=extras.getString("backend","default");
+            if("default".equals(backend)||(!backend.equals(ApiSettingsStore.backend(getContext(),false))&&!backend.equals(ApiSettingsStore.backend(getContext(),true))))
+                throw new ApiClient.ApiException("backend_changed");
+            if(!ApiSettingsStore.matchesEndpoint(backend,ApiSettingsStore.display(getContext()).endpoint))throw new ApiClient.ApiException("provider_mismatch");
+            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend);
             result.putString("content", content);
             result.putString("status", "generated");
         } catch (ApiClient.ApiException failure) {

@@ -21,7 +21,7 @@ public final class SamsungRecallInference {
             if(input==null||input.isEmpty()||input.length()>12000||Looper.myLooper()==Looper.getMainLooper())return "Unsafe";
             String output=request(context,input);
             RecallPrediction prediction=RecallPrediction.parse(input,output);
-            if(prediction==null)return "Unsafe";
+            if(prediction==null){Log.i("RezossRecallInference","classification invalid_output outputPresent="+(output!=null));return "Unsafe";}
             RecallSession.put(input,prediction,SystemClock.elapsedRealtime()+2000);
             Log.i("RezossRecallInference","classification="+prediction.action);
             return prediction.action;

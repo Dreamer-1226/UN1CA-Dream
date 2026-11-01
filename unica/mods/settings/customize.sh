@@ -91,6 +91,11 @@ done < <(find "$MODPATH/SecSettings.apk" -type f \
     ! -name "*.orig" \
     ! -name "*.rej")
 
+# The toggle controller binds the backend row after the UN1CA overlay is copied.
+APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "$MODPATH/now-nudge/0001-Show-AI-backend-only-when-Now-Nudge-is-enabled.patch" \
+    || ABORT "Failed to configure Now Nudge backend menu visibility"
+
 # Keep the device-specific Power schedule menu aligned with its Rezoss backend.
 python3 "$SRC_DIR/unica/mods/rezoss/scheduled-power-on/install-settings-menu.py" \
     "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_top_settings.xml" \

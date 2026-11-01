@@ -1,6 +1,6 @@
-Subject: [PATCH] Preserve WhatsApp chat nudges when personal-data autofill is UNKNOWN
+Subject: [PATCH] Preserve WhatsApp and Business chat nudges when personal-data autofill is UNKNOWN
 
-The exact focused WhatsApp conversation entry stays UNKNOWN for personal-data
+The exact focused WhatsApp or WhatsApp Business conversation entry stays UNKNOWN for personal-data
 autofill. Skip only its unsupported-field EXIT broadcast after FTU; do not
 route chat text into personal-data understanding or change chat eligibility.
 All other fields retain the original rejection. Existing registers, labels,
@@ -8,7 +8,7 @@ FTU handling and supported-field flow are preserved. Apply after patch 0026.
 
 --- a/smali_classes15/com/samsung/android/smartsuggestions/service/autofill/interpreter/AssistDataInterpreter.smali
 +++ b/smali_classes15/com/samsung/android/smartsuggestions/service/autofill/interpreter/AssistDataInterpreter.smali
-@@ -671,6 +671,91 @@
+@@ -671,6 +671,101 @@
      return p0
  .end method
  
@@ -27,8 +27,15 @@ FTU handling and supported-field flow are preserved. Apply after patch 0026.
 +    const-string v1, "com.whatsapp"
 +    invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 +    move-result v2
++    if-nez v2, :whatsapp_package_supported
++    const-string v1, "com.whatsapp.w4b"
++    invoke-virtual {v0}, Landroid/content/ComponentName;->getPackageName()Ljava/lang/String;
++    move-result-object v2
++    invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++    move-result v2
 +    if-eqz v2, :whatsapp_reject
 +
++    :whatsapp_package_supported
 +    invoke-virtual {v0}, Landroid/content/ComponentName;->getClassName()Ljava/lang/String;
 +    move-result-object v2
 +    const-string v1, "com.whatsapp.Conversation"
@@ -55,7 +62,10 @@ FTU handling and supported-field flow are preserved. Apply after patch 0026.
 +
 +    invoke-virtual {v0}, Landroid/app/assist/AssistStructure$ViewNode;->getIdPackage()Ljava/lang/String;
 +    move-result-object v2
-+    const-string v1, "com.whatsapp"
++    invoke-virtual {p1}, Lcom/samsung/android/smartsuggestions/service/autofill/data/AssistData;->getComponentName()Landroid/content/ComponentName;
++    move-result-object v1
++    invoke-virtual {v1}, Landroid/content/ComponentName;->getPackageName()Ljava/lang/String;
++    move-result-object v1
 +    invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 +    move-result v2
 +    if-eqz v2, :whatsapp_reject
@@ -87,7 +97,7 @@ FTU handling and supported-field flow are preserved. Apply after patch 0026.
 +    if-nez v0, :whatsapp_reject
 +
 +    const-string v0, "AssistDataInterpreter"
-+    const-string v1, "Preserve chat nudge for verified WhatsApp entry; skip personal-data autofill"
++    const-string v1, "Preserve chat nudge for verified WhatsApp or Business entry; skip personal-data autofill"
 +    invoke-static {v0, v1}, Lcom/samsung/android/smartsuggestions/service/autofill/util/AutofillFlowLogger;->i(Ljava/lang/String;Ljava/lang/String;)V
 +    const/4 v0, 0x1
 +    return v0
@@ -100,7 +110,7 @@ FTU handling and supported-field flow are preserved. Apply after patch 0026.
  .method private final loadAllInputTypeConfigs()V
      .locals 6
  
-@@ -1294,6 +1379,17 @@
+@@ -1294,6 +1389,17 @@
  
      if-nez v0, :cond_0
  

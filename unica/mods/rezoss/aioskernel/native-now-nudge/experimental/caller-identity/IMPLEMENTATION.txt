@@ -1,0 +1,58 @@
+Call Screening caller identity experiment
+
+The Phone adapter is pinned to the device's SamsungInCallUI 18.1.00.75,
+SHA-256 19b1c9aca978d6346ef014b6e99c49afe88ee4f8e0d56491d25f419a6aa32f5e.
+It is not automatically applied to the ROM's older Phone base or a newer app update.
+
+The ko.d3 request hook calls CallerIdentity.decorate with the current request list
+and session. The helper uses that session's current bo.h callback and l9.n call,
+then looks up its raw address through Android Contacts PhoneLookup. It never
+uses prior call history as proof of identity. It does not cache callers globally.
+The lookup requests cancellation after 800 ms. Cancellation is cooperative: a
+provider that ignores it can exceed that time. Errors retain the original path.
+
+A successful lookup prefixes a fresh per-request record, without changing the
+original conversation/history list:
+REZOSS_CALLER_CONTEXT_V1:{"saved":true,"name":"Marie Dupont"}
+or
+REZOSS_CALLER_CONTEXT_V1:{"saved":false,"name":""}
+
+The paired AIOS CallScreeningContract consumes only a leading metadata record.
+It asks an unsaved caller's name first when absent from their speech. If a saved
+name is supplied, it requests a spoken reply addressing that person by name and
+sets the returned caller field to the authoritative saved name. Caller speech
+cannot replace that saved display name. The model still has to follow the spoken
+instruction; static parser tests do not prove speech quality.
+
+Metadata requests return caller/purpose/answer. The inspected Phone parser zd.m.b
+accepts all three fields regardless of known/unknown request type. Legacy AIOS
+requests without metadata retain the original two- or three-field schema.
+No invented caller name, synthetic spoken fallback or relaxed JSON acceptance
+is added. Errors now distinguish incorrect fields, empty answer and trailing text.
+
+Contact names containing quotes, backslashes, control tokens/characters, or more
+than 64 characters retain Samsung's original behavior, because the downstream
+Phone JSON cleanup cannot safely carry those values. Lookup errors do not mark
+a number unsaved. Existing Samsung caller display and screening settings remain
+authoritative; this adapter does not change which calls are screened automatically.
+
+REA observations: active package ev_e4f4587225f987377958b8ac3dc576f0633073642744b7ce696b426e5a16f30f;
+request builder ev_aab432df8557eccf964749d0bb90f5a5f7006a544b06ef9a16ce00a7c6307006;
+Phone JSON parser ev_b1af9b2652b140830c7b4251db4246fe606a7e877d7725ef11b7eae1c56bf357;
+known-type predicate ev_5013f58abcfb33688762c2c174ce2dad374856bffcc2cd764157367e39586642.
+Raw smali supplied the exact ko.d3 hook and l9.n.b raw-address delegation.
+The GPU runtime logs already reported UNKNOWN for the tested unsaved number;
+repeat-call misclassification is not established as the schema-failure cause.
+
+Validation commands:
+JSON_JAR=/path/to/json.jar bash tests/run_callscreen_contract_test.sh
+bash experimental/caller-identity/validate_phone.sh /path/to/active-phone.apk /tmp/NEW-validation-directory
+Run the separate CallScreeningIdentityTest with the same JSON jar and fixture.
+
+Release boundary: source changes and static validation only. The Phone patch is
+outside automatic mod discovery. A paired release must merge the helper DEX into
+Phone, retain the correct signing/update policy, and rebuild AIOS before testing.
+validate_phone.sh's unsigned assembly artifact is NOT an installable release.
+No device APK, contact, setting or app data is modified by these validation steps.
+
+Validation result 2026-10-31: 994 original contract checks and 544 caller-identity checks passed. Phone helper compiled with Android 37 API and D8 min API 36. Exact 18.1.00.75 patch zero-fuzz dry-run/apply and APKTool assembly/ZIP integrity passed; ko.d3.run retains .locals 15. No signed release or installed behavior is established. Current Samsung Phone certificate SHA-256 is 34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42; verify the ROM update-signing policy before attempting a rebuilt Phone update.
