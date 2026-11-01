@@ -68,8 +68,22 @@ ENCODE_MP4()
 }
 # ]
 
-ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "system" \
-    "system/priv-app/wallpaper-res/wallpaper-res.apk" 0 0 644 "u:object_r:system_file:s0"
+# b5q uses the b8sxxx wallpapers, every other target the m3qxxx ones.
+case "$TARGET_CODENAME" in
+    b5q) WALLPAPER_SOURCE="b8sxxx" ;;
+    *) WALLPAPER_SOURCE="m3qxxx" ;;
+esac
+WALLPAPER_APK="system/priv-app/wallpaper-res/wallpaper-res.apk"
+if [ -e "$SRC_DIR/prebuilts/samsung/$WALLPAPER_SOURCE/$WALLPAPER_APK" ] || \
+        [ -e "$SRC_DIR/prebuilts/samsung/$WALLPAPER_SOURCE/$WALLPAPER_APK.00" ]; then
+    LOG "- Using $WALLPAPER_SOURCE wallpapers for $TARGET_CODENAME"
+else
+    LOGW "No wallpaper-res.apk in prebuilts/samsung/$WALLPAPER_SOURCE, using source firmware"
+    WALLPAPER_SOURCE="$SOURCE_FIRMWARE"
+fi
+ADD_TO_WORK_DIR "$WALLPAPER_SOURCE" "system" \
+    "$WALLPAPER_APK" 0 0 644 "u:object_r:system_file:s0"
+unset WALLPAPER_SOURCE WALLPAPER_APK
 # DECODE_APK "system" "system/priv-app/wallpaper-res/wallpaper-res.apk"
 # WALLPAPER_RES_DIR="$APKTOOL_DIR/system/priv-app/wallpaper-res/wallpaper-res.apk/res"
 # for f in "$WALLPAPER_RES_DIR"/drawable-nodpi/dex_wallpaper_*.webp; do
