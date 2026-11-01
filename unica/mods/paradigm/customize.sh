@@ -350,6 +350,15 @@ ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/libsbs.so" 0 0 644 "u:object_r:s
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/libtensorflowlite.audio.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/libtensorflowlite_jni.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/libvoice_booster.so" 0 0 644 "u:object_r:system_lib_file:s0"
+# The quick panel (playback) Audio Eraser is AudioFlinger's VoiceBooster
+# effect. Shipping the library is not enough: AudioFlinger only creates it when
+# audio_effects_common.conf declares it, which the source firmware may lack.
+_VOICE_BOOSTER_CONF="$WORK_DIR/system/system/etc/audio_effects_common.conf"
+if [ -f "$_VOICE_BOOSTER_CONF" ] && ! grep -q "voice_booster" "$_VOICE_BOOSTER_CONF"; then
+    LOG "- Registering VoiceBooster effect in /system/etc/audio_effects_common.conf"
+    EVAL "sed -i -e '/^libraries {/a\\  voice_booster {\\n    path /system/lib/libvoice_booster.so\\n  }' -e '/^effects {/a\\  voice_booster {\\n    library voice_booster\\n    uuid f5d84187-9dd3-40a4-87a3-056fee875338\\n  }' \"$_VOICE_BOOSTER_CONF\""
+fi
+unset _VOICE_BOOSTER_CONF
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/libsoundboostereq_legacy.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/lib_sag_ai_sound_sep_v1.00.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/lib_sag_ai_sound_sep_v2.00.so" 0 0 644 "u:object_r:system_lib_file:s0"
