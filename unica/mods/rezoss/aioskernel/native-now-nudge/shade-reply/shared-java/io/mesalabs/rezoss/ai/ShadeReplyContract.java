@@ -43,12 +43,23 @@ public final class ShadeReplyContract {
         return true;
     }
 
+    /** Android owns the tag segment: preserve it verbatim, including newlines and pipes. */
+    public static String packageFromKey(String key) {
+        if (key == null || key.isEmpty() || key.length() > 2048) return null;
+        int first = key.indexOf('|'), second = key.indexOf('|', first + 1);
+        int third = key.indexOf('|', second + 1), last = key.lastIndexOf('|');
+        if (first <= 0 || second <= first + 1 || third <= second + 1 || last <= third) return null;
+        String pkg = key.substring(first + 1, second);
+        if (!key.substring(0, first).matches("-?[0-9]{1,10}")
+                || !clean(pkg, 255) || !pkg.matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+")
+                || !key.substring(second + 1, third).matches("-?[0-9]{1,11}")
+                || !key.substring(last + 1).matches("[0-9]{1,10}")) return null;
+        return pkg;
+    }
+
     public static boolean valid(String key, String pkg, String fp) {
-        if (!clean(key, 2048) || !clean(pkg, 255) || !pkg.matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+")
-                || fp == null || !fp.matches("[0-9a-f]{64}")) return false;
-        String[] parts = key.split("\\|", -1);
-        return parts.length == 5 && parts[0].matches("-?[0-9]{1,10}") && parts[1].equals(pkg)
-                && parts[2].matches("-?[0-9]{1,11}") && parts[4].matches("[0-9]{1,10}");
+        return pkg != null && pkg.equals(packageFromKey(key))
+                && fp != null && fp.matches("[0-9a-f]{64}");
     }
 
     /** Call from one thread. Times must use the same monotonic nanosecond clock. */
@@ -66,7 +77,8 @@ public final class ShadeReplyContract {
         private String token;
         private long cutoff = Long.MIN_VALUE;
         private boolean disabled;
-        private static String identity(String key, String fp) { return key + "\n" + fp; }
+        private static String prefix(String key) { return key == null ? "null:" : key.length() + ":" + key + "\n"; }
+        private static String identity(String key, String fp) { return prefix(key) + fp; }
         private static boolean fresh(long started, long now) { return started > 0 && now >= started && now - started <= TTL; }
 
         public void open(String key, String pkg, String fp, String token, long nowNanos) {
@@ -130,13 +142,13 @@ public final class ShadeReplyContract {
                         String expiredKey = item.getKey();
                         it.remove();
                         generationFingerprints.remove(expiredKey);
-                        cache.keySet().removeIf(cached -> cached.startsWith(expiredKey + "\n"));
+                        cache.keySet().removeIf(cached -> cached.startsWith(prefix(expiredKey)));
                     }
                 }
                 if (generations.size() >= 16) return false;
             }
             if (generation == null || generation.started < startedNanos) {
-                cache.keySet().removeIf(cached -> cached.startsWith(key + "\n"));
+                cache.keySet().removeIf(cached -> cached.startsWith(prefix(key)));
             }
             generations.put(key, new Entry(startedNanos, null));
             generationFingerprints.put(key, fp);

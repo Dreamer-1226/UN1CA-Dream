@@ -1,0 +1,33 @@
+Subject: [PATCH] Offer neutral recall inputs to map inference only
+
+Keep Samsung SBert and URL labels. The opt-in helper marks exact neutral output
+for local action inference; all other gate results remain unchanged. Restrict
+marked model results to Browse Location after Samsung extraction and validation.
+The existing unsafe return and normal action routes remain intact. No register
+count changes. Requires NativeMapGate in the generated client helper.
+
+--- a/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/GatingModelFactory$GatingModelWrapper.smali
++++ b/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/GatingModelFactory$GatingModelWrapper.smali
+@@ -590,5 +590,9 @@
+ 
+     move-result-object p0
+ 
++    invoke-static {p1, p0}, Lio/mesalabs/rezoss/ai/NativeMapGate;->extend(Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
++
++    move-result-object p0
++
+     return-object p0
+ .end method
+--- a/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/RecallProvider.smali
++++ b/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/RecallProvider.smali
+@@ -540,6 +540,10 @@
+     move-result-object v2
+ 
+     :goto_2
++    invoke-static {v8, v2}, Lio/mesalabs/rezoss/ai/NativeMapGate;->filter(Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
++
++    move-result-object v2
++
+     if-eqz v6, :cond_a
+ 
+     new-instance v3, Lcom/samsung/android/smartsuggestions/feature/recall/model/SavePlacesActionBuilder;

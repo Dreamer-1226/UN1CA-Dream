@@ -35,7 +35,7 @@ public final class NativeReplyBridge {
   try{
    Bundle extras=request.getExtras();if(extras==null)return;
    String key=extras.getString("notificationKey"),fp=ShadeReplyIdentity.request(request);
-   String[] parts=key==null?new String[0]:key.split("\\|",-1);String pkg=parts.length==5?parts[1]:null;
+   String pkg=ShadeReplyContract.packageFromKey(key);
    if(!ShadeReplyContract.valid(key,pkg,fp)){Log.i("RezossShadeReply","begin unpaired");return;}
    ShadeScope scope=new ShadeScope(context,key,pkg,fp);synchronized(shade){if(shade.size()>=128)shade.clear();shade.put(param,scope);}scope.publish(Collections.emptyList());
   }catch(Exception failure){Log.w("RezossShadeReply","begin unavailable");}

@@ -75,6 +75,18 @@ public final class ShadeReplyKeyboardTest {
         // The same-replies early return must still re-arm the next expiration check.
         int clears=receiver.clears;SystemClock.clock+=60_000_000_001L;android.os.Handler.runDelayed();
         check(receiver.clears==clears+1);check(!ShadeReplyKeyboard.allowClick(expiring));check(!receiver.clearKeep);
+        ShadeReplyKeyboard.finish();
+        String opaque="0|com.whatsapp|1|androidTag=\n|10123";
+        start(ime,opaque,"opaque-token");
+        deliver(receiver,ime,opaque,SystemClock.elapsedRealtimeNanos());
+        Object opaqueItem=receiver.lastItem;check(ShadeReplyKeyboard.allowClick(opaqueItem));
+        start(ime,opaque.replace("\n", ""),"different-tag");
+        check(!ShadeReplyKeyboard.allowClick(opaqueItem));
+        check(!ShadeReplyKeyboard.keep());
+        deliver(receiver,ime,opaque,SystemClock.elapsedRealtimeNanos());
+        check(!ShadeReplyKeyboard.keep());
+        deliver(receiver,ime,opaque.replace("\n", ""),SystemClock.elapsedRealtimeNanos());
+        check(ShadeReplyKeyboard.allowClick(receiver.lastItem));
         System.out.println("ShadeReplyKeyboard production adapter: "+checks+" checks passed");
     }
 }

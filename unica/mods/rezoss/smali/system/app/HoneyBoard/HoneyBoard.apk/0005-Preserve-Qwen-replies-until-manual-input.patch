@@ -1443,7 +1443,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +        }
 +    .end annotation
 +
-+    .line 59
++    .line 70
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
 +    iput-wide p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;->started:J
@@ -1454,7 +1454,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.end method
 --- /dev/null
 +++ b/smali_classes5/io/mesalabs/rezoss/ai/ShadeReplyContract$State.smali
-@@ -0,0 +1,997 @@
+@@ -0,0 +1,1014 @@
 +.class public final Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;
 +.super Ljava/lang/Object;
 +.source "ShadeReplyContract.java"
@@ -1534,38 +1534,38 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method public constructor <init>()V
 +    .registers 3
 +
-+    .line 55
++    .line 66
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    .line 61
++    .line 72
 +    new-instance v0, Ljava/util/LinkedHashMap;
 +
 +    invoke-direct {v0}, Ljava/util/LinkedHashMap;-><init>()V
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
-+    .line 62
++    .line 73
 +    new-instance v0, Ljava/util/LinkedHashMap;
 +
 +    invoke-direct {v0}, Ljava/util/LinkedHashMap;-><init>()V
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generations:Ljava/util/Map;
 +
-+    .line 63
++    .line 74
 +    new-instance v0, Ljava/util/LinkedHashMap;
 +
 +    invoke-direct {v0}, Ljava/util/LinkedHashMap;-><init>()V
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generationFingerprints:Ljava/util/Map;
 +
-+    .line 64
++    .line 75
 +    new-instance v0, Ljava/util/LinkedHashSet;
 +
 +    invoke-direct {v0}, Ljava/util/LinkedHashSet;-><init>()V
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->blocked:Ljava/util/Set;
 +
-+    .line 67
++    .line 78
 +    const-wide/high16 v0, -0x8000000000000000L
 +
 +    iput-wide v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cutoff:J
@@ -1576,7 +1576,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method private static fresh(JJ)Z
 +    .registers 6
 +
-+    .line 70
++    .line 82
 +    const-wide/16 v0, 0x0
 +
 +    cmp-long v0, p0, v0
@@ -1609,18 +1609,16 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method private static identity(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +    .registers 3
 +
-+    .line 69
++    .line 81
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
-+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++    invoke-static {p0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->prefix(Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object p0
 +
-+    const-string v0, "\n"
-+
-+    invoke-virtual {p0, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p0
 +
@@ -1638,7 +1636,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method static synthetic lambda$receive$0(JLjava/util/Map$Entry;)Z
 +    .registers 5
 +
-+    .line 122
++    .line 134
 +    invoke-interface {p2}, Ljava/util/Map$Entry;->getValue()Ljava/lang/Object;
 +
 +    move-result-object p2
@@ -1657,24 +1655,10 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.end method
 +
 +.method static synthetic lambda$receive$1(Ljava/lang/String;Ljava/lang/String;)Z
-+    .registers 3
++    .registers 2
 +
-+    .line 133
-+    new-instance v0, Ljava/lang/StringBuilder;
-+
-+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
-+
-+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object p0
-+
-+    const-string v0, "\n"
-+
-+    invoke-virtual {p0, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object p0
-+
-+    invoke-virtual {p0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++    .line 145
++    invoke-static {p0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->prefix(Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object p0
 +
@@ -1686,12 +1670,48 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.end method
 +
 +.method static synthetic lambda$receive$2(Ljava/lang/String;Ljava/lang/String;)Z
++    .registers 2
++
++    .line 151
++    invoke-static {p0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->prefix(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {p1, p0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
++
++    move-result p0
++
++    return p0
++.end method
++
++.method private static prefix(Ljava/lang/String;)Ljava/lang/String;
 +    .registers 3
 +
-+    .line 139
++    .line 80
++    if-nez p0, :cond_5
++
++    const-string p0, "null:"
++
++    goto :goto_26
++
++    :cond_5
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
++
++    invoke-virtual {p0}, Ljava/lang/String;->length()I
++
++    move-result v1
++
++    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    move-result-object v0
++
++    const-string v1, ":"
++
++    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v0
 +
 +    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -1707,11 +1727,8 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    move-result-object p0
 +
-+    invoke-virtual {p1, p0}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
-+
-+    move-result p0
-+
-+    return p0
++    :goto_26
++    return-object p0
 +.end method
 +
 +
@@ -1719,15 +1736,15 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method public close(J)V
 +    .registers 5
 +
-+    .line 86
++    .line 98
 +    const/4 v0, 0x0
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
-+    .line 87
++    .line 99
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->token:Ljava/lang/String;
 +
-+    .line 88
++    .line 100
 +    iget-wide v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cutoff:J
 +
 +    invoke-static {v0, v1, p1, p2}, Ljava/lang/Math;->max(JJ)J
@@ -1736,22 +1753,22 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    iput-wide p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cutoff:J
 +
-+    .line 89
++    .line 101
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
 +    invoke-interface {p1}, Ljava/util/Map;->clear()V
 +
-+    .line 90
++    .line 102
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generations:Ljava/util/Map;
 +
 +    invoke-interface {p1}, Ljava/util/Map;->clear()V
 +
-+    .line 91
++    .line 103
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generationFingerprints:Ljava/util/Map;
 +
 +    invoke-interface {p1}, Ljava/util/Map;->clear()V
 +
-+    .line 92
++    .line 104
 +    return-void
 +.end method
 +
@@ -1766,7 +1783,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +        }
 +    .end annotation
 +
-+    .line 148
++    .line 160
 +    iget-boolean v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->disabled:Z
 +
 +    if-nez v0, :cond_37
@@ -1791,7 +1808,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto :goto_37
 +
-+    .line 149
++    .line 161
 +    :cond_17
 +    iget-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
@@ -1803,7 +1820,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    check-cast v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;
 +
-+    .line 150
++    .line 162
 +    if-eqz v0, :cond_32
 +
 +    iget-object v1, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;->replies:Ljava/util/List;
@@ -1818,7 +1835,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-eqz p1, :cond_32
 +
-+    .line 151
++    .line 163
 +    iget-object p1, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;->replies:Ljava/util/List;
 +
 +    goto :goto_36
@@ -1828,11 +1845,11 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    move-result-object p1
 +
-+    .line 150
++    .line 162
 +    :goto_36
 +    return-object p1
 +
-+    .line 148
++    .line 160
 +    :cond_37
 +    :goto_37
 +    invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
@@ -1845,7 +1862,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method public open(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
 +    .registers 9
 +
-+    .line 73
++    .line 85
 +    iget-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
 +    if-eqz v0, :cond_1b
@@ -1870,20 +1887,20 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-nez v0, :cond_1b
 +
-+    .line 74
++    .line 86
 +    :cond_18
 +    invoke-virtual {p0, p5, p6}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->close(J)V
 +
-+    .line 76
++    .line 88
 +    :cond_1b
 +    const/4 v0, 0x0
 +
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
-+    .line 77
++    .line 89
 +    iput-object v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->token:Ljava/lang/String;
 +
-+    .line 78
++    .line 90
 +    iget-boolean v0, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->disabled:Z
 +
 +    if-nez v0, :cond_42
@@ -1911,7 +1928,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto :goto_42
 +
-+    .line 82
++    .line 94
 +    :cond_39
 +    invoke-static {p1, p3}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->identity(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -1919,18 +1936,18 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    iput-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
-+    .line 83
++    .line 95
 +    iput-object p4, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->token:Ljava/lang/String;
 +
-+    .line 84
++    .line 96
 +    return-void
 +
-+    .line 79
++    .line 91
 +    :cond_42
 +    :goto_42
 +    invoke-virtual {p0, p5, p6}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->close(J)V
 +
-+    .line 80
++    .line 92
 +    return-void
 +.end method
 +
@@ -1949,7 +1966,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +        }
 +    .end annotation
 +
-+    .line 100
++    .line 112
 +    move-object/from16 v0, p0
 +
 +    move-object/from16 v1, p1
@@ -1990,13 +2007,13 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto/16 :goto_176
 +
-+    .line 102
++    .line 114
 +    :cond_27
 +    invoke-static {v1, v2}, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->identity(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v7
 +
-+    .line 103
++    .line 115
 +    iget-object v9, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generations:Ljava/util/Map;
 +
 +    invoke-interface {v9, v1}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
@@ -2005,7 +2022,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    check-cast v9, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;
 +
-+    .line 104
++    .line 116
 +    if-eqz v9, :cond_4e
 +
 +    iget-wide v10, v9, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;->started:J
@@ -2022,7 +2039,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    iget-object v10, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generationFingerprints:Ljava/util/Map;
 +
-+    .line 105
++    .line 117
 +    invoke-interface {v10, v1}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
 +
 +    move-result-object v10
@@ -2036,7 +2053,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +    :cond_4d
 +    return v8
 +
-+    .line 106
++    .line 118
 +    :cond_4e
 +    iget-object v10, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
@@ -2046,7 +2063,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    check-cast v10, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;
 +
-+    .line 107
++    .line 119
 +    if-eqz v10, :cond_5f
 +
 +    iget-wide v11, v10, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State$Entry;->started:J
@@ -2057,7 +2074,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v8
 +
-+    .line 109
++    .line 121
 +    :cond_5f
 +    if-eqz v10, :cond_6c
 +
@@ -2073,11 +2090,11 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v8
 +
-+    .line 110
++    .line 122
 +    :cond_6c
 +    nop
 +
-+    .line 111
++    .line 123
 +    invoke-interface/range {p6 .. p6}, Ljava/util/List;->isEmpty()Z
 +
 +    move-result v11
@@ -2086,7 +2103,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-nez v11, :cond_ae
 +
-+    .line 112
++    .line 124
 +    invoke-interface/range {p6 .. p6}, Ljava/util/List;->size()I
 +
 +    move-result v11
@@ -2097,13 +2114,13 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v8
 +
-+    .line 113
++    .line 125
 +    :cond_7c
 +    new-instance v11, Ljava/util/ArrayList;
 +
 +    invoke-direct {v11}, Ljava/util/ArrayList;-><init>()V
 +
-+    .line 114
++    .line 126
 +    invoke-interface/range {p6 .. p6}, Ljava/util/List;->iterator()Ljava/util/Iterator;
 +
 +    move-result-object v13
@@ -2121,7 +2138,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    check-cast v14, Ljava/lang/String;
 +
-+    .line 115
++    .line 127
 +    const/16 v15, 0x400
 +
 +    # invokes: Lio/mesalabs/rezoss/ai/ShadeReplyContract;->clean(Ljava/lang/String;I)Z
@@ -2143,19 +2160,19 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto :goto_a8
 +
-+    .line 116
++    .line 128
 +    :cond_a4
 +    invoke-virtual {v11, v14}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
-+    .line 117
++    .line 129
 +    goto :goto_85
 +
-+    .line 115
++    .line 127
 +    :cond_a8
 +    :goto_a8
 +    return v8
 +
-+    .line 118
++    .line 130
 +    :cond_a9
 +    invoke-static {v11}, Ljava/util/Collections;->unmodifiableList(Ljava/util/List;)Ljava/util/List;
 +
@@ -2163,11 +2180,11 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto :goto_af
 +
-+    .line 111
++    .line 123
 +    :cond_ae
 +    move-object v11, v12
 +
-+    .line 121
++    .line 133
 +    :goto_af
 +    const/16 v13, 0x10
 +
@@ -2183,7 +2200,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-lt v10, v13, :cond_d4
 +
-+    .line 122
++    .line 134
 +    iget-object v10, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
 +    invoke-interface {v10}, Ljava/util/Map;->entrySet()Ljava/util/Set;
@@ -2196,7 +2213,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {v10, v14}, Ljava/util/Set;->removeIf(Ljava/util/function/Predicate;)Z
 +
-+    .line 123
++    .line 135
 +    iget-object v10, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
 +    invoke-interface {v10}, Ljava/util/Map;->size()I
@@ -2207,7 +2224,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v8
 +
-+    .line 125
++    .line 137
 +    :cond_d4
 +    if-nez v9, :cond_134
 +
@@ -2219,7 +2236,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-lt v10, v13, :cond_134
 +
-+    .line 126
++    .line 138
 +    iget-object v10, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generations:Ljava/util/Map;
 +
 +    invoke-interface {v10}, Ljava/util/Map;->entrySet()Ljava/util/Set;
@@ -2230,7 +2247,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    move-result-object v10
 +
-+    .line 127
++    .line 139
 +    :goto_e8
 +    invoke-interface {v10}, Ljava/util/Iterator;->hasNext()Z
 +
@@ -2238,14 +2255,14 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-eqz v14, :cond_127
 +
-+    .line 128
++    .line 140
 +    invoke-interface {v10}, Ljava/util/Iterator;->next()Ljava/lang/Object;
 +
 +    move-result-object v14
 +
 +    check-cast v14, Ljava/util/Map$Entry;
 +
-+    .line 129
++    .line 141
 +    invoke-interface {v14}, Ljava/util/Map$Entry;->getValue()Ljava/lang/Object;
 +
 +    move-result-object v15
@@ -2264,22 +2281,22 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-nez v8, :cond_122
 +
-+    .line 130
++    .line 142
 +    invoke-interface {v14}, Ljava/util/Map$Entry;->getKey()Ljava/lang/Object;
 +
 +    move-result-object v8
 +
 +    check-cast v8, Ljava/lang/String;
 +
-+    .line 131
++    .line 143
 +    invoke-interface {v10}, Ljava/util/Iterator;->remove()V
 +
-+    .line 132
++    .line 144
 +    iget-object v9, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generationFingerprints:Ljava/util/Map;
 +
 +    invoke-interface {v9, v8}, Ljava/util/Map;->remove(Ljava/lang/Object;)Ljava/lang/Object;
 +
-+    .line 133
++    .line 145
 +    iget-object v9, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
 +    invoke-interface {v9}, Ljava/util/Map;->keySet()Ljava/util/Set;
@@ -2292,7 +2309,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {v9, v14}, Ljava/util/Set;->removeIf(Ljava/util/function/Predicate;)Z
 +
-+    .line 135
++    .line 147
 +    :cond_122
 +    move-object/from16 v9, p2
 +
@@ -2300,7 +2317,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    goto :goto_e8
 +
-+    .line 136
++    .line 148
 +    :cond_127
 +    move/from16 v16, v8
 +
@@ -2316,13 +2333,13 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v16
 +
-+    .line 125
++    .line 137
 +    :cond_134
 +    move/from16 v16, v8
 +
 +    move-object/from16 p2, v9
 +
-+    .line 138
++    .line 150
 +    :cond_138
 +    if-eqz p2, :cond_142
 +
@@ -2334,7 +2351,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    if-gez v5, :cond_150
 +
-+    .line 139
++    .line 151
 +    :cond_142
 +    iget-object v5, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
@@ -2348,7 +2365,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {v5, v6}, Ljava/util/Set;->removeIf(Ljava/util/function/Predicate;)Z
 +
-+    .line 141
++    .line 153
 +    :cond_150
 +    iget-object v5, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generations:Ljava/util/Map;
 +
@@ -2358,12 +2375,12 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {v5, v1, v6}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 +
-+    .line 142
++    .line 154
 +    iget-object v5, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->generationFingerprints:Ljava/util/Map;
 +
 +    invoke-interface {v5, v1, v2}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 +
-+    .line 143
++    .line 155
 +    iget-object v1, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->blocked:Ljava/util/Set;
 +
 +    invoke-interface {v1, v7}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
@@ -2374,7 +2391,7 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    return v16
 +
-+    .line 144
++    .line 156
 +    :cond_168
 +    iget-object v0, v0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
@@ -2384,16 +2401,16 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {v0, v7, v1}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 +
-+    .line 145
++    .line 157
 +    const/4 v0, 0x1
 +
 +    return v0
 +
-+    .line 100
++    .line 112
 +    :cond_174
 +    move/from16 v16, v8
 +
-+    .line 101
++    .line 113
 +    :goto_176
 +    return v16
 +.end method
@@ -2401,14 +2418,14 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +.method public typed(J)V
 +    .registers 3
 +
-+    .line 94
++    .line 106
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
 +    if-nez p1, :cond_5
 +
 +    return-void
 +
-+    .line 95
++    .line 107
 +    :cond_5
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->blocked:Ljava/util/Set;
 +
@@ -2416,14 +2433,14 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    invoke-interface {p1, p2}, Ljava/util/Set;->add(Ljava/lang/Object;)Z
 +
-+    .line 96
++    .line 108
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->cache:Ljava/util/Map;
 +
 +    iget-object p2, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->active:Ljava/lang/String;
 +
 +    invoke-interface {p1, p2}, Ljava/util/Map;->remove(Ljava/lang/Object;)Ljava/lang/Object;
 +
-+    .line 97
++    .line 109
 +    iget-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->blocked:Ljava/util/Set;
 +
 +    invoke-interface {p1}, Ljava/util/Set;->size()I
@@ -2448,13 +2465,13 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +
 +    iput-object p1, p0, Lio/mesalabs/rezoss/ai/ShadeReplyContract$State;->token:Ljava/lang/String;
 +
-+    .line 98
++    .line 110
 +    :cond_2a
 +    return-void
 +.end method
 --- /dev/null
 +++ b/smali_classes5/io/mesalabs/rezoss/ai/ShadeReplyContract.smali
-@@ -0,0 +1,370 @@
+@@ -0,0 +1,435 @@
 +.class public final Lio/mesalabs/rezoss/ai/ShadeReplyContract;
 +.super Ljava/lang/Object;
 +.source "ShadeReplyContract.java"
@@ -2704,126 +2721,191 @@ Subject: [PATCH] Keep Qwen replies until manual input or editor exit
 +    return-object v0
 +.end method
 +
-+.method public static valid(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
-+    .registers 5
-+
-+    .line 47
-+    const/16 v0, 0x800
-+
-+    invoke-static {p0, v0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract;->clean(Ljava/lang/String;I)Z
-+
-+    move-result v0
-+
-+    const/4 v1, 0x0
-+
-+    if-eqz v0, :cond_5c
-+
-+    const/16 v0, 0xff
-+
-+    invoke-static {p1, v0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract;->clean(Ljava/lang/String;I)Z
-+
-+    move-result v0
-+
-+    if-eqz v0, :cond_5c
-+
-+    const-string v0, "[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+"
-+
-+    invoke-virtual {p1, v0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
-+
-+    move-result v0
-+
-+    if-eqz v0, :cond_5c
-+
-+    if-eqz p2, :cond_5c
++.method public static packageFromKey(Ljava/lang/String;)Ljava/lang/String;
++    .registers 8
 +
 +    .line 48
-+    const-string v0, "[0-9a-f]{64}"
++    const/4 v0, 0x0
 +
-+    invoke-virtual {p2, v0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++    if-eqz p0, :cond_70
 +
-+    move-result p2
++    invoke-virtual {p0}, Ljava/lang/String;->isEmpty()Z
 +
-+    if-nez p2, :cond_24
++    move-result v1
 +
-+    goto :goto_5c
++    if-nez v1, :cond_70
++
++    invoke-virtual {p0}, Ljava/lang/String;->length()I
++
++    move-result v1
++
++    const/16 v2, 0x800
++
++    if-le v1, v2, :cond_12
++
++    goto :goto_70
 +
 +    .line 49
-+    :cond_24
-+    const-string p2, "\\|"
++    :cond_12
++    const/16 v1, 0x7c
 +
-+    const/4 v0, -0x1
++    invoke-virtual {p0, v1}, Ljava/lang/String;->indexOf(I)I
 +
-+    invoke-virtual {p0, p2, v0}, Ljava/lang/String;->split(Ljava/lang/String;I)[Ljava/lang/String;
++    move-result v2
++
++    add-int/lit8 v3, v2, 0x1
++
++    invoke-virtual {p0, v1, v3}, Ljava/lang/String;->indexOf(II)I
++
++    move-result v4
++
++    .line 50
++    add-int/lit8 v5, v4, 0x1
++
++    invoke-virtual {p0, v1, v5}, Ljava/lang/String;->indexOf(II)I
++
++    move-result v6
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->lastIndexOf(I)I
++
++    move-result v1
++
++    .line 51
++    if-lez v2, :cond_6f
++
++    if-le v4, v3, :cond_6f
++
++    if-le v6, v5, :cond_6f
++
++    if-gt v1, v6, :cond_31
++
++    goto :goto_6f
++
++    .line 52
++    :cond_31
++    invoke-virtual {p0, v3, v4}, Ljava/lang/String;->substring(II)Ljava/lang/String;
++
++    move-result-object v3
++
++    .line 53
++    const/4 v4, 0x0
++
++    invoke-virtual {p0, v4, v2}, Ljava/lang/String;->substring(II)Ljava/lang/String;
++
++    move-result-object v2
++
++    const-string v4, "-?[0-9]{1,10}"
++
++    invoke-virtual {v2, v4}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++
++    move-result v2
++
++    if-eqz v2, :cond_6e
++
++    .line 54
++    const/16 v2, 0xff
++
++    invoke-static {v3, v2}, Lio/mesalabs/rezoss/ai/ShadeReplyContract;->clean(Ljava/lang/String;I)Z
++
++    move-result v2
++
++    if-eqz v2, :cond_6e
++
++    const-string v2, "[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+"
++
++    invoke-virtual {v3, v2}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++
++    move-result v2
++
++    if-eqz v2, :cond_6e
++
++    .line 55
++    invoke-virtual {p0, v5, v6}, Ljava/lang/String;->substring(II)Ljava/lang/String;
++
++    move-result-object v2
++
++    const-string v4, "-?[0-9]{1,11}"
++
++    invoke-virtual {v2, v4}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++
++    move-result v2
++
++    if-eqz v2, :cond_6e
++
++    add-int/lit8 v1, v1, 0x1
++
++    .line 56
++    invoke-virtual {p0, v1}, Ljava/lang/String;->substring(I)Ljava/lang/String;
 +
 +    move-result-object p0
 +
-+    .line 50
-+    array-length p2, p0
++    const-string v1, "[0-9]{1,10}"
 +
-+    const/4 v0, 0x5
-+
-+    if-ne p2, v0, :cond_5a
-+
-+    aget-object p2, p0, v1
-+
-+    const-string v0, "-?[0-9]{1,10}"
-+
-+    invoke-virtual {p2, v0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
-+
-+    move-result p2
-+
-+    if-eqz p2, :cond_5a
-+
-+    const/4 p2, 0x1
-+
-+    aget-object v0, p0, p2
-+
-+    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-+
-+    move-result p1
-+
-+    if-eqz p1, :cond_5a
-+
-+    const/4 p1, 0x2
-+
-+    aget-object p1, p0, p1
-+
-+    .line 51
-+    const-string v0, "-?[0-9]{1,11}"
-+
-+    invoke-virtual {p1, v0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
-+
-+    move-result p1
-+
-+    if-eqz p1, :cond_5a
-+
-+    const/4 p1, 0x4
-+
-+    aget-object p0, p0, p1
-+
-+    const-string p1, "[0-9]{1,10}"
-+
-+    invoke-virtual {p0, p1}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++    invoke-virtual {p0, v1}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
 +
 +    move-result p0
 +
-+    if-eqz p0, :cond_5a
++    if-nez p0, :cond_6d
 +
-+    move v1, p2
++    goto :goto_6e
 +
-+    goto :goto_5b
++    .line 57
++    :cond_6d
++    return-object v3
 +
-+    :cond_5a
-+    nop
++    .line 56
++    :cond_6e
++    :goto_6e
++    return-object v0
 +
-+    .line 50
-+    :goto_5b
-+    return v1
++    .line 51
++    :cond_6f
++    :goto_6f
++    return-object v0
 +
 +    .line 48
-+    :cond_5c
-+    :goto_5c
-+    return v1
++    :cond_70
++    :goto_70
++    return-object v0
++.end method
++
++.method public static valid(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
++    .registers 3
++
++    .line 61
++    if-eqz p1, :cond_18
++
++    invoke-static {p0}, Lio/mesalabs/rezoss/ai/ShadeReplyContract;->packageFromKey(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {p1, p0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_18
++
++    if-eqz p2, :cond_18
++
++    .line 62
++    const-string p0, "[0-9a-f]{64}"
++
++    invoke-virtual {p2, p0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_18
++
++    const/4 p0, 0x1
++
++    goto :goto_19
++
++    :cond_18
++    const/4 p0, 0x0
++
++    .line 61
++    :goto_19
++    return p0
 +.end method
 --- /dev/null
 +++ b/smali_classes5/io/mesalabs/rezoss/ai/ShadeReplyKeyboard$0.smali

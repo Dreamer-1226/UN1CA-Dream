@@ -20,6 +20,45 @@ public final class ShadeReplyContractTest {
         check(!ShadeReplyContract.valid(A, "com.signal", FP));
         check(!ShadeReplyContract.valid(A + "\n", PKG, FP));
         check(!ShadeReplyContract.valid(null, PKG, FP));
+        String opaque = "0|com.whatsapp.w4b|1|base64Tag=\n|10536";
+        String piped = "0|com.whatsapp.w4b|1|opaque|tag\r\n|10536";
+        check(ShadeReplyContract.valid(opaque, "com.whatsapp.w4b", FP));
+        check(ShadeReplyContract.valid(piped, "com.whatsapp.w4b", FP));
+        check("com.whatsapp.w4b".equals(ShadeReplyContract.packageFromKey(opaque)));
+        check("com.whatsapp.w4b".equals(ShadeReplyContract.packageFromKey(piped)));
+        check(!ShadeReplyContract.valid(opaque, PKG, FP));
+        check(!ShadeReplyContract.valid("0|com.whats\napp|1|tag|10536", PKG, FP));
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|1|tag|10536\n") == null);
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|id|tag|10536") == null);
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|1|tag|uid") == null);
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|1|tag") == null);
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|1||10536") != null);
+        check(ShadeReplyContract.packageFromKey(null) == null);
+        check(ShadeReplyContract.packageFromKey("0|com.whatsapp|1|" + new String(new char[2048]) + "|10536") == null);
+        ShadeReplyContract.State opaqueState = new ShadeReplyContract.State();
+        check(opaqueState.receive(opaque, "com.whatsapp.w4b", FP, 10, reply(), 20));
+        opaqueState.open(opaque, "com.whatsapp.w4b", FP, "opaque1", 30);
+        check(opaqueState.current(31).size() == 2);
+        // Whitespace in Android's tag is identity, not formatting to normalize.
+        String trimmedTag = opaque.replace("\n", "");
+        opaqueState.open(trimmedTag, "com.whatsapp.w4b", FP, "opaque2", 40);
+        check(opaqueState.current(41).isEmpty());
+        check(!opaqueState.receive(opaque, "com.whatsapp.w4b", FP, 10, reply(), 42));
+        check(opaqueState.receive(trimmedTag, "com.whatsapp.w4b", FP, 43, reply(), 44));
+        opaqueState.typed(45);
+        opaqueState.open(trimmedTag, "com.whatsapp.w4b", FP, "opaque2", 46);
+        check(opaqueState.current(47).isEmpty());
+        // A tag may itself contain another complete key plus a newline. Cache eviction
+        // must compare a length-delimited identity prefix, not a raw key prefix.
+        String nested = A + "\ninsideTag|10123";
+        check(ShadeReplyContract.valid(nested, PKG, FP));
+        ShadeReplyContract.State distinct = new ShadeReplyContract.State();
+        check(distinct.receive(nested, PKG, FP, 10, reply(), 20));
+        check(distinct.receive(A, PKG, FP, 30, reply(), 31));
+        distinct.open(nested, PKG, FP, "nested", 40);
+        check(distinct.current(41).size() == 2);
+        distinct.open(null, PKG, FP, "missing", 42);
+        check(distinct.current(43).isEmpty());
         ShadeReplyContract.State s = new ShadeReplyContract.State();
         check(s.receive(A, PKG, FP, 10, reply(), 20)); // before opening
         s.open(A, PKG, FP, "editor1", 30);
