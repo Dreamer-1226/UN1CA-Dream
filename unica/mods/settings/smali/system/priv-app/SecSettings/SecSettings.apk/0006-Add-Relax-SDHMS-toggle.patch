@@ -1295,11 +1295,11 @@ new file mode 100644
 +    .registers 6
 +
 +    .line 50
-+    const-string v0, "dm3q"
++    const-string v0, "^(dm1q|dm2q|dm3q|b5q|q5q)$"
 +
 +    sget-object v1, Landroid/os/Build;->DEVICE:Ljava/lang/String;
 +
-+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++    invoke-virtual {v1, v0}, Ljava/lang/String;->matches(Ljava/lang/String;)Z
 +
 +    move-result v0
 +

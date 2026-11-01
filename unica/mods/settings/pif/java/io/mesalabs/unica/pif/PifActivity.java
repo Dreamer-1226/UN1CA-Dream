@@ -133,7 +133,7 @@ public final class PifActivity extends Activity {
         action(busy?"Working…":"Choose Pixel device",source+"\nFetch using Autopif or GitHub",this::devices);
         action("Edit PIF properties","Add or change supported profile values",this::edit);
         footnote(status);
-        if(!supported())footnote("Native configuration controls require the dm3q SDK 37 PIF backend.");
+        if(!supported())footnote("Native configuration controls require the SDK 37 PIF backend.");
         section("Spoof configuration");group();
         toggle("Spoof Build","Override the device identity used by Play services","spoofBuild");
         toggle("Spoof Build · Play Store","Also override Play Store identity; requires Spoof Build","spoofVendingBuild");

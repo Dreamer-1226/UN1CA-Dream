@@ -4157,7 +4157,7 @@ new file mode 100644
 +
 +    if-nez v0, :cond_1ab
 +
-+    const-string v0, "Native configuration controls require the dm3q SDK 37 PIF backend."
++    const-string v0, "Native configuration controls require the SDK 37 PIF backend."
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/pif/PifActivity;->footnote(Ljava/lang/String;)V
 +
