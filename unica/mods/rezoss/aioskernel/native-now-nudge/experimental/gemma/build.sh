@@ -8,6 +8,11 @@ ROOT=$(cd "$HERE/../.." && pwd)
 OUTPUT_DIR=${1:?Usage: build.sh NEW_OUTPUT_DIRECTORY}
 [[ ! -e "$OUTPUT_DIR" ]] || { echo "Refusing existing output directory: $OUTPUT_DIR" >&2; exit 1; }
 SDK=${ANDROID_HOME:-$HOME/Android/Sdk}; TOOLS=$SDK/build-tools/37.0.0
+# LiteRT-LM 0.19 ships Java 21 class files; prefer a JDK 21 javac when present.
+JAVAC=javac
+for JDK in "${JAVA_HOME_21_X64:-}" "${JAVA_HOME_21_ARM64:-}" "${JAVA_HOME_21:-}"; do
+    [[ -n "$JDK" && -x "$JDK/bin/javac" ]] && { JAVAC=$JDK/bin/javac; break; }
+done
 WORK=$(mktemp -d /tmp/unica-gemma-backends.XXXXXX)
 BASE=$ROOT/prebuilt/AIOS-V73-base.apk
 printf '%s  %s\n' aef3822a21d4c8821bbfd0b8db2630d8db7b3a1f86bd3d3e9c5e2a0f7fbd5a8c "$BASE" | sha256sum -c -
@@ -46,7 +51,7 @@ f=ET.SubElement(activity,'intent-filter');ET.SubElement(f,'action',{ns+'name':'a
 tree.write(path,encoding='utf-8',xml_declaration=True)
 PY
     mapfile -t SOURCES < <(find "$STAGE/backend/java" -name '*.java' -type f | sort)
-    javac -source 8 -target 8 -Xlint:-options -classpath "$SDK/platforms/android-37.0/android.jar:$WORK/deps/litertlm-classes.jar:$WORK/deps/kotlin-stdlib.jar" -d "$STAGE/classes" "${SOURCES[@]}"
+    "$JAVAC" -source 8 -target 8 -Xlint:-options -classpath "$SDK/platforms/android-37.0/android.jar:$WORK/deps/litertlm-classes.jar:$WORK/deps/kotlin-stdlib.jar" -d "$STAGE/classes" "${SOURCES[@]}"
     jar cf "$STAGE/backend.jar" -C "$STAGE/classes" .
     "$TOOLS/d8" --min-api 30 --lib "$SDK/platforms/android-37.0/android.jar" --output "$STAGE/dex" "$STAGE/backend.jar" "$WORK/deps/"*.jar
     "$TOOLS/aapt2" link --manifest "$STAGE/backend/AndroidManifest.xml" -I "$SDK/platforms/android-37.0/android.jar" -o "$STAGE/manifest.apk"

@@ -93,11 +93,13 @@ jobs:
           echo -n "${{ secrets.PLATFORM_KEY_PK8 }}" | base64 --decode > security/unica_platform.pk8
           echo -n "${{ secrets.PLATFORM_KEY_PEM }}" | base64 --decode > security/unica_platform.x509.pem
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21 and 17
         uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: |
+            21
+            17
           cache: 'gradle'
 
       - name: Generate build config
