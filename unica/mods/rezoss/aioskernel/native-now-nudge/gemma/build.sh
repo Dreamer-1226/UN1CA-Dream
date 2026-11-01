@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
+# shellcheck disable=SC2043
 # Build the ROM Gemma GPU backend; model weights remain separate.
 set -euo pipefail
 : "${SRC_DIR:?Source buildenv.sh dm3q first}"
