@@ -2,8 +2,9 @@ APPLY_PATCH "system" "system/framework/framework.jar" \
     "$MODPATH/framework.jar/0001-Introduce-PlayIntegrityHooks.patch"
 APPLY_PATCH "system" "system/framework/framework.jar" \
     "$MODPATH/framework.jar/0002-Spoof-PIF-system-properties.patch"
-# SDK 37 child startup hook; retain the existing implementation on other targets.
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ && "$SOURCE_PLATFORM_SDK_VERSION" == "37" ]]; then
+# SDK 37 child startup hook. It only touches the system framework, so it is
+# not tied to the target SoC; other source SDKs keep the existing implementation.
+if [[ "$SOURCE_PLATFORM_SDK_VERSION" == "37" ]]; then
     # flip-qssi/fold-qssi framework.jar may differ, only hook where the patch fits.
     DECODE_APK "system" "system/framework/framework.jar"
     if LC_ALL=C patch -p1 -d "$APKTOOL_DIR/system/framework/framework.jar" -N --forward -l --dry-run -s \

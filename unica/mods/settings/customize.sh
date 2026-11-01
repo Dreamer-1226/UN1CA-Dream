@@ -273,7 +273,9 @@ LOG_STEP_OUT
 LOG "- Installing Battery Saving service policy"
 python3 "$MODPATH/battery/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Battery Saving service policy"
 python3 "$MODPATH/ota/install-policy.py" "$WORK_DIR" || ABORT "Failed to install OTA staging service policy"
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ ]]; then
+# The certificate worker only uses the system cacerts store, so any SM8550 or
+# SM8250 target (S23/Z5 or S20/S20 FE/Note20) can run it.
+if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q|c1q|c2q|r8q)$ ]]; then
     python3 "$MODPATH/movecertificate/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Move Certificate service policy"
 else
     DELETE_FROM_WORK_DIR "system" "system/bin/unica-movecert"
