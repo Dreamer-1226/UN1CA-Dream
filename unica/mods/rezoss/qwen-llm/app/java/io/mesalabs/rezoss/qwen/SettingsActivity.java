@@ -66,7 +66,7 @@ public final class SettingsActivity extends Activity {
         page.addView(description, matchWrap());
 
         local = new Switch(this);
-        local.setText("Run on this device (Qwen2.5-1.5B, no API)");
+        local.setText("Run on this device (Qwen3-0.6B, no API)");
         local.setTextSize(16);
         local.setPadding(0, dp(4), 0, dp(4));
         page.addView(local, matchWrap());
@@ -139,7 +139,7 @@ public final class SettingsActivity extends Activity {
         String text;
         if (status.equals("ready") || status.equals("running")) text = "On-device model ready.";
         else if (status.startsWith("preparing")) text = "Preparing the on-device model (" + status.substring(10) + "). Keep the app open.";
-        else if (status.equals("not_prepared")) text = "Model pack installed. Turn this on to prepare it (about 1.1 GB).";
+        else if (status.equals("not_prepared")) text = "Model pack installed. Turn this on to prepare it (about 470 MB).";
         else if (status.equals("model_missing")) text = "Install QWEN_LLM_rezoss_model.apk to use the on-device model. After it is prepared you can uninstall the pack.";
         else text = "On-device model unavailable (" + status + ").";
         boolean on = local != null && local.isChecked();

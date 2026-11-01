@@ -18,15 +18,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.json.*;
 
 /**
- * Optional on-device backend: Qwen2.5-1.5B-Instruct Q4_K_M on the bundled llama.cpp server.
+ * Optional on-device backend: Qwen3-0.6B Q4_0 (non-thinking) on the bundled llama.cpp server.
  * The model ships in a separate, same-signer APK and is copied once into private storage after
  * a SHA-256 check. The server only listens on loopback and requires a per-launch random key.
  */
 final class LocalEngine {
     static final String MODEL_PACKAGE = "io.mesalabs.rezoss.qwen.model";
-    static final String MODEL = "qwen2.5-1.5b-instruct-q4_k_m.gguf";
-    private static final String SHA = "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e";
-    private static final long MODEL_SIZE = 1117320736L;
+    static final String MODEL = "qwen3-0.6b-q4_0.gguf";
+    private static final String SHA = "4b78d8e3c61976cebb78ef5affe19d0eca75b1b47ec66f613a5a3245484758d5";
+    private static final long MODEL_SIZE = 469671328L;
     private static final int CONTEXT = 4096;
     private static final long IDLE_STOP_MS = 120000;
     private static final String TAG = "RezossLLM";
@@ -100,6 +100,11 @@ final class LocalEngine {
     }
 
     private void prepare() throws Exception {
+        // Drop models and stamps left behind by an earlier model pack.
+        File[] stale = context.getFilesDir().listFiles((dir, name) ->
+                (name.endsWith(".gguf") || name.endsWith(".gguf.part") || name.endsWith(".verified"))
+                        && !name.equals(MODEL) && !name.equals(SHA + ".verified"));
+        if (stale != null) for (File file : stale) file.delete();
         File target = modelFile();
         File part = new File(context.getFilesDir(), MODEL + ".part");
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -150,7 +155,8 @@ final class LocalEngine {
                 messages.put(new JSONObject().put("role", "system").put("content", system));
             messages.put(new JSONObject().put("role", "user").put("content", body));
             JSONObject request = new JSONObject().put("messages", messages).put("max_tokens", maxTokens)
-                    .put("temperature", 0.3).put("stream", false).put("cache_prompt", true);
+                    .put("temperature", 0.3).put("stream", false).put("cache_prompt", true)
+                    .put("chat_template_kwargs", new JSONObject().put("enable_thinking", false));
             if (jsonReplies) {
                 JSONObject properties = new JSONObject();
                 for (String tone : new String[]{"negative", "neutral", "positive"})
@@ -215,7 +221,7 @@ final class LocalEngine {
         File binary = new File(context.getApplicationInfo().nativeLibraryDir, "librezoss_llama.so");
         ProcessBuilder builder = new ProcessBuilder(binary.getAbsolutePath(), "-m", modelFile().getAbsolutePath(),
                 "--host", "127.0.0.1", "--port", String.valueOf(port), "-c", String.valueOf(CONTEXT),
-                "-t", "4", "-tb", "4", "-np", "1", "--no-webui", "--jinja",
+                "-t", "4", "-tb", "4", "-np", "1", "--no-webui", "--jinja", "--reasoning-budget", "0",
                 "--api-key-file", keyFile.getAbsolutePath(), "--log-disable");
         builder.redirectOutput(new File("/dev/null"));
         builder.redirectError(new File("/dev/null"));

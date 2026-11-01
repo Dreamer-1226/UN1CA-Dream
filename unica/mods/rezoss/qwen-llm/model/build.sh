@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Build the optional on-device model pack (Qwen2.5-1.5B-Instruct Q4_K_M) for Rezoss AI.
+# Build the optional on-device model pack (Qwen3-0.6B Q4_0) for Rezoss AI.
 # The app copies and verifies the model once; the pack can be uninstalled afterwards.
 set -euo pipefail
 : "${SRC_DIR:?Source buildenv.sh <target> first}"
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 OUTPUT=${1:-$SRC_DIR/out/archived/QWEN_LLM/QWEN_LLM_rezoss_model.apk}
 MODEL_DIR=${QWEN_MODEL_DIR:-$SRC_DIR/out/archived/QWEN_LLM/model}
-MODEL=qwen2.5-1.5b-instruct-q4_k_m.gguf
+MODEL=qwen3-0.6b-q4_0.gguf
 SDK=${ANDROID_HOME:-$HOME/Android/Sdk}; TOOLS=$SDK/build-tools/37.0.0
 WORK=$(mktemp -d /tmp/rezoss-model-pack.XXXXXX)
 trap 'rm -rf "$WORK"' EXIT
