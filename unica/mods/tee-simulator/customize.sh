@@ -5,8 +5,8 @@
 
 SKIPUNZIP=1
 
-if [[ ! "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ || "$SOURCE_PLATFORM_SDK_VERSION" != "37" ]]; then
-    LOG "- Skipping TEE Simulator: requires an SM8550 target with SDK 37"
+if [[ ! "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q)$ || "$SOURCE_PLATFORM_SDK_VERSION" != "37" ]]; then
+    LOG "- Skipping TEE Simulator: requires an SM8550 or S20 (SM8250) target with SDK 37"
     return 0
 fi
 if [ ! -f "$SRC_DIR/unica/mods/keybox/disable" ]; then
