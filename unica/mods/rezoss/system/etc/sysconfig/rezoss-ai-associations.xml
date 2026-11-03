@@ -22,4 +22,13 @@
     <!-- Experimental AIOS model import uses Android's user-selected storage provider. -->
     <allow-association target="com.samsung.android.aioskernelservice" allowed="com.android.externalstorage" />
     <allow-association target="com.android.externalstorage" allowed="com.samsung.android.aioskernelservice" />
+    <!-- The picker's Download, Images/Videos and Recent roots are served by these providers. -->
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.android.providers.downloads" />
+    <allow-association target="com.android.providers.downloads" allowed="com.samsung.android.aioskernelservice" />
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.android.providers.media.module" />
+    <allow-association target="com.android.providers.media.module" allowed="com.samsung.android.aioskernelservice" />
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.google.android.providers.media.module" />
+    <allow-association target="com.google.android.providers.media.module" allowed="com.samsung.android.aioskernelservice" />
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.android.providers.media" />
+    <allow-association target="com.android.providers.media" allowed="com.samsung.android.aioskernelservice" />
 </config>
