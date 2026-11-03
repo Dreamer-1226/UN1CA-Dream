@@ -23,14 +23,14 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
 # Relax SDHMS uses the inspected dm3q persistent process, with no root shell,
 # kernel changes or cross-app data writes. Reject an unreviewed SDHMS ABI.
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ ]]; then
+#if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ ]]; then
 #    python3 "$MODPATH/thermal/verify-input.py" \
 #        "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
 #        || ABORT "Relax SDHMS firmware compatibility check failed"
-    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
-        || ABORT "Failed to install Relax SDHMS policy control"
-fi
+#    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+#        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
+#        || ABORT "Failed to install Relax SDHMS policy control"
+#fi
 
 # SoftwareUpdateUtils no longer exposes isOTAUpgradeAllowed(Context) on One UI 9.
 
@@ -277,10 +277,10 @@ LOG_STEP_OUT
 # ROM-native Battery Saving: the native worker only accepts fixed kernel controls.
 LOG "- Installing Battery Saving service policy"
 python3 "$MODPATH/battery/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Battery Saving service policy"
-python3 "$MODPATH/ota/install-policy.py" "$WORK_DIR" || ABORT "Failed to install OTA staging service policy"
+#python3 "$MODPATH/ota/install-policy.py" "$WORK_DIR" || ABORT "Failed to install OTA staging service policy"
 # The certificate worker only uses the system cacerts store, so any SM8550 or
 # SM8250 target (S23/Z5 or S20/S20 FE/Note20) can run it.
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q|c1q|c2q|r8q)$ ]]; then
+if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
     python3 "$MODPATH/movecertificate/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Move Certificate service policy"
 else
     DELETE_FROM_WORK_DIR "system" "system/bin/unica-movecert"
@@ -292,7 +292,7 @@ fi
 # The GPU tables are pinned to the S23 Ultra firmware. Other SM8550 targets
 # get the editor only if their vendor_boot/kgsl pass the same check.
 UNICA_GPU=false
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ ]]; then
+if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
     if "$MODPATH/gpu/verify-firmware.sh" "$WORK_DIR/kernel/vendor_boot.img" \
             "$WORK_DIR/vendor_dlkm/lib/modules/msm_kgsl.ko"; then
         UNICA_GPU=true
