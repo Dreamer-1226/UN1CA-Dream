@@ -96,11 +96,6 @@ APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     "$MODPATH/now-nudge/0001-Show-AI-backend-only-when-Now-Nudge-is-enabled.patch" \
     || ABORT "Failed to configure Now Nudge backend menu visibility"
 
-# Keep the device-specific Power schedule menu aligned with its Rezoss backend.
-python3 "$SRC_DIR/unica/mods/rezoss/scheduled-power-on/install-settings-menu.py" \
-    "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_top_settings.xml" \
-    "$TARGET_CODENAME" || ABORT "Failed to configure Power schedule menu"
-
 # Expose UN1CA-selected SamsungSans source-bank fonts through Samsung's normal
 # Display > Font list and apply path.
 LOG "- Patching Samsung font list integration in /system/system/priv-app/SecSettings.apk"
@@ -277,7 +272,6 @@ LOG_STEP_OUT
 # ROM-native Battery Saving: the native worker only accepts fixed kernel controls.
 LOG "- Installing Battery Saving service policy"
 python3 "$MODPATH/battery/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Battery Saving service policy"
-#python3 "$MODPATH/ota/install-policy.py" "$WORK_DIR" || ABORT "Failed to install OTA staging service policy"
 # The certificate worker only uses the system cacerts store, so any SM8550 or
 # SM8250 target (S23/Z5 or S20/S20 FE/Note20) can run it.
 if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
@@ -286,27 +280,3 @@ else
     DELETE_FROM_WORK_DIR "system" "system/bin/unica-movecert"
     DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_movecert.rc"
 fi
-
-# dm3q-only GPU image editor and recovery backup policy. Other targets keep no
-# partition access or service; the shared Settings page reports unsupported.
-# The GPU tables are pinned to the S23 Ultra firmware. Other SM8550 targets
-# get the editor only if their vendor_boot/kgsl pass the same check.
-UNICA_GPU=false
-if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
-    if "$MODPATH/gpu/verify-firmware.sh" "$WORK_DIR/kernel/vendor_boot.img" \
-            "$WORK_DIR/vendor_dlkm/lib/modules/msm_kgsl.ko"; then
-        UNICA_GPU=true
-    elif [[ "$TARGET_CODENAME" == "dm3q" ]]; then
-        ABORT "GPU capability check failed; review the changed table/driver contract before shipping"
-    else
-        LOGW "GPU tuning skipped: $TARGET_CODENAME firmware does not match the inspected GPU table/driver contract"
-    fi
-fi
-if $UNICA_GPU; then
-    python3 "$MODPATH/gpu/install-policy.py" "$WORK_DIR" || ABORT "Failed to install GPU tuning service policy"
-else
-    DELETE_FROM_WORK_DIR "system" "system/bin/unica-gpu"
-    DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_gpu.rc"
-    DELETE_FROM_WORK_DIR "system" "system/etc/unica/gpu"
-fi
-unset UNICA_GPU
