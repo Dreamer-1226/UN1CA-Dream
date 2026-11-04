@@ -105,4 +105,5 @@ A special thanks goes to the following for their invaluable contributions in no 
 - **[Fede2782](https://github.com/Fede2782)** for his contributions and help with Exynos/MTK support
 - **[iDrinkCoffee](https://github.com/iDrinkCoffee-TG)** and **[RisenID](https://github.com/RisenID)** for their support
 - **[LineageOS Team](https://www.lineageos.org/)** for their original [OTA updater implementation](https://github.com/LineageOS/android_packages_apps_Updater)
+- **[GoRhanHee](https://github.com/GoRhanHee)** for [GoRhanHee Kernel](https://github.com/GoRhanHee/android_kernel_samsung_sm8550) shipped on the Galaxy S23 and Galaxy Z Flip5
 - *All the UN1CA project forks, contributors, testers and users ❤️*
