@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # Copyright (c) 2026 ssch71
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
