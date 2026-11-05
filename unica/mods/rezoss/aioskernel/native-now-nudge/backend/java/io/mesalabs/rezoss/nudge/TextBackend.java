@@ -239,6 +239,38 @@ public final class TextBackend {
         }
     }
     interface Control { boolean cancelled(); long deadline(); void process(Process process); default void request(String id){} }
+    Bundle diagnosticConfig() throws Exception { return api.diagnosticConfig(); }
+    String generateDiagnostic(String excerpt,String destination,boolean consent,Control control)throws Exception {
+        if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
+        try {
+            Bundle config=diagnosticConfig();
+            if(!destination.equals(config.getString("destination"))||(config.getBoolean("online")&&!consent))throw new IOException("backend_changed");
+            String prompt=DiagnosticPrompt.create(excerpt);
+            if(control.cancelled())throw new InterruptedIOException();
+            String route=config.getString("backend","default");
+            if(!"default".equals(route)) {
+                String id=UUID.randomUUID().toString();control.request(id);
+                try{return api.generate(prompt,256,control.deadline(),id,route,destination);}finally{control.request(null);}
+            }
+            return diagnosticLocal(prompt,control);
+        } finally { runnerLock.unlock(); }
+    }
+    private String diagnosticLocal(String prompt,Control control)throws Exception {
+        prepareModel(control.deadline());
+        if(count(prompt,control)>700)throw new IOException("context_limit");
+        File job=Files.createTempDirectory(context.getCacheDir().toPath(),"diagnostic-").toFile();
+        Process process=null;
+        try {
+            process=launch(job,prompt,null,256);control.process(process);
+            if(control.cancelled())throw new InterruptedIOException();
+            if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");
+            if(process.exitValue()!=0)throw new IOException("runner_failed");
+            return ModelOutput.completion(new String(Files.readAllBytes(new File(job,"output.txt").toPath()),"UTF-8")).trim();
+        } finally {
+            if(process!=null)process.destroyForcibly();control.process(null);
+            File[] files=job.listFiles();if(files!=null)for(File file:files)file.delete();job.delete();
+        }
+    }
     String generateLocal(String input,boolean summary,Control control)throws Exception {
         return generateControlled(input,summary,false,control);
     }

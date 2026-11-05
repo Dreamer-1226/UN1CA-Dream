@@ -31,6 +31,9 @@ final class ApiClient {
 
     static String complete(Context context, String systemPrompt, String userPrompt,
             int maxTokens, long deadline, String requestId, String backend) throws Exception {
+        return complete(context,systemPrompt,userPrompt,maxTokens,deadline,requestId,backend,null);
+    }
+    static String complete(Context context,String systemPrompt,String userPrompt,int maxTokens,long deadline,String requestId,String backend,String destination)throws Exception {
         if (userPrompt == null || userPrompt.isEmpty() || userPrompt.length() > 16000
                 || maxTokens < 1 || maxTokens > 2048 || requestId == null || requestId.isEmpty())
             throw new ApiException("invalid_request");
@@ -38,7 +41,16 @@ final class ApiClient {
         long remaining = deadline - SystemClock.elapsedRealtime();
         if (remaining < 1) throw new ApiException("deadline");
 
-        ApiSettingsStore.Settings settings = ApiSettingsStore.forBackend(context,backend);
+        ApiSettingsStore.Settings settings;
+        synchronized(ApiSettingsStore.class){
+            if(destination!=null&&!backend.equals(ApiSettingsStore.backend(context,false)))throw new ApiException("backend_changed");
+            settings=ApiSettingsStore.forBackend(context,backend);
+        }
+        if(destination!=null){
+            byte[] hash=java.security.MessageDigest.getInstance("SHA-256").digest((backend+"\n"+settings.model+"\n"+settings.endpoint).getBytes("UTF-8"));
+            StringBuilder actual=new StringBuilder();for(byte b:hash)actual.append(String.format(java.util.Locale.ROOT,"%02x",b&255));
+            if(!destination.equals(actual.toString()))throw new ApiException("backend_changed");
+        }
         if (!settings.ready()) throw new ApiException("api_unconfigured");
         ApiSettingsStore.validateEndpoint(settings.endpoint);
 

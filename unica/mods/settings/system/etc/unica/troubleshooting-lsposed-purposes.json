@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "package": "com.tsng.hidemyapplist",
+      "scope": "android",
+      "unica_mod": "HMA",
+      "feature_class": "io.mesalabs.unica.HmaPolicy",
+      "source": "https://github.com/Dr-TSNG/Hide-My-Applist",
+      "scope_source": "https://github.com/Dr-TSNG/Hide-My-Applist/blob/master/app/src/main/res/values/arrays.xml"
+    }
+  ]
+}

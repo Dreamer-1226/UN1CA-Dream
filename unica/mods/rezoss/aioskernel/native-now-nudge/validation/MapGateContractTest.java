@@ -2,9 +2,27 @@ import io.mesalabs.rezoss.ai.MapGateContract;
 import java.util.*;
 
 public final class MapGateContractTest {
+    enum Label {
+        OTHER("other"), UNSAFE("is_unsafe"), ACTION("has_intention_action"), QUERY("has_intention_query");
+        final String text; Label(String text) { this.text = text; }
+        @Override public String toString() { return text; }
+    }
     private static int checks;
     private static void check(boolean result) { checks++; if (!result) throw new AssertionError("check " + checks); }
     public static void main(String[] args) {
+        List<Label> raw = Collections.singletonList(Label.OTHER);
+        check(MapGateContract.beforeFilter(raw, true, true).equals(Collections.singletonList("other")));
+        check(raw.size() == 1 && raw.get(0) == Label.OTHER);
+        check(MapGateContract.beforeFilter(raw, false, true) == null);
+        check(MapGateContract.beforeFilter(raw, true, false) == null);
+        check(MapGateContract.beforeFilter(null, true, true) == null);
+        check(MapGateContract.beforeFilter(Collections.emptyList(), true, true) == null);
+        check(MapGateContract.beforeFilter(Collections.singletonList("other"), true, true) == null);
+        check(MapGateContract.beforeFilter(Collections.singletonList(null), true, true) == null);
+        for (List<Label> labels : Arrays.asList(Arrays.asList(Label.UNSAFE), Arrays.asList(Label.ACTION),
+                Arrays.asList(Label.QUERY), Arrays.asList(Label.OTHER, Label.UNSAFE),
+                Arrays.asList(Label.OTHER, Label.ACTION), Arrays.asList(Label.OTHER, Label.OTHER)))
+            check(MapGateContract.beforeFilter(labels, true, true) == null);
         List<String> other = Collections.singletonList("other");
         String input = "Directions to 10 Downing Street, London";
         List<String> candidate = MapGateContract.extend(input, other, true, true);

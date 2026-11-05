@@ -17,9 +17,9 @@ public final class LocalInferenceService extends Service {
     private TextBackend backend;
     private Messenger endpoint;
     private final class Job implements Runnable,TextBackend.Control,IBinder.DeathRecipient {
-        final Messenger callback;final int uid;final String input;final boolean summary,recall;final long deadline,submitted=SystemClock.elapsedRealtime();
+        final Messenger callback;final int uid;final String input;final boolean summary,recall,diagnostic,consent;final String destination;final long deadline,submitted=SystemClock.elapsedRealtime();
         volatile Process process;volatile String cancellation;volatile String requestId;volatile Thread thread;
-        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
+        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));diagnostic="diagnostic".equals(b.getString("task"));consent=b.getBoolean("online_consent");destination=b.getString("destination","");deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
         public boolean cancelled(){return cancellation!=null;}
         public long deadline(){return deadline;}
         public void process(Process p){process=p;if(p!=null&&cancelled())p.destroyForcibly();}
@@ -29,7 +29,7 @@ public final class LocalInferenceService extends Service {
         public void run(){
             thread=Thread.currentThread();long started=SystemClock.elapsedRealtime();String value=null,status="unavailable";
             Log.i("RezossV73Local","task="+(recall?"recall":summary?"summary":"replies")+" queueMs="+(started-submitted)+" remainingMs="+(deadline-started));
-            try{if(!cancelled()){value=recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
+            try{if(!cancelled()){value=diagnostic?backend.generateDiagnostic(input,destination,consent,this):recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
             catch(Exception e){
                 if(SystemClock.elapsedRealtime()>=deadline)status="deadline";
                 else if(e instanceof IOException && "deadline".equals(e.getMessage()))status="deadline";
@@ -56,23 +56,34 @@ public final class LocalInferenceService extends Service {
                 try{
                     boolean summaryCaller=trusted(message.sendingUid,"io.mesalabs.unica.localsummary");
                     boolean recallCaller=trusted(message.sendingUid,"com.samsung.android.ssco");
-                    if(!summaryCaller&&!recallCaller)throw new SecurityException("caller_denied");
+                    boolean diagnosticCaller=message.sendingUid==1000 && getPackageManager().checkSignatures("android","com.android.settings")==android.content.pm.PackageManager.SIGNATURE_MATCH;
+                    if(!summaryCaller&&!recallCaller&&!diagnosticCaller)throw new SecurityException("caller_denied");
                     IBinder key=message.replyTo.getBinder();
                     if(message.what==2){Job job=jobs.get(key);if(job!=null&&job.uid==message.sendingUid)job.cancel("client_cancelled");return;}
+                    if(message.what==3){
+                        if(!diagnosticCaller||backend==null)throw new SecurityException("caller_denied");
+                        Message reply=Message.obtain(null,3);Bundle info=backend.diagnosticConfig();
+                        info.putBoolean("ready",backend.configured());reply.setData(info);message.replyTo.send(reply);return;
+                    }
                     if(message.what!=1)return;
                     Bundle request=message.getData();boolean recall="recall".equals(request.getString("task"));
-                    if(recall){
+                    if("diagnostic".equals(request.getString("task"))){
+                        if(!diagnosticCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
+                    }else if(recall){
                         if(!recallCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
                     }else if(!summaryCaller||request.containsKey("task"))throw new SecurityException("task_denied");
                     if(backend==null||!backend.configured()){respond(message.replyTo,null,"backend_unavailable");return;}
                     if(!jobs.isEmpty()){respond(message.replyTo,null,"busy");return;}
                     Job job=new Job(message);
-                    if(job.input.isEmpty()||job.input.length()>12000||job.deadline<=SystemClock.elapsedRealtime()){respond(message.replyTo,null,"invalid_or_expired");return;}
+                    if(job.input.isEmpty()||job.input.length()>(job.diagnostic?1400:12000)||job.deadline<=SystemClock.elapsedRealtime()){respond(message.replyTo,null,"invalid_or_expired");return;}
                     String blocked=ThermalGuard.blocked(LocalInferenceService.this);
                     if(blocked!=null){respond(message.replyTo,null,blocked);return;}
                     key.linkToDeath(job,0);jobs.put(key,job);
                     try{backend.submit(job);}catch(RejectedExecutionException busy){jobs.remove(key);key.unlinkToDeath(job,0);respond(message.replyTo,null,"busy");}
-                }catch(Exception e){respond(message.replyTo,null,"caller_or_request_denied");}
+                }catch(Exception e){
+                    String reason=e instanceof IOException&&e.getMessage()!=null&&e.getMessage().matches("[a-z_]{1,64}")?e.getMessage():"caller_or_request_denied";
+                    respond(message.replyTo,null,reason);
+                }
             }
         });
         watchdog.scheduleAtFixedRate(()->main.post(()->{for(Job job:jobs.values()){String blocked=ThermalGuard.blocked(this);if(blocked==null&&SystemClock.elapsedRealtime()>=job.deadline)blocked="deadline";if(blocked!=null)job.cancel(blocked);}}),500,500,TimeUnit.MILLISECONDS);

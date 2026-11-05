@@ -1,0 +1,26 @@
+Subject: [PATCH] Use the active Gemma runtime for diagnostic analysis
+
+--- a/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
++++ b/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
+@@ -256,20 +256,7 @@
+         } finally { runnerLock.unlock(); }
+     }
+     private String diagnosticLocal(String prompt,Control control)throws Exception {
+-        prepareModel(control.deadline());
+-        if(count(prompt,control)>700)throw new IOException("context_limit");
+-        File job=Files.createTempDirectory(context.getCacheDir().toPath(),"diagnostic-").toFile();
+-        Process process=null;
+-        try {
+-            process=launch(job,prompt,null,256);control.process(process);
+-            if(control.cancelled())throw new InterruptedIOException();
+-            if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");
+-            if(process.exitValue()!=0)throw new IOException("runner_failed");
+-            return ModelOutput.completion(new String(Files.readAllBytes(new File(job,"output.txt").toPath()),"UTF-8")).trim();
+-        } finally {
+-            if(process!=null)process.destroyForcibly();control.process(null);
+-            File[] files=job.listFiles();if(files!=null)for(File file:files)file.delete();job.delete();
+-        }
++        return gemma.generate(prompt,256,control);
+     }
+     String generateLocal(String input,boolean summary,Control control)throws Exception {
+         return generateControlled(input,summary,false,control);

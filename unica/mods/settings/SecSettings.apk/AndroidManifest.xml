@@ -1,4 +1,5 @@
 /application>/i
+        <activity android:name="io.mesalabs.unica.troubleshooting.TroubleshootingActivity" android:exported="false" android:configChanges="keyboardHidden|orientation|screenSize" android:label="@string/unica_troubleshooting_title"/>
         <activity android:name="io.mesalabs.unica.movecertificate.MoveCertificateActivity" android:exported="false" android:label="@string/unica_movecert_title"/>
         <activity android:name="io.mesalabs.unica.pif.PifActivity" android:exported="false" android:label="@string/unica_pif_title"/>
         <activity android:name="io.mesalabs.unica.keybox.KeyboxActivity" android:enableOnBackInvokedCallback="true" android:exported="false" android:label="Manage Keybox"/>

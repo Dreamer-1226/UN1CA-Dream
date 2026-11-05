@@ -1,11 +1,31 @@
-Subject: [PATCH] Offer neutral recall inputs to map inference only
+Subject: [PATCH] Preserve raw neutral recall predictions for map inference only
 
-Keep Samsung SBert and URL labels. The opt-in helper marks exact neutral output
-for local action inference; all other gate results remain unchanged. Restrict
-marked model results to Browse Location after Samsung extraction and validation.
-The existing unsafe return and normal action routes remain intact. No register
-count changes. Requires NativeMapGate in the generated client helper.
+Retain exact singleton OTHER enum output before Samsung discards neutral labels.
+Null leaves Samsung's original filter in control for unsafe, failed, empty,
+mixed, query and normal action predictions. The wrapper still appends native
+map-URL labels before deciding whether an exact neutral result needs fallback.
+Restrict marked model results to Browse Location after Samsung extraction and
+validation. No register count changes. Requires NativeMapGate client helper.
 
+--- a/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/SBertGatingModel.smali
++++ b/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/SBertGatingModel.smali
+@@ -3667,6 +3667,16 @@
+     :cond_c
+     check-cast v0, Ljava/util/List;
+
++    invoke-static {v0}, Lio/mesalabs/rezoss/ai/NativeMapGate;->beforeFilter(Ljava/util/List;)Ljava/util/List;
++
++    move-result-object v1
++
++    if-eqz v1, :rezoss_original_label_filter
++
++    return-object v1
++
++    :rezoss_original_label_filter
++
+     move-object v1, v0
+
+     check-cast v1, Ljava/lang/Iterable;
 --- a/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/GatingModelFactory$GatingModelWrapper.smali
 +++ b/smali_classes15/com/samsung/android/smartsuggestions/feature/recall/model/GatingModelFactory$GatingModelWrapper.smali
 @@ -590,5 +590,9 @@

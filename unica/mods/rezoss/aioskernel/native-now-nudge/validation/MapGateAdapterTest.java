@@ -8,6 +8,11 @@ import org.json.JSONArray;
 
 /** Exercises production Android adapter with settings, thread, JSON and reflective actions. */
 public final class MapGateAdapterTest {
+    enum Label {
+        OTHER("other"), UNSAFE("is_unsafe"), ACTION("has_intention_action"), QUERY("has_intention_query");
+        final String text; Label(String text) { this.text = text; }
+        @Override public String toString() { return text; }
+    }
     private static int assertions;
     private static void check(boolean value) { assertions++; if (!value) throw new AssertionError(assertions); }
     public static final class Action {
@@ -22,6 +27,12 @@ public final class MapGateAdapterTest {
         public Map<String,String> getParameters() { return Collections.emptyMap(); }
     }
     public static void main(String[] args) {
+        check(NativeMapGate.beforeFilter(Collections.singletonList(Label.OTHER)).equals(Collections.singletonList("other")));
+        check(NativeMapGate.beforeFilter(Collections.emptyList()) == null);
+        check(NativeMapGate.beforeFilter(Collections.singletonList("other")) == null);
+        for (Label label : Arrays.asList(Label.UNSAFE, Label.ACTION, Label.QUERY))
+            check(NativeMapGate.beforeFilter(Collections.singletonList(label)) == null);
+        check(NativeMapGate.beforeFilter(Arrays.asList(Label.OTHER, Label.UNSAFE)) == null);
         List<String> neutral=Collections.singletonList("other");
         List<String> marked=NativeMapGate.extend("Directions to 10 Downing Street, London",neutral);
         check(marked!=neutral && MapGateContract.fallback(marked));
@@ -48,15 +59,18 @@ public final class MapGateAdapterTest {
         check(NativeMapGate.filter(json,Collections.singletonList(new Action("Browse Location","location",""))).isEmpty());
         for(String flag:Arrays.asList("rezoss_now_nudge_native","rezoss_now_nudge_context_actions","rezoss_aios_v73_backend")) {
             Settings.Global.disabled=flag;
+            check(NativeMapGate.beforeFilter(Collections.singletonList(Label.OTHER)) == null);
             check(NativeMapGate.extend("Directions to London",neutral)==neutral);
             check(NativeMapGate.filter(json,actions).isEmpty());
             check(NativeMapGate.filter("[\"has_intention_action\"]",actions)==actions);
         }
         Settings.Global.disabled=null;
         Looper.main=true;
+        check(NativeMapGate.beforeFilter(Collections.singletonList(Label.OTHER)) == null);
         check(NativeMapGate.extend("Directions to London",neutral)==neutral);
         Looper.main=false;
         ActivityThread.available=false;
+        check(NativeMapGate.beforeFilter(Collections.singletonList(Label.OTHER)) == null);
         check(NativeMapGate.extend("Directions to London",neutral)==neutral);
         check(NativeMapGate.filter(json,actions).isEmpty());
         System.out.println("Map adapter assertions="+assertions);

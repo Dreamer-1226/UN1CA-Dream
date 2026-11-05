@@ -28,6 +28,8 @@ for BACKEND in gpu; do
     cp -a "$ROOT/backend" "$STAGE/"
     patch --dry-run --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0001-Use-LiteRT-for-local-inference.patch"
     patch --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0001-Use-LiteRT-for-local-inference.patch"
+    patch --dry-run --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0002-Use-Gemma-for-diagnostic-analysis.patch"
+    patch --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0002-Use-Gemma-for-diagnostic-analysis.patch"
     cp -a "$HERE/java/." "$STAGE/backend/java/"
     cat > "$STAGE/backend/java/io/mesalabs/rezoss/nudge/GemmaBuild.java" <<JAVA
 package io.mesalabs.rezoss.nudge;

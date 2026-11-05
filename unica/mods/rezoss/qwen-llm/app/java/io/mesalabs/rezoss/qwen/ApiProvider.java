@@ -33,7 +33,10 @@ public final class ApiProvider extends ContentProvider {
         Bundle result = new Bundle();
         if("backend_config".equals(method)){
             result.putString("backend",ApiSettingsStore.backend(getContext(),false));
-            result.putString("screening_backend",ApiSettingsStore.backend(getContext(),true));return result;
+            result.putString("screening_backend",ApiSettingsStore.backend(getContext(),true));
+            ApiSettingsStore.Settings display=ApiSettingsStore.display(getContext());
+            result.putInt("diagnostic_protocol",1);
+            result.putString("endpoint",display.endpoint);result.putString("model",display.model);return result;
         }
         if ("api_ready".equals(method)) {
             try { result.putBoolean("configured", ApiSettingsStore.configured(getContext())); }
@@ -59,7 +62,7 @@ public final class ApiProvider extends ContentProvider {
             if("default".equals(backend)||(!backend.equals(ApiSettingsStore.backend(getContext(),false))&&!backend.equals(ApiSettingsStore.backend(getContext(),true))))
                 throw new ApiClient.ApiException("backend_changed");
             if(!ApiSettingsStore.matchesEndpoint(backend,ApiSettingsStore.display(getContext()).endpoint))throw new ApiClient.ApiException("provider_mismatch");
-            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend);
+            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend, extras.getString("destination"));
             result.putString("content", content);
             result.putString("status", "generated");
         } catch (ApiClient.ApiException failure) {

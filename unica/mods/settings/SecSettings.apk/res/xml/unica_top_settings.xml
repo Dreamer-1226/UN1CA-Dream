@@ -27,4 +27,9 @@
     <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_settings_sync" android:title="@string/unica_ota_title" android:key="unica_ota" android:summary="@string/unica_ota_summary">
         <intent android:targetPackage="com.android.settings" android:targetClass="io.mesalabs.unica.ota.OtaActivity"/>
     </io.mesalabs.unica.settings.preference.IconPreference>
+    <com.samsung.android.settings.widget.SecInsetCategoryPreference />
+    <SecPreferenceCategory android:key="unica_support_group" android:title="@string/unica_support_group_title" />
+    <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_unica_troubleshooting" android:title="@string/unica_troubleshooting_title" android:key="unica_troubleshooting" android:summary="@string/unica_troubleshooting_summary">
+        <intent android:targetPackage="com.android.settings" android:targetClass="io.mesalabs.unica.troubleshooting.TroubleshootingActivity"/>
+    </io.mesalabs.unica.settings.preference.IconPreference>
 </PreferenceScreen>

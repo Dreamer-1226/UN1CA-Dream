@@ -23,6 +23,12 @@ public final class NativeMapGate {
                     && Settings.Global.getInt(context.getContentResolver(), "rezoss_aios_v73_backend", 0) == 1;
         } catch (Exception | LinkageError unavailable) { return false; }
     }
+    public static List<String> beforeFilter(List<?> labels) {
+        List<String> result = MapGateContract.beforeFilter(labels, enabled(),
+                Looper.myLooper() != Looper.getMainLooper());
+        if (result != null) Log.i("RezossMapGate", "neutral prediction retained before Samsung filtering");
+        return result;
+    }
     public static List<String> extend(String input, List<String> labels) {
         List<String> result = MapGateContract.extend(input, labels, enabled(),
                 Looper.myLooper() != Looper.getMainLooper());

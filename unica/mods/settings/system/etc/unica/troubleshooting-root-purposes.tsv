@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Exact module ID<TAB>UN1CA mod<TAB>purpose<TAB>required installed ROM files, separated by |
+# Purpose duplication is not proof of a crash or a rejected Integrity verdict.
+# PIF identity: https://github.com/KOWX712/PlayIntegrityFix/blob/inject_s/module.yaml
+playintegrityfix	PIF	Play Integrity spoofing	lib64/libunica_pif.so|framework/framework.jar
+# Tricky Store purpose: https://github.com/5ec1cff/TrickyStore ; ID verified from official 1.4.1 module.prop.
+tricky_store	TEE Simulator	Hardware attestation and certificate-chain replacement	bin/unica-teesim-inject|framework/unica-teesim.jar|lib64/libunica_teesim.so|etc/init/unica-teesim.rc
+# Local source: unica/mods/tee-simulator/runtime-hotfix/module.prop
+unica_teesim_runtime_fix	TEE Simulator	Temporary TEE backend replacement	bin/unica-teesim-inject|framework/unica-teesim.jar|lib64/libunica_teesim.so|etc/init/unica-teesim.rc

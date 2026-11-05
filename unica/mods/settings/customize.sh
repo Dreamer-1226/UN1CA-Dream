@@ -285,3 +285,9 @@ else
     DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_gpu.rc"
     DELETE_FROM_WORK_DIR "system" "system/etc/unica/gpu"
 fi
+
+# User-triggered Troubleshooting worker; no automatic boot-time module changes.
+python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Troubleshooting policy"
+python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" || ABORT "Failed to index ROM conflict targets"
+SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
+SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"

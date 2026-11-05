@@ -8,6 +8,16 @@ import java.util.Map;
 public final class MapGateContract {
     public static final String MARKER = "rezoss_map_fallback";
     private MapGateContract() {}
+    /** Null retains Samsung's original filter. This seam receives raw enum labels. */
+    public static List<String> beforeFilter(List<?> labels, boolean enabled, boolean worker) {
+        if (!enabled || !worker || labels == null || labels.size() != 1) return null;
+        Object label = labels.get(0);
+        if (!(label instanceof Enum<?>) || !"OTHER".equals(((Enum<?>) label).name())
+                || !"other".equals(label.toString())) return null;
+        List<String> retained = new ArrayList<>();
+        retained.add("other");
+        return retained;
+    }
     public static List<String> extend(String input, List<String> labels, boolean enabled, boolean worker) {
         if (!enabled || !worker || input == null || input.trim().isEmpty() || input.length() > 12000
                 || labels == null || labels.size() != 1 || !"other".equals(labels.get(0))) return labels;
