@@ -11,6 +11,9 @@ import shutil
 import struct
 import subprocess
 import tempfile
+import zlib
+
+import abi
 
 
 def digest(data):
@@ -37,10 +40,6 @@ def prepare(base, work, stage, backup):
     kernel = boot[4096:4096 + size]
     if kernel[:2] == b"\x1f\x8b":
         kernel = gzip.decompress(kernel)
-    require(digest(kernel) == manifest["kernel_image_sha256"],
-            "Final boot kernel differs from validated 5.15.220 Image. "
-            "Revalidate the new kernel ABI before updating the manifest, "
-            "or disable REZOSS_ENABLE_WONDERTAP_TEST for this build.")
     for name, expected in manifest["modules"].items():
         require(digest((payload / name).read_bytes()) == expected,
                 f"Candidate module checksum mismatch: {name}")
@@ -96,6 +95,14 @@ def prepare(base, work, stage, backup):
         visited.add(key)
 
     check_graph(wonder, set())
+    # Validate the candidate stack and its complete loader dependency closure
+    # against the actual selected kernel, independently of its patch release.
+    abi.validate(kernel, manifest["kernel_abi"], {
+        Path(key).name: ((payload if Path(key).name in names else target) /
+                         Path(key).name).read_bytes()
+        for key in sorted(visited)
+    }, abi.vendor_boot_modules(work / "kernel/vendor_boot.img",
+                               base.parent / "ksu-next/magiskboot"))
     metadata["modules.dep"] = "".join(
         f"{key}:" + (" " + " ".join(value) if value else "") + "\n"
         for key, value in rows.items())
@@ -141,7 +148,7 @@ def prepare(base, work, stage, backup):
         shutil.copy2(payload / name, destination / name)
     for name, content in metadata.items():
         (destination / name).write_text(content)
-    print("Validated kernel Image, candidate hashes, stock dependencies and loader graph")
+    print("Validated kernel ABI, candidate hashes, stock dependencies and loader graph")
 
 
 if __name__ == "__main__":
@@ -151,5 +158,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         prepare(args.base, args.work, args.stage, args.backup)
-    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+    except (ValueError, OSError, EOFError, struct.error, zlib.error,
+            subprocess.CalledProcessError) as error:
         parser.exit(1, f"Wondertap validation failed: {error}\n")

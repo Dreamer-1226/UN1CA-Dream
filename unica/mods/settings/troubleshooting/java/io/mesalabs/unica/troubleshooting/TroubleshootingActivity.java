@@ -48,10 +48,18 @@ public final class TroubleshootingActivity extends Activity {
     private TextView label(String value,int size,boolean secondary){TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(themed(secondary?android.R.attr.textColorSecondary:android.R.attr.textColorPrimary,secondary?(dark()?0xffbfc1c7:0xff62656b):(dark()?0xfff4f4f6:0xff17181b)));return t;}
     private void card(String title){page=new LinearLayout(this);page.setOrientation(1);page.setClipToOutline(true);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(24);content.addView(page,lp);cards.add(page);text(title,22).setTypeface(Typeface.create("sans-serif-medium",0));}
     private TextView text(String value,int size){TextView t=label(value,size,size<20);t.setPaddingRelative(dp(24),dp(10),dp(24),dp(14));t.setTextIsSelectable(true);page.addView(t);return t;}
+    private CharSequence highlightDuplicate(String summary){
+        String prefix="Same purpose as UN1CA’s ";int start=summary.indexOf(prefix);
+        if(start<0)return summary;
+        int end=summary.indexOf('\n',start);if(end<0)end=summary.length();
+        android.text.SpannableString styled=new android.text.SpannableString(summary);
+        styled.setSpan(new android.text.style.ForegroundColorSpan(dark()?0xffff8a80:0xffb3261e),start,end,android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return styled;
+    }
     private final class ActionRow extends LinearLayout {
         ActionRow(String title,String summary,Runnable action){super(TroubleshootingActivity.this);setOrientation(HORIZONTAL);setGravity(Gravity.CENTER_VERTICAL);setMinimumHeight(dp(80));setPaddingRelative(dp(24),dp(18),dp(20),dp(18));
             LinearLayout labels=new LinearLayout(TroubleshootingActivity.this);labels.setOrientation(VERTICAL);TextView name=label(title,20,false);name.setTypeface(Typeface.create("sans-serif-medium",0));labels.addView(name);
-            if(!summary.isEmpty()){TextView detail=label(summary,15,true);detail.setPadding(0,dp(5),0,0);labels.addView(detail);}
+            if(!summary.isEmpty()){TextView detail=label(summary,15,true);detail.setText(highlightDuplicate(summary));detail.setPadding(0,dp(5),0,0);labels.addView(detail);}
             addView(labels,new LinearLayout.LayoutParams(0,-2,1));TextView arrow=label(getResources().getConfiguration().getLayoutDirection()==View.LAYOUT_DIRECTION_RTL?"‹":"›",26,true);arrow.setPaddingRelative(dp(16),0,0,0);arrow.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);addView(arrow);
             labels.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);setContentDescription(title+(summary.isEmpty()?"":". "+summary));setFocusable(true);
             setBackground(new RippleDrawable(android.content.res.ColorStateList.valueOf(themed(android.R.attr.colorControlHighlight,0x18000000)),null,new ColorDrawable(android.graphics.Color.WHITE)));setOnClickListener(v->action.run());

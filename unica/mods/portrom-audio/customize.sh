@@ -10,7 +10,13 @@ if [[ "$TARGET_CODENAME" == "dm3q" && "$TARGET_PLATFORM_SDK_VERSION" == "37" ]];
         || { ABORT "PortROM audio preparation failed"; return 1; }
     ADD_TO_WORK_DIR "$PORTROM_STAGE" "system" "system/etc/unica/portrom-audio" \
         0 0 755 "u:object_r:system_file:s0" || return 1
-    ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/init/unica_portrom_audio.rc" \
+    ADD_TO_WORK_DIR "$PORTROM_STAGE" "vendor" "etc/unica/portrom-audio" \
+        0 0 755 "u:object_r:vendor_file:s0" || return 1
+    ADD_TO_WORK_DIR "$PORTROM_STAGE" "system" "system/etc/selinux/plat_sepolicy.cil" \
+        0 0 644 "u:object_r:system_file:s0" || return 1
+    ADD_TO_WORK_DIR "$PORTROM_STAGE" "system" "system/etc/selinux/plat_sepolicy_and_mapping.sha256" \
+        0 0 644 "u:object_r:system_file:s0" || return 1
+    ADD_TO_WORK_DIR "$PORTROM_STAGE" "system" "system/etc/init/unica_portrom_audio.rc" \
         0 0 644 "u:object_r:system_file:s0" || return 1
     LOG "- PortROM staging retained at $PORTROM_STAGE"
     unset PORTROM_STAGE
