@@ -35,6 +35,7 @@ out/
 !/unica/mods/rezoss/fancam/experimental/system/
 !/unica/mods/rezoss/fancam/experimental/LICENSE-OSNet.txt
 !/unica/mods/rezoss/fancam/experimental/LICENSE-YOLOv7.txt
+!/unica/mods/rezoss/fancam/sm8250/
 
 *.bak*
 *.log

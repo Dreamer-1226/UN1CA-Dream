@@ -1,0 +1,49 @@
+{
+ "libveframework.videoeditor.samsung.so": {
+  "sha256_in": "57547980e8627e42d034a8b4620a148c7a4cd15e666a246ba5f5ae0cae898c95",
+  "sha256_out": "2c670a4a4683774a1dcfd2eeea22c611f1ac33ac6edf993b21dbde857547798f",
+  "patches": [
+   {
+    "off": 208,
+    "old": "b095",
+    "new": "0096"
+   },
+   {
+    "off": 216,
+    "old": "b095",
+    "new": "0096"
+   },
+   {
+    "off": 2658004,
+    "old": "1781",
+    "new": "bbd1"
+   },
+   {
+    "off": 6018496,
+    "old": "000000000000000000000000",
+    "new": "fd7bbea9fd030091e02301a9"
+   },
+   {
+    "off": 6018510,
+    "old": "0000000000000000000000000000000000000000000000000000",
+    "new": "40f9e10b40f978cef297e02341a97fc1ff97fd7bc2a8c0035fd6"
+   }
+  ]
+ },
+ "libauto-reframing-arm64-v8a.so": {
+  "sha256_in": "e8921a043f2050d69d11f906820a400054c835bebd0f743bff7a33405c42f835",
+  "sha256_out": "85f7b4dd6922c8d575037aadb9b4619c8123b6cddf4adef028495031c6c9bfc6",
+  "patches": [
+   {
+    "off": 289112,
+    "old": "48e19a5268b4",
+    "new": "0800805208d0"
+   },
+   {
+    "off": 289824,
+    "old": "48e19a5268b4",
+    "new": "0800805208d0"
+   }
+  ]
+ }
+}

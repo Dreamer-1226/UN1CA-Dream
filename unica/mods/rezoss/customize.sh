@@ -1441,6 +1441,11 @@ python3 "$MODPATH/firewall/patch_region_strings.py" \
     "$MODPATH/firewall/region_names.tsv" \
     || ABORT "Failed to sanitize Firewall province/country strings"
 
+# SM8250 (S20/Note20/Z Fold2) My Fan Cam: GPU SNAP stack and models.
+if [[ "$TARGET_PLATFORM" == "sm8250" ]]; then
+    source "$MODPATH/fancam/sm8250/apply.sh" || return 1
+fi
+
 unset REZOSS_SM8550_TARGET
 
 LOG_STEP_OUT
