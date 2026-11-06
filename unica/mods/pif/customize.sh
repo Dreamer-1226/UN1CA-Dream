@@ -36,7 +36,7 @@ APPLY_PATCH "system" "system/framework/services.jar" \
     "$MODPATH/services.jar/0001-Introduce-PlayIntegrityHooks.patch"
 
 # The native ROM backend supplies the compatibility API later in module order.
-if [ ! -f "$APKTOOL_DIR/system/framework/framework.jar/smali_classes6/io/mesalabs/unica/KeyboxImitationHooks.smali" ] && \
+if ! compgen -G "$APKTOOL_DIR/system/framework/framework.jar/smali_classes*/io/mesalabs/unica/KeyboxImitationHooks.smali" > /dev/null && \
     { [ ! -f "$SRC_DIR/unica/mods/tee-simulator/module.prop" ] || \
       [ -f "$SRC_DIR/unica/mods/tee-simulator/disable" ] || \
       [[ ! "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q)$ || "$SOURCE_PLATFORM_SDK_VERSION" != "37" ]]; }; then

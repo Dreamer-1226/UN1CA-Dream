@@ -1,4 +1,4 @@
 id=keybox
 name=Key attestation spoof
-author=salvogiangri, HELLBOY017
+author=salvogiangri, HELLBOY017, At30c, AstroByteX-Code
 description=Allows key attestation spoofing with a custom keybox.
