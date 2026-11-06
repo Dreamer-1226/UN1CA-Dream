@@ -1,4 +1,4 @@
-KERNEL_TAG="boot-x1q-20261106-182919"
+KERNEL_TAG="boot-x1q-20261106-210323"
 KERNEL_REPO="https://github.com/ssch71/not_samsung.sm8250-4.19/releases/download/$KERNEL_TAG"
 
 LOG_STEP_IN "- Downloading not_kernel ($KERNEL_TAG)"

@@ -288,29 +288,37 @@ if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
         done
         unset f
 
-        if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
-            # The composer exposes WQHD/FHD/HD display modes
-            PF_APPLY_PATCH "system" "system/framework/framework.jar" \
-                "$MODPATH/resolution/oneui9/framework.jar/0001-Enable-FW_SUPPORT_MULTI_RESOLUTION.patch"
-            PF_APPLY_PATCH "system" "system/framework/gamemanager.jar" \
-                "$MODPATH/resolution/oneui9/gamemanager.jar/0001-Enable-dynamic-resolution-control.patch"
-        else
-            # Legacy vendor: a single WQHD+ display mode, SecSettings switches
-            # resolution with forced size/density instead. The stock density is
-            # meant for the FHD+ default, scale it by 1440/1080 for WQHD+.
+        # The composer exposes WQHD/FHD/HD display modes. This holds for the
+        # sm8250 (API 33) vendors too: their HWC lists 1440x3200, 1080x2400 and
+        # 720x1600 modes, and SecSettings switches between them with
+        # setUserPreferredDisplayMode. Without multi resolution in the framework
+        # the density stayed at the WQHD+ value after a switch, so FHD+/HD
+        # showed a giant UI (sw206dp at HD) and Settings closed on the change.
+        PF_APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/resolution/oneui9/framework.jar/0001-Enable-FW_SUPPORT_MULTI_RESOLUTION.patch"
+        PF_APPLY_PATCH "system" "system/framework/gamemanager.jar" \
+            "$MODPATH/resolution/oneui9/gamemanager.jar/0001-Enable-dynamic-resolution-control.patch"
+        if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "36" ]; then
+            # Multi resolution takes the native WQHD+ density from
+            # ro.sf.init.lcd_density and keeps ro.sf.lcd_density as the FHD+
+            # one, as stock does (y2q: 450/600). Legacy vendors may lack the
+            # former (platform patches then mirror ro.sf.lcd_density into it),
+            # so derive it as ro.sf.lcd_density * 1440/1080.
             DENSITY_PARTITION="vendor"
             DENSITY="$(GET_PROP "vendor" "ro.sf.lcd_density")"
             if [ ! "$DENSITY" ]; then
                 DENSITY_PARTITION="odm"
                 DENSITY="$(GET_PROP "odm" "ro.sf.lcd_density")"
             fi
+            INIT_DENSITY="$(GET_PROP "$DENSITY_PARTITION" "ro.sf.init.lcd_density")"
             if [[ "$DENSITY" =~ ^[0-9]+$ ]]; then
-                SET_PROP "$DENSITY_PARTITION" "ro.sf.lcd_density" "$((DENSITY * 4 / 3))"
-                SET_PROP "$DENSITY_PARTITION" "ro.sf.init.lcd_density" "$((DENSITY * 4 / 3))"
+                if [ ! "$INIT_DENSITY" ] || [ "$INIT_DENSITY" == "$DENSITY" ]; then
+                    SET_PROP "$DENSITY_PARTITION" "ro.sf.init.lcd_density" "$((DENSITY * 4 / 3))"
+                fi
             else
                 LOGW "ro.sf.lcd_density not found, keeping the default density"
             fi
-            unset DENSITY DENSITY_PARTITION
+            unset DENSITY DENSITY_PARTITION INIT_DENSITY
         fi
         PF_APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "$MODPATH/resolution/oneui9/SecSettings.apk/0001-Enable-dynamic-resolution-control.patch"
