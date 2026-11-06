@@ -46,3 +46,79 @@ LOG_STEP_IN "- Adding camera PRO mode EV-fix"
 ADD_TO_WORK_DIR "r9qxxx" "vendor" \
     "lib64/X12QS_libTsAe.so" 0 0 644 "u:object_r:vendor_file:s0"
 LOG_STEP_OUT
+
+# HDR10+ encoder bypass, HEVC temporal SVC and vendor bufferqueue timestamp fixes.
+# From AstroByteX-Code/UN1CA-SM8250 (Mian Hamza): fb943f3, 73f432a, cd5faed.
+LOG_STEP_IN "- Removing HDR10+ check"
+
+if [ -f "$WORK_DIR/system/system/lib/libstagefright.so" ]; then
+    if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "dbf8002043f2685004990844824240f0a583"; then
+        # ARM32 S918B base: skip the conditional branch into ACodec's HDR10+ abort path.
+        HEX_PATCH "$WORK_DIR/system/system/lib/libstagefright.so" \
+            "dbf8002043f2685004990844824240f0a583" \
+            "dbf8002043f2685004990844824200bf00bf"
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "dbf8002043f2685004990844824200bf00bf"; then
+        LOG "- 32-bit HDR10+ abort check already patched"
+    else
+        LOG "- No known 32-bit HDR10+ abort check found in libstagefright.so"
+    fi
+fi
+
+if [ -f "$WORK_DIR/system/system/lib64/libstagefright.so" ]; then
+    if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "010140f9c8f5059440470034"; then
+        # Android 17 / One UI 9.0 (S928B QSSI base): bypass HEVC HDR10+ abort in ACodec::setupVideoEncoder
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "010140f9c8f5059440470034" \
+            "010140f91f2003d51f2003d5"
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "010140f9cc9f059480480034"; then
+        # Android 16 (S928U1 / One UI 8.5 QSSI base): bypass HEVC HDR10+ abort in ACodec::setupVideoEncoder
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "010140f9cc9f059480480034" \
+            "010140f91f2003d51f2003d5"
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "010140f97069059420510034"; then
+        # Legacy / pa3qzcx HDR10+ check removal (SDK < 36)
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "010140f97069059420510034" \
+            "010140f91f2003d51f2003d5"
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "70690594205100347a9a40f9"; then
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "70690594205100347a9a40f9" \
+            "706905941f2003d57a9a40f9"
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "864d0594604d00347a9a40f9"; then
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "864d0594604d00347a9a40f9" \
+            "864d05941f2003d57a9a40f9"
+    else
+        LOG "- No known HDR10+ abort check found in libstagefright.so (or already patched)"
+    fi
+
+    # Android 16: MediaCodecSource::suspendRecording(bool) fix
+    if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "810240f97ef9019421f5ffd021481091e00314aa2200805225fd0194"; then
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "810240f97ef9019421f5ffd021481091e00314aa2200805225fd0194" \
+            "810240f97ef9019421f5ffd021481091e00314aa0200805225fd0194"
+    fi
+
+    # Android 17 / One UI 9.0: disable temporal SVC for HEVC encoder
+    if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "3f2f0071600000543f1f007141060054"; then
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "3f2f0071600000543f1f007141060054" \
+            "3f2f00711f2003d53f1f007141060054"
+    # Android 16: disable temporal SVC for HEVC encoder
+    elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" | grep -q "e10740b9e22340b9e00313aa44aa059420020034fa03002a"; then
+        HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+            "e10740b9e22340b9e00313aa44aa059420020034fa03002a" \
+            "e10740b9e22340b9e00313aa44aa059411000014fa03002a"
+    fi
+fi
+LOG_STEP_OUT
+
+# Vendor bufferqueue helper: patch backward-in-time timestamp check
+if [ -f "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" ] && \
+        xxd -p -c 0 "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" | grep -q "d7e94601401b71eb060006da"; then
+    LOG_STEP_IN "- Patching vendor bufferqueue helper backward timestamp check"
+    HEX_PATCH "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" \
+        "d7e94601401b71eb060006da" \
+        "d7e94601401b71eb060000bf"
+    LOG_STEP_OUT
+fi
