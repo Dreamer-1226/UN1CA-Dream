@@ -60,8 +60,9 @@ def prepare(work, stage):
         speaker_applied = True
     except speaker.BaselineError:
         speaker_applied = False
-        shutil.copyfile(HERE / 'system/etc/init/unica_portrom_audio.rc',
-                        stage / 'system/system/etc/init/unica_portrom_audio.rc')
+        fallback_rc = stage / 'system/system/etc/init/unica_portrom_audio.rc'
+        fallback_rc.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(HERE / 'system/etc/init/unica_portrom_audio.rc', fallback_rc)
     for path in destination.rglob('*'):
         if path.is_symlink():
             raise ValueError('Symlink in merged audio: ' + str(path))
