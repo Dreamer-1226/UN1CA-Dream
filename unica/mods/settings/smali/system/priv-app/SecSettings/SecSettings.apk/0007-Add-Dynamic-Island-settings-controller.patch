@@ -3184,7 +3184,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/HeadsUpTakeover.sma
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/HeadsUpTakeover.smali
-@@ -0,0 +1,1576 @@
+@@ -0,0 +1,1600 @@
 +.class final Ldev/android/dynamicisland/island/HeadsUpTakeover;
 +.super Ljava/lang/Object;
 +.source "HeadsUpTakeover.java"
@@ -4255,6 +4255,10 @@ new file mode 100644
 +    .line 198
 +    const-string v2, "not shown: the messages app is open"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {p0, v2}, Ldev/android/dynamicisland/island/HeadsUpTakeover;->log(Ljava/lang/String;)V
 +
 +    goto :goto_d1
@@ -4275,6 +4279,10 @@ new file mode 100644
 +
 +    .line 200
 +    const-string v2, "not shown: island hidden (lock screen, full screen or landscape)"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {p0, v2}, Ldev/android/dynamicisland/island/HeadsUpTakeover;->log(Ljava/lang/String;)V
 +
@@ -4306,6 +4314,10 @@ new file mode 100644
 +
 +    :cond_cc
 +    const-string v2, "not shown: the island could not open"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    :goto_ce
 +    invoke-direct {p0, v2}, Ldev/android/dynamicisland/island/HeadsUpTakeover;->log(Ljava/lang/String;)V
@@ -4516,6 +4528,10 @@ new file mode 100644
 +    :cond_97
 +    const-string v1, "not shown: the island could not open"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    :goto_99
 +    invoke-direct {p0, v1}, Ldev/android/dynamicisland/island/HeadsUpTakeover;->log(Ljava/lang/String;)V
 +
@@ -4567,6 +4583,10 @@ new file mode 100644
 +
 +    :cond_c2
 +    const-string v1, "the notification settings are off"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    :goto_c4
 +    new-instance v2, Ljava/lang/StringBuilder;
@@ -4711,6 +4731,10 @@ new file mode 100644
 +
 +    :cond_13d
 +    const-string p1, "its app is open"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    :goto_13f
 +    new-instance v1, Ljava/lang/StringBuilder;
@@ -5623,7 +5647,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/IslandController.sm
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/IslandController.smali
-@@ -0,0 +1,2245 @@
+@@ -0,0 +1,2253 @@
 +.class public final Ldev/android/dynamicisland/island/IslandController;
 +.super Ljava/lang/Object;
 +.source "IslandController.java"
@@ -6764,6 +6788,10 @@ new file mode 100644
 +
 +    const-string v6, "Reply to "
 +
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
++
 +    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v5
@@ -6785,6 +6813,10 @@ new file mode 100644
 +
 +    :cond_5d
 +    const-string v1, "Send"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    :goto_5f
 +    new-instance v5, Ldev/android/dynamicisland/island/IslandController$3;
@@ -44342,7 +44374,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/source/CastSource.s
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/source/CastSource.smali
-@@ -0,0 +1,988 @@
+@@ -0,0 +1,1000 @@
 +.class public final Ldev/android/dynamicisland/island/source/CastSource;
 +.super Ljava/lang/Object;
 +.source "CastSource.java"
@@ -44560,6 +44592,10 @@ new file mode 100644
 +
 +    const-string v5, "Screen recording"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    if-eqz v3, :cond_45
 +
 +    .line 75
@@ -44645,6 +44681,10 @@ new file mode 100644
 +
 +    :cond_68
 +    const-string v0, "Sharing screen"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const-string v2, "\u0414\u0435\u043c\u043e\u043d\u0441\u0442\u0440\u0430\u0446\u0438\u044f \u044d\u043a\u0440\u0430\u043d\u0430"
 +
@@ -44879,6 +44919,10 @@ new file mode 100644
 +    new-instance v1, Ldev/android/dynamicisland/island/model/IslandItem$Action;
 +
 +    const-string p3, "Stop"
++
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
 +
 +    const-string p4, "\u041e\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c"
 +
@@ -46496,7 +46540,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/source/EventSource.
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/source/EventSource.smali
-@@ -0,0 +1,2914 @@
+@@ -0,0 +1,2982 @@
 +.class public final Ldev/android/dynamicisland/island/source/EventSource;
 +.super Ljava/lang/Object;
 +.source "EventSource.java"
@@ -46785,6 +46829,10 @@ new file mode 100644
 +
 +    const-string v2, "Charging"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {p0, v1, v2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v1
@@ -46916,6 +46964,10 @@ new file mode 100644
 +
 +    const-string p2, "Super fast charging"
 +
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
 +    :goto_2f
 +    invoke-direct {p0, p1, p2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -46945,6 +46997,10 @@ new file mode 100644
 +
 +    const-string p2, "Fast charging"
 +
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
 +    :goto_45
 +    invoke-direct {p0, p1, p2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -46966,6 +47022,10 @@ new file mode 100644
 +    const-string p1, "\ucda9\uc804 \uc911"
 +
 +    const-string p2, "Charging"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    :goto_55
 +    invoke-direct {p0, p1, p2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
@@ -47166,6 +47226,10 @@ new file mode 100644
 +
 +    const-string v2, "Low battery"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {p0, v1, v2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v1
@@ -47200,6 +47264,10 @@ new file mode 100644
 +    move-result-object v2
 +
 +    const-string v3, "% remaining"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -47864,6 +47932,10 @@ new file mode 100644
 +
 +    const-string v1, "Bluetooth device"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-direct {p0, v0, v1}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v0
@@ -47875,6 +47947,10 @@ new file mode 100644
 +    const-string v0, "%"
 +
 +    const-string v1, "Connected"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const-string v2, "\uc5f0\uacb0\ub428"
 +
@@ -47908,6 +47984,10 @@ new file mode 100644
 +
 +    const-string v5, "Connected \u00b7 "
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v4
@@ -47917,6 +47997,10 @@ new file mode 100644
 +    move-result-object v4
 +
 +    const-string v5, "% battery"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -48625,6 +48709,10 @@ new file mode 100644
 +
 +    const-string v2, "Ring"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {p0, p1, v2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object p1
@@ -48650,6 +48738,10 @@ new file mode 100644
 +    const-string p1, "\uc9c4\ub3d9"
 +
 +    const-string v1, "Vibrate"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, p1, v1}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -48678,6 +48770,10 @@ new file mode 100644
 +
 +    const-string v1, "Silent"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-direct {p0, p1, v1}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object p1
@@ -48704,6 +48800,10 @@ new file mode 100644
 +    const-string p1, "\uc18c\ub9ac \ubaa8\ub4dc"
 +
 +    const-string v1, "Sound mode"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, p1, v1}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -49068,6 +49168,10 @@ new file mode 100644
 +
 +    const-string v2, "Do Not Disturb"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const v3, -0x828501
 +
 +    .line 265
@@ -49173,6 +49277,10 @@ new file mode 100644
 +    :cond_12a
 +    const-string p2, "Off"
 +
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
 +    :goto_12c
 +    invoke-direct {p0, p1, p2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -49184,6 +49292,10 @@ new file mode 100644
 +    const-string p1, "\uc124\uc815 \ubcc0\uacbd"
 +
 +    const-string p2, "Setting changed"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    invoke-direct {p0, p1, p2}, Ldev/android/dynamicisland/island/source/EventSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -58354,7 +58466,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/source/PeekSource.s
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/source/PeekSource.smali
-@@ -0,0 +1,1873 @@
+@@ -0,0 +1,1889 @@
 +.class public final Ldev/android/dynamicisland/island/source/PeekSource;
 +.super Ljava/lang/Object;
 +.source "PeekSource.java"
@@ -58511,6 +58623,10 @@ new file mode 100644
 +    const-string p1, "\ub2f5\uc7a5"
 +
 +    const-string v1, "Reply"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, p1, v1}, Ldev/android/dynamicisland/island/source/PeekSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -59983,6 +60099,10 @@ new file mode 100644
 +    :goto_5e
 +    const-string v4, "Copied"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    const-string v5, "\ubcf5\uc0ac\ub428"
 +
 +    if-eqz p3, :cond_69
@@ -59997,6 +60117,10 @@ new file mode 100644
 +    const-string v6, "\uc778\uc99d\ubc88\ud638"
 +
 +    const-string v7, "Verification code"
++
++    invoke-static/range {v7 .. v7}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v7
 +
 +    invoke-direct {p0, v6, v7}, Ldev/android/dynamicisland/island/source/PeekSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -60119,6 +60243,10 @@ new file mode 100644
 +    const-string v1, "\ubcf5\uc0ac"
 +
 +    const-string v3, "Copy"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v1, v3}, Ldev/android/dynamicisland/island/source/PeekSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -60519,7 +60647,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/source/PrivacySourc
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/source/PrivacySource.smali
-@@ -0,0 +1,1611 @@
+@@ -0,0 +1,1627 @@
 +.class public final Ldev/android/dynamicisland/island/source/PrivacySource;
 +.super Ljava/lang/Object;
 +.source "PrivacySource.java"
@@ -60834,6 +60962,10 @@ new file mode 100644
 +
 +    const-string v3, "Camera & microphone in use"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {p0, v2, v3}, Ldev/android/dynamicisland/island/source/PrivacySource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v2
@@ -60850,6 +60982,10 @@ new file mode 100644
 +    const-string v2, "\uce74\uba54\ub77c \uc0ac\uc6a9 \uc911"
 +
 +    const-string v3, "Camera in use"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v2, v3}, Ldev/android/dynamicisland/island/source/PrivacySource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -60868,6 +61004,10 @@ new file mode 100644
 +
 +    const-string v3, "Microphone in use"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {p0, v2, v3}, Ldev/android/dynamicisland/island/source/PrivacySource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v2
@@ -60881,6 +61021,10 @@ new file mode 100644
 +    const-string v2, "\uc704\uce58 \uc0ac\uc6a9 \uc911"
 +
 +    const-string v3, "Location in use"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v2, v3}, Ldev/android/dynamicisland/island/source/PrivacySource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -70600,7 +70744,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/source/TorchSource.
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/source/TorchSource.smali
-@@ -0,0 +1,1093 @@
+@@ -0,0 +1,1101 @@
 +.class public final Ldev/android/dynamicisland/island/source/TorchSource;
 +.super Ljava/lang/Object;
 +.source "TorchSource.java"
@@ -71157,6 +71301,10 @@ new file mode 100644
 +
 +    const-string v3, "Flashlight"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {p0, v2, v3}, Ldev/android/dynamicisland/island/source/TorchSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object v2
@@ -71272,6 +71420,10 @@ new file mode 100644
 +    const-string v3, "\ub044\uae30"
 +
 +    const-string v4, "Turn off"
++
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
 +
 +    invoke-direct {p0, v3, v4}, Ldev/android/dynamicisland/island/source/TorchSource;->t(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 +
@@ -114157,7 +114309,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/island/window/SemBlur.smal
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/island/window/SemBlur.smali
-@@ -0,0 +1,456 @@
+@@ -0,0 +1,460 @@
 +.class final Ldev/android/dynamicisland/island/window/SemBlur;
 +.super Ljava/lang/Object;
 +.source "SemBlur.java"
@@ -114590,6 +114742,10 @@ new file mode 100644
 +
 +    .line 88
 +    const-string v0, "\"reduce transparency\" is on in the accessibility settings"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +    :try_end_6b
 +    .catchall {:try_start_43 .. :try_end_6b} :catchall_6d
 +
@@ -119991,7 +120147,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/settings/GlobalPrefs$Edit.
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/settings/GlobalPrefs$Edit.smali
-@@ -0,0 +1,482 @@
+@@ -0,0 +1,486 @@
 +.class final Ldev/android/dynamicisland/settings/GlobalPrefs$Edit;
 +.super Ljava/lang/Object;
 +.source "GlobalPrefs.java"
@@ -120082,6 +120238,10 @@ new file mode 100644
 +    move-result-object v0
 +
 +    const-string v1, "Cannot save island settings. The rules or app list may be too large."
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const/4 v2, 0x1
 +
@@ -146337,7 +146497,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/settings/SettingsActivity.
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/settings/SettingsActivity.smali
-@@ -0,0 +1,3014 @@
+@@ -0,0 +1,3018 @@
 +.class public final Ldev/android/dynamicisland/settings/SettingsActivity;
 +.super Landroid/app/Activity;
 +.source "SettingsActivity.java"
@@ -148221,6 +148381,10 @@ new file mode 100644
 +
 +    .line 190
 +    const-string v0, "No app available to open this link."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -153102,7 +153266,7 @@ diff --git a/smali_classes5/dev/android/dynamicisland/xposed/Refl.smali b/smali_
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes5/dev/android/dynamicisland/xposed/Refl.smali
-@@ -0,0 +1,1539 @@
+@@ -0,0 +1,1543 @@
 +.class public final Ldev/android/dynamicisland/xposed/Refl;
 +.super Ljava/lang/Object;
 +.source "Refl.java"
@@ -154494,6 +154658,10 @@ new file mode 100644
 +    move-result-object p1
 +
 +    const-string v0, " (not "
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +

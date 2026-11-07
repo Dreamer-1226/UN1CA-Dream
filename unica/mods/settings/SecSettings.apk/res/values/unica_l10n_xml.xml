@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_l10n_1">Protect selected apps</string>
+    <string name="unica_l10n_2">Choose apps and presets, then enable protection. Restart protected apps after changes so cached results and process permissions refresh. Configuration applies to this Android user.</string>
+    <string name="unica_l10n_3">Enable HMA protection</string>
+    <string name="unica_l10n_4">App to spoof</string>
+    <string name="unica_l10n_5">Choose banking apps or other apps that receive filtered results. Applies to this Android user.</string>
+    <string name="unica_l10n_6">App to hide</string>
+    <string name="unica_l10n_7">Choose modules, MT Manager, and other user apps to hide.</string>
+    <string name="unica_l10n_8">Prevent Play Store update</string>
+    <string name="unica_l10n_9">Hide selected user apps from Google Play Store package visibility.</string>
+    <string name="unica_l10n_10">Unknown Installed</string>
+    <string name="unica_l10n_11">Spoof selected unknown-source user apps as installed from Play Store or Galaxy Store.</string>
+    <string name="unica_l10n_12">Activity launch protection</string>
+    <string name="unica_l10n_13">Block launches of hidden apps</string>
+    <string name="unica_l10n_14">Invert protection for selected apps</string>
+    <string name="unica_l10n_15">Presets</string>
+    <string name="unica_l10n_16">Application presets</string>
+    <string name="unica_l10n_17">Settings presets</string>
+    <string name="unica_l10n_18">Compatibility and permissions</string>
+    <string name="unica_l10n_19">Risky package protection</string>
+    <string name="unica_l10n_20">Keep apps with Google Play services dependencies visible to Play services.</string>
+    <string name="unica_l10n_21">Restrict Zygote permissions</string>
+    <string name="unica_l10n_22">Experimental. Applies when protected apps restart.</string>
+    <string name="unica_l10n_23">Backup and restore</string>
+    <string name="unica_l10n_24">Back up HMA config</string>
+    <string name="unica_l10n_25">Export the current HMA configuration as an HMA-OSS style JSON file.</string>
+    <string name="unica_l10n_26">Restore HMA config</string>
+    <string name="unica_l10n_27">Import a UN1CA HMA backup or compatible HMA-OSS JSON file.</string>
+    <string name="unica_l10n_28">AI backend settings</string>
+    <string name="unica_l10n_29">ROM default: local Qwen. Configure optional cloud providers.</string>
+</resources>

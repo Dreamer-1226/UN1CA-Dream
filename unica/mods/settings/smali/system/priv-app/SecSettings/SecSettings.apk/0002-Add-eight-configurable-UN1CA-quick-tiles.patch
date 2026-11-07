@@ -1084,7 +1084,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/quicktiles/ConfigActivity.smali b/
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/quicktiles/ConfigActivity.smali
-@@ -0,0 +1,2818 @@
+@@ -0,0 +1,2958 @@
 +.class public final Lio/mesalabs/unica/quicktiles/ConfigActivity;
 +.super Landroid/app/Activity;
 +.source "ConfigActivity.java"
@@ -1183,6 +1183,10 @@ new file mode 100644
 +    iget-object v1, p0, Lio/mesalabs/unica/quicktiles/ConfigActivity;->targetButton:Landroid/widget/Button;
 +
 +    const-string v2, "Loading apps\u2026"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
 +
@@ -1334,6 +1338,10 @@ new file mode 100644
 +
 +    const-string v3, "Choose an app shortcut"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {v0, v3}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
@@ -1347,6 +1355,10 @@ new file mode 100644
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    .line 164
 +    const/4 v1, 0x0
@@ -1366,6 +1378,10 @@ new file mode 100644
 +    move-exception p1
 +
 +    const-string p1, "Shortcut access is unavailable for this app."
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->message(Ljava/lang/String;)V
 +
@@ -1465,6 +1481,10 @@ new file mode 100644
 +
 +    const-string v0, "UN1CA Tile "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p1
@@ -1486,6 +1506,10 @@ new file mode 100644
 +    .line 80
 +    const-string p1, "One tap runs the selected action. Changes take effect after Save."
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->text(Ljava/lang/String;)V
 +
 +    .line 81
@@ -1496,6 +1520,10 @@ new file mode 100644
 +    move-result-object p1
 +
 +    const-string v0, "Tile label"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->input(Ljava/lang/String;Ljava/lang/String;)Landroid/widget/EditText;
 +
@@ -1509,6 +1537,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity$2;-><init>(Lio/mesalabs/unica/quicktiles/ConfigActivity;)V
 +
 +    const-string v0, "Action"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -1575,6 +1607,10 @@ new file mode 100644
 +
 +    const-string v0, "Private DNS provider hostname"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->input(Ljava/lang/String;Ljava/lang/String;)Landroid/widget/EditText;
 +
 +    move-result-object p1
@@ -1595,6 +1631,10 @@ new file mode 100644
 +
 +    const-string v0, "Choose target"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
 +    move-result-object p1
@@ -1607,6 +1647,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity$4;-><init>(Lio/mesalabs/unica/quicktiles/ConfigActivity;)V
 +
 +    const-string v0, "Icon"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -1621,6 +1665,10 @@ new file mode 100644
 +
 +    const-string v0, "Save"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
 +    .line 99
@@ -1629,6 +1677,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity$6;-><init>(Lio/mesalabs/unica/quicktiles/ConfigActivity;)V
 +
 +    const-string v0, "Save and add to Quick Settings"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -1639,6 +1691,10 @@ new file mode 100644
 +
 +    const-string v0, "Cancel"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
 +    .line 101
@@ -1647,6 +1703,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity$8;-><init>(Lio/mesalabs/unica/quicktiles/ConfigActivity;)V
 +
 +    const-string v0, "Reset this slot"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->button(Ljava/lang/String;Landroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -1874,10 +1934,18 @@ new file mode 100644
 +
 +    const-string v0, "Quick Tiles"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->layout(Ljava/lang/String;)V
 +
 +    .line 70
 +    const-string v0, "Assign one action to each tile, then add it to Quick Settings. Hold a tile to edit it."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->text(Ljava/lang/String;)V
 +
@@ -2289,6 +2357,10 @@ new file mode 100644
 +    :cond_120
 +    const-string p1, "Tile saved"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-static {p0, p1, v3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
 +
 +    move-result-object p1
@@ -2346,6 +2418,10 @@ new file mode 100644
 +    if-nez v0, :cond_150
 +
 +    const-string p1, "Unable to save tile"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    goto :goto_154
 +
@@ -2409,6 +2485,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Action: "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -2685,6 +2765,10 @@ new file mode 100644
 +
 +    const-string v2, "Icon: "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -2760,6 +2844,10 @@ new file mode 100644
 +    invoke-direct {p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->updateEditor()V
 +
 +    const-string p1, "Unable to load installed apps"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->message(Ljava/lang/String;)V
 +
@@ -2937,6 +3025,10 @@ new file mode 100644
 +
 +    const-string v1, "Choose an installed app"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {p1, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
@@ -2951,6 +3043,10 @@ new file mode 100644
 +
 +    .line 147
 +    const-string p2, "Cancel"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    const/4 v0, 0x0
 +
@@ -3219,11 +3315,19 @@ new file mode 100644
 +
 +    const-string v0, "Clear this tile\'s action and label?"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -3236,6 +3340,10 @@ new file mode 100644
 +    invoke-direct {v0, p0}, Lio/mesalabs/unica/quicktiles/ConfigActivity$10;-><init>(Lio/mesalabs/unica/quicktiles/ConfigActivity;)V
 +
 +    const-string v1, "Reset"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -3295,6 +3403,10 @@ new file mode 100644
 +
 +    const-string v1, "UN1CA Tile "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {p2, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p2
@@ -3338,6 +3450,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
 +
 +    const-string v0, "Choose an action"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -3403,6 +3519,10 @@ new file mode 100644
 +    invoke-direct {p1, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
 +
 +    const-string v0, "Predefined action"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -3471,6 +3591,10 @@ new file mode 100644
 +
 +    const-string v0, "Tile icon"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
@@ -3479,7 +3603,15 @@ new file mode 100644
 +
 +    const-string v5, "App"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    const-string v0, "Automatic"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const-string v1, "DNS"
 +
@@ -3563,6 +3695,10 @@ new file mode 100644
 +    :cond_f
 +    const-string p1, "Configuration saved. You can also add the tile using Quick Settings \u2192 Edit."
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->message(Ljava/lang/String;)V
 +
 +    goto :goto_1a
@@ -3571,6 +3707,10 @@ new file mode 100644
 +    :cond_15
 +    :goto_15
 +    const-string p1, "Tile is in Quick Settings"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/quicktiles/ConfigActivity;->message(Ljava/lang/String;)V
 +
@@ -4355,7 +4495,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/quicktiles/QuickTile.smali b/smali
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/quicktiles/QuickTile.smali
-@@ -0,0 +1,1181 @@
+@@ -0,0 +1,1189 @@
 +.class public abstract Lio/mesalabs/unica/quicktiles/QuickTile;
 +.super Landroid/service/quicksettings/TileService;
 +.source "QuickTile.java"
@@ -4967,6 +5107,10 @@ new file mode 100644
 +
 +    const-string v1, "SystemUI restart was not permitted"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    goto :goto_1b2
 +
 +    :cond_1ae
@@ -4979,6 +5123,10 @@ new file mode 100644
 +    if-nez v1, :cond_1b6
 +
 +    const-string v1, "Action unavailable"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    :cond_1b6
 +    invoke-static {p0, v1, v0}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -5542,7 +5690,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/quicktiles/ShortcutActivity.smali 
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/quicktiles/ShortcutActivity.smali
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,161 @@
 +.class public final Lio/mesalabs/unica/quicktiles/ShortcutActivity;
 +.super Landroid/app/Activity;
 +.source "ShortcutActivity.java"
@@ -5670,6 +5818,10 @@ new file mode 100644
 +    :try_start_52
 +    const-string p1, "This shortcut is no longer available. Choose it again in Quick Tiles."
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    const/4 v0, 0x1
 +
 +    invoke-static {p0, p1, v0}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -5705,7 +5857,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/quicktiles/TileConfig.smali b/smal
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/quicktiles/TileConfig.smali
-@@ -0,0 +1,1032 @@
+@@ -0,0 +1,1052 @@
 +.class public final Lio/mesalabs/unica/quicktiles/TileConfig;
 +.super Ljava/lang/Object;
 +.source "TileConfig.java"
@@ -5763,7 +5915,15 @@ new file mode 100644
 +
 +    const-string v8, "Predefined action"
 +
++    invoke-static/range {v8 .. v8}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v8
++
 +    const-string v1, "Not configured"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const-string v2, "Private DNS"
 +
@@ -5786,7 +5946,15 @@ new file mode 100644
 +
 +    const-string v8, "Wireless debugging settings"
 +
++    invoke-static/range {v8 .. v8}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v8
++
 +    const-string v1, "Camera"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const-string v2, "Record video"
 +
@@ -6317,6 +6485,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "UN1CA Tile "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +

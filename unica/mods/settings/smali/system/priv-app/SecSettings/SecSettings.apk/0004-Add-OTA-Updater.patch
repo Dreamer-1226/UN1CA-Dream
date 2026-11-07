@@ -650,7 +650,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/ota/OtaActivity.smali b/smali_clas
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/ota/OtaActivity.smali
-@@ -0,0 +1,2531 @@
+@@ -0,0 +1,2643 @@
 +.class public final Lio/mesalabs/unica/ota/OtaActivity;
 +.super Landroid/app/Activity;
 +.source "OtaActivity.java"
@@ -1075,6 +1075,10 @@ new file mode 100644
 +
 +    const-string v4, "Reading OTA: "
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v3
@@ -1164,6 +1168,10 @@ new file mode 100644
 +    const-string v0, "UTF-8"
 +
 +    const-string v1, "Verifying OTA before reboot\u2026"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, v1}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +
@@ -1358,6 +1366,10 @@ new file mode 100644
 +
 +    const-string v0, "Rebooting into OrangeFox\u2026"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +
 +    const-string v0, "power"
@@ -1523,6 +1535,10 @@ new file mode 100644
 +
 +    const-string v0, "Download the latest OTA from the folder, then return here and select its ZIP."
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +    :try_end_1a
 +    .catch Landroid/content/ActivityNotFoundException; {:try_start_12 .. :try_end_1a} :catch_1b
@@ -1534,6 +1550,10 @@ new file mode 100644
 +    move-exception v0
 +
 +    const-string v0, "No app can open the download folder. Install a browser, or select an OTA ZIP downloaded elsewhere."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +
@@ -1721,12 +1741,20 @@ new file mode 100644
 +
 +    const-string p1, "Verifying selected OTA\u2026"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +
 +    invoke-static {v0}, Lio/mesalabs/unica/ota/OtaPackage;->verify(Ljava/io/File;)Lorg/json/JSONObject;
 +
 +    .line 74
 +    const-string v1, "Saving verified OTA"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    sget-object p1, Lio/mesalabs/unica/ota/OtaActivity;->ZIP:Ljava/io/File;
 +
@@ -1738,6 +1766,10 @@ new file mode 100644
 +
 +    .line 75
 +    const-string p1, "OTA verified. Ready to install."
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +    :try_end_50
@@ -2075,6 +2107,10 @@ new file mode 100644
 +
 +    const-string v0, "Select the downloaded OTA ZIP first."
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/ota/OtaActivity;->show(Ljava/lang/String;)V
 +
 +    return-void
@@ -2086,17 +2122,29 @@ new file mode 100644
 +
 +    const-string v1, "Install OTA update?"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    const-string v1, "The phone will restart into OrangeFox. Press Volume Down during its initial 5-second countdown to cancel."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const/4 v2, 0x0
 +
@@ -2109,6 +2157,10 @@ new file mode 100644
 +    invoke-direct {v1, p0}, Lio/mesalabs/unica/ota/OtaActivity$5;-><init>(Lio/mesalabs/unica/ota/OtaActivity;)V
 +
 +    const-string v2, "Install"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v0, v2, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -2263,6 +2315,10 @@ new file mode 100644
 +
 +    const-string v0, "Wait for the update operation to finish"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const/4 v1, 0x0
 +
 +    invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -2287,6 +2343,10 @@ new file mode 100644
 +    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 +
 +    const-string p1, "OTA Update"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {p0, p1}, Lio/mesalabs/unica/ota/OtaActivity;->setTitle(Ljava/lang/CharSequence;)V
 +
@@ -2386,6 +2446,10 @@ new file mode 100644
 +    invoke-virtual {v3, v5}, Landroid/widget/TextView;->setGravity(I)V
 +
 +    const-string v5, "Navigate up"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v3, v5}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
 +
@@ -2497,6 +2561,10 @@ new file mode 100644
 +
 +    const-string v0, "Installed software"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, p1, v0}, Lio/mesalabs/unica/ota/OtaActivity;->label(Landroid/widget/LinearLayout;Ljava/lang/String;)V
 +
 +    const-string v0, ""
@@ -2535,7 +2603,15 @@ new file mode 100644
 +
 +    const-string v4, "Download latest OTA"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    const-string v5, "Open the download folder in your browser"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-direct {p0, v4, v5, p1}, Lio/mesalabs/unica/ota/OtaActivity;->action(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Runnable;)V
 +
@@ -2546,7 +2622,15 @@ new file mode 100644
 +
 +    const-string v4, "Select a local OTA ZIP"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    const-string v5, "Choose a downloaded update and check compatibility"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-direct {p0, v4, v5, p1}, Lio/mesalabs/unica/ota/OtaActivity;->action(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Runnable;)V
 +
@@ -2557,7 +2641,15 @@ new file mode 100644
 +
 +    const-string v4, "Install and reboot"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    const-string v5, "Restart into OrangeFox to install the verified update"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-direct {p0, v4, v5, p1}, Lio/mesalabs/unica/ota/OtaActivity;->action(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Runnable;)V
 +
@@ -2568,9 +2660,17 @@ new file mode 100644
 +
 +    const-string v4, "Update status"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    invoke-direct {p0, p1, v4}, Lio/mesalabs/unica/ota/OtaActivity;->label(Landroid/widget/LinearLayout;Ljava/lang/String;)V
 +
 +    const-string v4, "Select an OTA ZIP to check for an update."
++
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
 +
 +    invoke-direct {p0, v4, v2, v1}, Lio/mesalabs/unica/ota/OtaActivity;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
 +
@@ -2611,6 +2711,10 @@ new file mode 100644
 +    move-result-object p1
 +
 +    const-string v1, "\nRelease: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -2657,6 +2761,10 @@ new file mode 100644
 +    invoke-direct {p1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "Last installation: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -2727,6 +2835,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "Updater setup: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -3187,7 +3299,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/ota/OtaPackage.smali b/smali_class
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/ota/OtaPackage.smali
-@@ -0,0 +1,793 @@
+@@ -0,0 +1,797 @@
 +.class final Lio/mesalabs/unica/ota/OtaPackage;
 +.super Ljava/lang/Object;
 +.source "OtaPackage.java"
@@ -3804,6 +3916,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Package checksum failed: "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +

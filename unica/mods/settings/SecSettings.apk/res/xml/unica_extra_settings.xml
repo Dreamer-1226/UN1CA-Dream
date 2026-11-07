@@ -14,7 +14,7 @@
     <SecSwitchPreference android:title="@string/unica_games_spoof_title" android:key="unica_games_spoof" settings:controller="io.mesalabs.unica.settings.extra.GamesPropsPreferenceController" />
     <com.samsung.android.settings.widget.SecInsetCategoryPreference />
     <SecSwitchPreference android:title="@string/unica_now_nudge_experimental_title" android:key="unica_now_nudge_experimental" android:summary="@string/unica_now_nudge_experimental_summary" settings:controller="io.mesalabs.unica.settings.extra.NowNudgeExperimentalPreferenceController" />
-    <Preference android:icon="@drawable/ic_unica_design_robot" android:title="AI backend settings" android:key="unica_ai_backend" android:summary="ROM default: local Qwen. Configure optional cloud providers.">
+    <Preference android:icon="@drawable/ic_unica_design_robot" android:title="@string/unica_l10n_28" android:key="unica_ai_backend" android:summary="@string/unica_l10n_29">
         <intent android:action="android.intent.action.MAIN" android:targetPackage="io.mesalabs.rezoss.qwen" android:targetClass="io.mesalabs.rezoss.qwen.SettingsActivity" />
     </Preference>
     <com.samsung.android.settings.widget.SecInsetCategoryPreference />

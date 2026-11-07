@@ -3036,7 +3036,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/gpu/GpuActivity.smali b/smali_clas
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/gpu/GpuActivity.smali
-@@ -0,0 +1,8582 @@
+@@ -0,0 +1,9094 @@
 +.class public final Lio/mesalabs/unica/gpu/GpuActivity;
 +.super Landroid/app/Activity;
 +.source "GpuActivity.java"
@@ -3111,6 +3111,10 @@ new file mode 100644
 +    const-string v25, "SUPER_TURBO_NO_CPR"
 +
 +    const-string v1, "RAW EXPERIMENTAL"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const-string v2, "RETENTION"
 +
@@ -3346,7 +3350,15 @@ new file mode 100644
 +
 +    const-string v0, "Draft level added"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const-string v1, "Review its frequency, RPMh, bus and ACD values. These draft values are not a stability recommendation."
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->alert(Ljava/lang/String;Ljava/lang/String;)V
 +    :try_end_50
@@ -3358,6 +3370,10 @@ new file mode 100644
 +    move-exception v0
 +
 +    const-string v1, "Cannot add level"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
@@ -3448,6 +3464,10 @@ new file mode 100644
 +
 +    const-string v4, "Write both GPU tables to vendor_boot?"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    invoke-virtual {v3, v4}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v3
@@ -3462,6 +3482,10 @@ new file mode 100644
 +
 +    const-string v1, "Apply trial"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    new-instance v3, Lio/mesalabs/unica/gpu/GpuActivity$8;
 +
 +    invoke-direct {v3, p0, v2}, Lio/mesalabs/unica/gpu/GpuActivity$8;-><init>(Lio/mesalabs/unica/gpu/GpuActivity;Ljava/lang/String;)V
@@ -3471,6 +3495,10 @@ new file mode 100644
 +    move-result-object v0
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const/4 v2, 0x0
 +
@@ -3500,6 +3528,10 @@ new file mode 100644
 +    move-exception v0
 +
 +    const-string v1, "Cannot apply"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
@@ -3820,6 +3852,10 @@ new file mode 100644
 +
 +    const-string v9, "\nTable "
 +
++    invoke-static/range {v9 .. v9}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v9
++
 +    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v8
@@ -3945,6 +3981,10 @@ new file mode 100644
 +    move-result v12
 +
 +    const-string v13, "Level "
++
++    invoke-static/range {v13 .. v13}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v13
 +
 +    if-lt v8, v12, :cond_c0
 +
@@ -4303,6 +4343,10 @@ new file mode 100644
 +    :cond_1ef
 +    const-string v0, "ACD changed; "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {v2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    :cond_1f4
@@ -4407,6 +4451,10 @@ new file mode 100644
 +    move-object v1, v0
 +
 +    const-string v0, "\nComplete values to write:\n"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {v7, v0}, Landroid/text/SpannableStringBuilder;->append(Ljava/lang/CharSequence;)Landroid/text/SpannableStringBuilder;
 +
@@ -4585,6 +4633,10 @@ new file mode 100644
 +
 +    const-string v0, "File picker unavailable"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1}, Landroid/content/ActivityNotFoundException;->getMessage()Ljava/lang/String;
 +
 +    move-result-object p1
@@ -4622,6 +4674,10 @@ new file mode 100644
 +
 +    const-string v2, "Cancel"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const-string v3, "baselineHash"
 +
 +    if-eqz v0, :cond_4c
@@ -4652,11 +4708,19 @@ new file mode 100644
 +
 +    const-string v6, "Restart backup for this ROM?"
 +
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
++
 +    invoke-virtual {v5, v6}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v5
 +
 +    const-string v6, "The previous backup refresh belongs to a different image. Preserve and verify its rollback, journal and staged files in protected /data storage before freeing their cache space. Then create this ROM\'s clean backup. Save the NEW rollback ZIP to PC or USB before Apply. Your tuning profile stays saved. This does not flash any image."
++
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
 +
 +    invoke-virtual {v5, v6}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -4667,6 +4731,10 @@ new file mode 100644
 +    invoke-direct {v6, p0, v0, v3, v4}, Lio/mesalabs/unica/gpu/GpuActivity$25;-><init>(Lio/mesalabs/unica/gpu/GpuActivity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 +
 +    const-string v0, "Restart backup"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {v5, v0, v6}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -4725,12 +4793,20 @@ new file mode 100644
 +    :cond_72
 +    const-string v5, "Create backup for current ROM?"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    :goto_74
 +    invoke-virtual {v4, v5}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v4
 +
 +    const-string v5, "The current image differs from the saved original. Copy and verify the old rollback in protected /data storage before freeing its /cache space. Then back up this ROM\'s clean vendor_boot and save the new rollback ZIP to PC or USB. Your tuning profile stays saved. This does not flash either image."
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v4, v5}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -4741,6 +4817,10 @@ new file mode 100644
 +    invoke-direct {v5, p0, v0, v3}, Lio/mesalabs/unica/gpu/GpuActivity$26;-><init>(Lio/mesalabs/unica/gpu/GpuActivity;Ljava/lang/String;Ljava/lang/String;)V
 +
 +    const-string v0, "Create backup"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {v4, v0, v5}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -4803,6 +4883,10 @@ new file mode 100644
 +
 +    const-string v2, "Raw RPMh request, 1\u2013480. This is not millivolts or a hardware-supported range. Request 1 and values outside stock are experimental."
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const/4 v3, 0x1
 +
 +    invoke-direct {p0, v2, v3}, Lio/mesalabs/unica/gpu/GpuActivity;->riskText(Ljava/lang/String;Z)Ljava/lang/CharSequence;
@@ -4825,6 +4909,10 @@ new file mode 100644
 +
 +    const-string v3, "Custom voltage request"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {v2, v3}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v2
@@ -4835,6 +4923,10 @@ new file mode 100644
 +
 +    const-string v2, "Save"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const/4 v3, 0x0
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -4842,6 +4934,10 @@ new file mode 100644
 +    move-result-object v1
 +
 +    const-string v2, "Cancel"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -5199,6 +5295,10 @@ new file mode 100644
 +
 +    const-string v5, "Navigate up"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    invoke-virtual {v3, v5}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
 +
 +    new-instance v5, Lio/mesalabs/unica/gpu/GpuActivity$41;
@@ -5223,6 +5323,10 @@ new file mode 100644
 +
 +    .line 182
 +    const-string v3, "Advanced GPU Tuning"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {v0, v3, v10, v6}, Lio/mesalabs/unica/gpu/GpuActivity;->label(Ljava/lang/CharSequence;IZ)Landroid/widget/TextView;
 +
@@ -5309,17 +5413,33 @@ new file mode 100644
 +
 +    const-string v2, "GPU frequency and voltage tuning for S23 Ultra."
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {v0, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->description(Ljava/lang/String;Ljava/lang/CharSequence;)V
 +
 +    .line 186
 +    const-string v1, "Trial changes"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const-string v2, "Changes take effect after reboot. Unsuitable values can cause freezes or prevent booting. Keep your recovery rollback available."
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {v0, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->description(Ljava/lang/String;Ljava/lang/CharSequence;)V
 +
 +    .line 187
 +    const-string v1, "Device status"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->section(Ljava/lang/String;)V
 +
@@ -5336,6 +5456,10 @@ new file mode 100644
 +    :cond_108
 +    const-string v1, "GPU image"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    :goto_10a
 +    iget-object v2, v0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
@@ -5348,10 +5472,18 @@ new file mode 100644
 +
 +    const-string v2, "Refresh image and compatibility"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-direct {v0, v2, v8, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)V
 +
 +    .line 189
 +    const-string v1, "Tuning profile"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->section(Ljava/lang/String;)V
 +
@@ -5371,8 +5503,16 @@ new file mode 100644
 +    :cond_12a
 +    const-string v1, "No saved profile"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    :goto_12c
 +    const-string v2, "Values are saved automatically and retained across ROM updates that preserve Settings data. Imported values are never applied automatically."
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {v0, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->description(Ljava/lang/String;Ljava/lang/CharSequence;)V
 +
@@ -5421,6 +5561,10 @@ new file mode 100644
 +
 +    .line 194
 +    const-string v1, "Recovery rollback"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->section(Ljava/lang/String;)V
 +
@@ -5718,6 +5862,10 @@ new file mode 100644
 +    .line 198
 +    const-string v1, "GPU tables"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->section(Ljava/lang/String;)V
 +
 +    invoke-direct {v0}, Lio/mesalabs/unica/gpu/GpuActivity;->card()V
@@ -5855,11 +6003,19 @@ new file mode 100644
 +    .line 203
 +    const-string v1, "Red values are outside stock or change bus/ACD behavior. They may map to different corners, freeze the GPU or prevent booting. Request 1 is experimental and is not 1 mV."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-direct {v0, v1, v8}, Lio/mesalabs/unica/gpu/GpuActivity;->riskText(Ljava/lang/String;Z)Ljava/lang/CharSequence;
 +
 +    move-result-object v1
 +
 +    const-string v2, "Experimental settings"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {v0, v2, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->description(Ljava/lang/String;Ljava/lang/CharSequence;)V
 +
@@ -5936,6 +6092,10 @@ new file mode 100644
 +    move-result-object v4
 +
 +    const-string v5, " \u00b7 Power level "
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -6100,6 +6260,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Bus "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -6295,6 +6459,10 @@ new file mode 100644
 +
 +    const-string v3, "Add power level"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {v0, v3, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)V
 +
 +    goto :goto_49d
@@ -6359,10 +6527,18 @@ new file mode 100644
 +
 +    const-string v3, "Apply GPU table"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {v0, v3, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)V
 +
 +    .line 213
 +    const-string v1, "Restore and restart"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->section(Ljava/lang/String;)V
 +
@@ -6449,6 +6625,10 @@ new file mode 100644
 +    .line 216
 +    const-string v1, "Inspired by libxzr/KonaBess. Both Samsung GPU tables, within the inspected FDT space. Nothing applies or reboots automatically."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    move/from16 v2, v17
 +
 +    invoke-direct {v0, v1, v11, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->label(Ljava/lang/CharSequence;IZ)Landroid/widget/TextView;
@@ -6516,11 +6696,27 @@ new file mode 100644
 +
 +    const-string v2, "Bus maximum index"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const-string v3, "ACD cell (decimal/0x hex, or none)"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    const-string v4, "Bus frequency index"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    const-string v5, "Bus minimum index"
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    filled-new-array {v4, v5, v2, v3}, [Ljava/lang/String;
 +
@@ -6683,6 +6879,10 @@ new file mode 100644
 +
 +    const-string v3, "Bus and ACD \u00b7 level "
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v2
@@ -6705,6 +6905,10 @@ new file mode 100644
 +
 +    const-string v1, "Save"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const/4 v2, 0x0
 +
 +    invoke-virtual {v0, v1, v2}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -6712,6 +6916,10 @@ new file mode 100644
 +    move-result-object v0
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1, v2}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -6777,6 +6985,10 @@ new file mode 100644
 +
 +    const-string v3, "GPU frequency (MHz)"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    const/16 v4, 0xe
 +
 +    invoke-direct {p0, v3, v4, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->label(Ljava/lang/CharSequence;IZ)Landroid/widget/TextView;
@@ -6788,6 +7000,10 @@ new file mode 100644
 +    invoke-virtual {v2, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
 +    const-string v3, "Up to six decimal places (1 Hz). Positive u32 Hz input only; this is a storage limit, not a supported clock range. Non-stock frequencies appear in red and can prevent booting."
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v3, v1}, Lio/mesalabs/unica/gpu/GpuActivity;->riskText(Ljava/lang/String;Z)Ljava/lang/CharSequence;
 +
@@ -6809,6 +7025,10 @@ new file mode 100644
 +    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v4, "Power level "
++
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
 +
 +    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -6832,6 +7052,10 @@ new file mode 100644
 +
 +    const-string v2, "Save"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const/4 v3, 0x0
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -6839,6 +7063,10 @@ new file mode 100644
 +    move-result-object v1
 +
 +    const-string v2, "Cancel"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -6899,6 +7127,10 @@ new file mode 100644
 +
 +    const-string v3, "Index from 0 to "
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v2
@@ -6948,6 +7180,10 @@ new file mode 100644
 +    :cond_4d
 +    const-string v3, "Initial power level"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    :goto_4f
 +    invoke-virtual {v2, v3}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -6959,6 +7195,10 @@ new file mode 100644
 +
 +    const-string v2, "Save"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    const/4 v3, 0x0
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -6966,6 +7206,10 @@ new file mode 100644
 +    move-result-object v1
 +
 +    const-string v2, "Cancel"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -7081,6 +7325,10 @@ new file mode 100644
 +
 +    const-string v3, "Voltage request \u00b7 table "
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v2
@@ -7123,11 +7371,19 @@ new file mode 100644
 +
 +    const-string p1, "Custom request"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setNeutralButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -7195,6 +7451,10 @@ new file mode 100644
 +    if-nez p1, :cond_31
 +
 +    const-string p1, "Rollback unavailable"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    const-string p2, "Refresh compatibility before exporting the rollback ZIP."
 +
@@ -7337,6 +7597,10 @@ new file mode 100644
 +    move-result-object v1
 +
 +    const-string v2, "My GPU profile"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-static {v2, v0, v1}, Lio/mesalabs/unica/gpu/GpuProfile;->fromTables(Ljava/lang/String;Ljava/lang/String;Lorg/json/JSONArray;)Lio/mesalabs/unica/gpu/GpuProfile;
 +
@@ -7583,6 +7847,10 @@ new file mode 100644
 +
 +    const-string v2, "The saved data was kept for recovery. "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -7600,6 +7868,10 @@ new file mode 100644
 +    move-result-object v0
 +
 +    const-string v1, "Saved profile unavailable"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, v1, v0}, Lio/mesalabs/unica/gpu/GpuActivity;->alert(Ljava/lang/String;Ljava/lang/String;)V
 +
@@ -7981,6 +8253,10 @@ new file mode 100644
 +
 +    const-string v2, "Remove power level "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -8005,6 +8281,10 @@ new file mode 100644
 +
 +    const-string v1, "This changes the saved table structure. Remaining levels are renumbered and initial/minimum references adjusted. Keep at least two levels. Apply is a separate action."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const/4 v2, 0x1
 +
 +    invoke-direct {p0, v1, v2}, Lio/mesalabs/unica/gpu/GpuActivity;->riskText(Ljava/lang/String;Z)Ljava/lang/CharSequence;
@@ -8021,11 +8301,19 @@ new file mode 100644
 +
 +    const-string p1, "Remove"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -8078,6 +8366,10 @@ new file mode 100644
 +
 +    const-string v7, "\nTable "
 +
++    invoke-static/range {v7 .. v7}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v7
++
 +    invoke-virtual {v6, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v6
@@ -8115,6 +8407,10 @@ new file mode 100644
 +    move-result-object v6
 +
 +    const-string v7, " \u00b7 minimum "
++
++    invoke-static/range {v7 .. v7}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v7
 +
 +    invoke-virtual {v6, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8164,6 +8460,10 @@ new file mode 100644
 +    invoke-direct {v9}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v10, "Level "
++
++    invoke-static/range {v10 .. v10}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v10
 +
 +    invoke-virtual {v9, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8328,6 +8628,10 @@ new file mode 100644
 +    :cond_10f
 +    const-string p1, "\nExperimental values can freeze the GPU or prevent booting. Requests are not millivolts; the driver rounds to available corners. Raw request 1 is not a standard named corner. Neither stock nor red values guarantee stability. Keep the matching recovery rollback available."
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-direct {p0, p1, v5}, Lio/mesalabs/unica/gpu/GpuActivity;->riskText(Ljava/lang/String;Z)Ljava/lang/CharSequence;
 +
 +    move-result-object p1
@@ -8347,6 +8651,10 @@ new file mode 100644
 +
 +    const-string v1, "Load imported tuning profile?"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
@@ -8365,11 +8673,19 @@ new file mode 100644
 +
 +    const-string p1, "Load profile"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -8718,6 +9034,10 @@ new file mode 100644
 +
 +    const-string v1, "Working: "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -8727,6 +9047,10 @@ new file mode 100644
 +    move-result-object v0
 +
 +    const-string v1, ". Keep the device powered\u2026"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8810,6 +9134,10 @@ new file mode 100644
 +    move-exception p1
 +
 +    const-string p2, "Cannot save voltage request"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    invoke-virtual {p1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
@@ -8983,6 +9311,10 @@ new file mode 100644
 +
 +    const-string v2, "Cannot initialize tuning profile: "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -9048,6 +9380,10 @@ new file mode 100644
 +
 +    const-string v1, "This driver clamps active-row DDR requests above 9 to 9. "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    :cond_12
@@ -9061,6 +9397,10 @@ new file mode 100644
 +
 +    const-string v1, "Outside stock RPMh requests. "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    :cond_1f
@@ -9073,6 +9413,10 @@ new file mode 100644
 +    if-nez v1, :cond_2c
 +
 +    const-string v1, "Outside stock frequency table. "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -9096,6 +9440,10 @@ new file mode 100644
 +    if-lt p2, v1, :cond_42
 +
 +    const-string p1, "Added power level. "
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    :goto_3e
 +    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -9164,6 +9512,10 @@ new file mode 100644
 +    move-exception p1
 +
 +    const-string p1, "Stock comparison unavailable. "
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -9442,6 +9794,10 @@ new file mode 100644
 +
 +    const-string p2, "Cannot load values"
 +
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
 +    invoke-virtual {p1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
 +    move-result-object p1
@@ -9462,11 +9818,19 @@ new file mode 100644
 +
 +    const-string v0, "Replace saved profile values?"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "This replaces the saved draft. Back up your profile first if you want to keep it."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -9478,11 +9842,19 @@ new file mode 100644
 +
 +    const-string v1, "Load values"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -9542,6 +9914,10 @@ new file mode 100644
 +
 +    const-string v0, "File picker unavailable"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1}, Landroid/content/ActivityNotFoundException;->getMessage()Ljava/lang/String;
 +
 +    move-result-object p1
@@ -9558,7 +9934,15 @@ new file mode 100644
 +    .line 197
 +    const-string p1, "If Android cannot start"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    const-string v0, "Boot into OrangeFox using the device\'s recovery procedure. Mount Cache. Flash /cache/unica-gpu/rollback.zip, or flash the saved rollback ZIP from USB/PC storage. It verifies and restores the exact pre-trial vendor_boot image. Reboot manually after success. Keep a matching full ROM available if recovery restoration fails. Never use this ZIP after changing firmware."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, p1, v0}, Lio/mesalabs/unica/gpu/GpuActivity;->alert(Ljava/lang/String;Ljava/lang/String;)V
 +
@@ -9571,7 +9955,15 @@ new file mode 100644
 +    .line 199
 +    const-string p1, "GPU tuning"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    const-string v0, "Both tables are stored in firmware. The driver chooses the active table by chip/SKU; choosing a table here only chooses which draft to edit. Up to 15 entries per table, within the original FDT space. RPMh requests are mapped to available command-DB corners, not millivolts. Red marks values outside stock. None of these settings are a stability guarantee."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, p1, v0}, Lio/mesalabs/unica/gpu/GpuActivity;->alert(Ljava/lang/String;Ljava/lang/String;)V
 +
@@ -9601,13 +9993,25 @@ new file mode 100644
 +
 +    const-string v0, "Edit GPU table"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Table 0 \u00b7 SKU-specific"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const-string v1, "Table 1 \u00b7 fallback"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    filled-new-array {v0, v1}, [Ljava/lang/String;
 +
@@ -9624,6 +10028,10 @@ new file mode 100644
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -9737,11 +10145,19 @@ new file mode 100644
 +
 +    const-string v0, "Restore original GPU image?"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "This restores the full vendor_boot image captured before this trial, including its original GPU table. Reboot after restoration succeeds."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -9753,11 +10169,19 @@ new file mode 100644
 +
 +    const-string v1, "Restore"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -9799,11 +10223,19 @@ new file mode 100644
 +
 +    const-string v0, "Reboot device?"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Keep the rollback ZIP and recovery available. Only reboot after Apply or Restore reports success."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -9815,11 +10247,19 @@ new file mode 100644
 +
 +    const-string v1, "Reboot"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string v0, "Cancel"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/4 v1, 0x0
 +
@@ -10229,6 +10669,10 @@ new file mode 100644
 +
 +    const-string v0, "Use experimental RPMh request?"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p2, v0}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p2
@@ -10275,11 +10719,19 @@ new file mode 100644
 +
 +    const-string p1, "Use request"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {p2, p1, v0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
 +
 +    const-string p2, "Cancel"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    const/4 p3, 0x0
 +
@@ -10374,6 +10826,10 @@ new file mode 100644
 +
 +    const-string v0, "Rollback export failed: "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p1
@@ -10389,6 +10845,10 @@ new file mode 100644
 +    iput-object p1, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
 +    const-string p1, "Rollback export failed"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    iget-object p2, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
@@ -10804,6 +11264,10 @@ new file mode 100644
 +
 +    const-string v0, "Profile operation failed: "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p2
@@ -10819,6 +11283,10 @@ new file mode 100644
 +    iput-object p1, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
 +    const-string p1, "Profile operation failed"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    iget-object p2, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
@@ -11177,6 +11645,10 @@ new file mode 100644
 +
 +    const-string p2, "Cannot remove level"
 +
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
 +    invoke-virtual {p1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
 +    move-result-object p1
@@ -11210,6 +11682,10 @@ new file mode 100644
 +    move-exception p1
 +
 +    const-string p2, "Cannot save profile"
++
++    invoke-static/range {p2 .. p2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
 +
 +    invoke-virtual {p1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
 +
@@ -11274,6 +11750,10 @@ new file mode 100644
 +
 +    const-string v0, "Compatible firmware. Backup: "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p3
@@ -11300,6 +11780,10 @@ new file mode 100644
 +
 +    const-string v0, ". Rollback export: "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p3
@@ -11318,6 +11802,10 @@ new file mode 100644
 +
 +    :cond_51
 +    const-string v0, "required before Apply"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    :goto_53
 +    invoke-virtual {p3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -11363,6 +11851,10 @@ new file mode 100644
 +
 +    const-string v0, ". Your tuning profile stays saved."
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p3
@@ -11386,6 +11878,10 @@ new file mode 100644
 +
 +    const-string v1, "Operation failed: "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -11395,6 +11891,10 @@ new file mode 100644
 +    move-result-object p3
 +
 +    const-string v0, ". Refresh status before any further action."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -11407,6 +11907,10 @@ new file mode 100644
 +    iput-object p3, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
 +    const-string p3, "GPU operation failed"
++
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
 +
 +    iget-object v0, p0, Lio/mesalabs/unica/gpu/GpuActivity;->message:Ljava/lang/String;
 +
@@ -11518,6 +12022,10 @@ new file mode 100644
 +
 +    const-string v0, "Wait for the GPU operation to finish"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const/4 v1, 0x0
 +
 +    invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -11541,6 +12049,10 @@ new file mode 100644
 +    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 +
 +    const-string p1, "Advanced GPU Tuning (Konabess)"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {p0, p1}, Lio/mesalabs/unica/gpu/GpuActivity;->setTitle(Ljava/lang/CharSequence;)V
 +
@@ -11724,7 +12236,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/gpu/GpuProfile.smali b/smali_class
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/gpu/GpuProfile.smali
-@@ -0,0 +1,2287 @@
+@@ -0,0 +1,2315 @@
 +.class final Lio/mesalabs/unica/gpu/GpuProfile;
 +.super Ljava/lang/Object;
 +.source "GpuProfile.java"
@@ -12022,6 +12534,10 @@ new file mode 100644
 +    invoke-direct {p1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v0, "Missing profile field: "
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -12747,6 +13263,10 @@ new file mode 100644
 +
 +    const-string v1, "Expected whole number: "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -13093,6 +13613,10 @@ new file mode 100644
 +
 +    const-string v0, "Invalid profile text: "
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p2
@@ -13127,7 +13651,15 @@ new file mode 100644
 +
 +    const-string v1, "My GPU profile"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const-string v2, "Pinned Samsung S918BXXUAZZI8 table defaults"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-static {v1, v2, v0}, Lio/mesalabs/unica/gpu/GpuProfile;->fromTables(Ljava/lang/String;Ljava/lang/String;Lorg/json/JSONArray;)Lio/mesalabs/unica/gpu/GpuProfile;
 +
@@ -13787,6 +14319,10 @@ new file mode 100644
 +
 +    const-string v2, "Final GPU row bypasses the driver bus clamp: bus maximum must be 0\u20139 (got "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -13959,6 +14495,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Invalid GPU frequency, RPMh request, bus ordering or ACD cell at level "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -14745,7 +15285,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/gpu/KonaProfileImport.smali b/smal
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/gpu/KonaProfileImport.smali
-@@ -0,0 +1,1486 @@
+@@ -0,0 +1,1502 @@
 +.class final Lio/mesalabs/unica/gpu/KonaProfileImport;
 +.super Ljava/lang/Object;
 +.source "KonaProfileImport.java"
@@ -14944,6 +15484,10 @@ new file mode 100644
 +
 +    const-string v1, "Unsupported GPU property: "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -14999,6 +15543,10 @@ new file mode 100644
 +
 +    const-string v1, "Missing or malformed "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -15040,6 +15588,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Expected "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -16154,6 +16706,10 @@ new file mode 100644
 +    check-cast v0, Ljava/lang/String;
 +
 +    const-string v2, "Unknown; imported upstream KonaBess export"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-static {v0, v2, v1}, Lio/mesalabs/unica/gpu/GpuProfile;->fromTables(Ljava/lang/String;Ljava/lang/String;Lorg/json/JSONArray;)Lio/mesalabs/unica/gpu/GpuProfile;
 +

@@ -3058,7 +3058,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/battery/BatteryActivity.smali b/sm
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/battery/BatteryActivity.smali
-@@ -0,0 +1,5902 @@
+@@ -0,0 +1,6186 @@
 +.class public final Lio/mesalabs/unica/battery/BatteryActivity;
 +.super Landroid/app/Activity;
 +.source "BatteryActivity.java"
@@ -3174,6 +3174,10 @@ new file mode 100644
 +    :cond_14
 +    :goto_14
 +    const-string v0, "No apps selected"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    :goto_16
 +    const/16 v1, 0xc
@@ -3620,11 +3624,19 @@ new file mode 100644
 +
 +    const-string v1, "NOSLEN profile"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    const-string v1, "NOSLEN disables Wi-Fi runtime suspend and PCIe link power saving, disables Wi-Fi wakeup, sets swappiness to 60 and cached processes to 32, and restricts three Samsung apps. It may increase drain or delay background communication. Unsupported controls will be reported."
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -3636,6 +3648,10 @@ new file mode 100644
 +
 +    const-string p1, "Continue"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
@@ -3645,6 +3661,10 @@ new file mode 100644
 +    invoke-direct {v0, p2}, Lio/mesalabs/unica/battery/BatteryActivity$4;-><init>(Ljava/lang/Runnable;)V
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -3713,11 +3733,19 @@ new file mode 100644
 +
 +    const-string v1, "Apply custom restrictions?"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    const-string v1, "Selected app restrictions can interrupt notifications, alarms, calls, account services and background work. Wi-Fi radio off disconnects all Wi-Fi; Wi-Fi Calling off can prevent calls where cellular coverage is poor. Only the selected controls and apps will change. Disable Battery Saving to restore saved settings."
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -3729,6 +3757,10 @@ new file mode 100644
 +
 +    const-string p1, "Apply"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
@@ -3738,6 +3770,10 @@ new file mode 100644
 +    invoke-direct {v0, p2}, Lio/mesalabs/unica/battery/BatteryActivity$14;-><init>(Ljava/lang/Runnable;)V
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -3767,11 +3803,19 @@ new file mode 100644
 +
 +    const-string v1, "Stingy: aggressive saving"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    const-string v1, "This profile deliberately sacrifices performance and background functions. Notifications, background sync, uploads, backups, app-store updates, widgets, VPNs and wearables can stop working. The screen becomes dim with a short timeout; CPU/GPU speed is heavily capped. Aggressive PCIe saving may expose driver instability. Play services, Play Store, Galaxy Store and non-essential system apps are restricted. Alarms, calls and connectivity can also fail. Core UIDs, Settings, SystemUI, credential and permission components, launcher, enabled keyboards, accessibility services and device administrators remain protected for recovery. Android exemptions and foreground services mean zero background activity is not guaranteed. Disable Battery Saving to restore saved settings; missed work and notifications cannot be recovered. Select the preset, then Save and apply."
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
@@ -3783,6 +3827,10 @@ new file mode 100644
 +
 +    const-string p1, "Continue"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p1
@@ -3792,6 +3840,10 @@ new file mode 100644
 +    invoke-direct {v0, p2}, Lio/mesalabs/unica/battery/BatteryActivity$22;-><init>(Ljava/lang/Runnable;)V
 +
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {p1, v1, v0}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -3853,6 +3905,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v3, "Current: "
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -3928,6 +3984,10 @@ new file mode 100644
 +
 +    const-string v6, " \u00b7 Original: "
 +
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
++
 +    invoke-virtual {v4, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v4
@@ -3992,6 +4052,10 @@ new file mode 100644
 +
 +    const-string v3, "Unavailable on this device"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-virtual {p1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p1
@@ -4007,6 +4071,10 @@ new file mode 100644
 +    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v5, " \u00b7 Requested: "
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -4139,6 +4207,10 @@ new file mode 100644
 +    invoke-direct {p1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v3, "Saved value "
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-virtual {p1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -4438,6 +4510,10 @@ new file mode 100644
 +
 +    const-string v1, "Enable Battery Saving"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setText(Ljava/lang/CharSequence;)V
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/battery/BatteryActivity;->profile:Lorg/json/JSONObject;
@@ -4477,6 +4553,10 @@ new file mode 100644
 +    .line 76
 +    const-string v1, "Turning this off restores the values saved before this feature changed them. Changes below take effect after Save and apply."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const/16 v4, 0xd
 +
 +    invoke-direct {p0, v1, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
@@ -4502,6 +4582,10 @@ new file mode 100644
 +
 +    const-string v1, "Refresh device status"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/battery/BatteryActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
 +    .line 84
@@ -4512,6 +4596,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "Preset: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -4539,6 +4627,10 @@ new file mode 100644
 +
 +    .line 85
 +    const-string v0, "Balanced preserves kernel and memory defaults and reports freezer state. Efficiency selects an advertised CPU ceiling near 85% of the original fastest-cluster limit; battery benefit needs measurement. Refresh-rate limiting stays optional. NOSLEN reproduces the module\'s intended settings. Stingy uses the lowest usable clocks and refresh rate, restricts user and non-essential system apps including Play services and both app stores, disables auto-sync, dims the screen, removes animations and enables dark mode. Severe performance and background-function loss are intentional."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4583,6 +4675,10 @@ new file mode 100644
 +    iput-object v0, p0, Lio/mesalabs/unica/battery/BatteryActivity;->page:Landroid/widget/LinearLayout;
 +
 +    const-string v0, "Controls"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    const/16 v5, 0x14
 +
@@ -4633,10 +4729,18 @@ new file mode 100644
 +
 +    const-string v0, "Targeted app restrictions"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
 +    .line 98
 +    const-string v0, "Only select apps whose background work you can limit. Restricting messaging, alarms, VPN, wearables or Samsung feature providers can break expected behavior. No apps are selected by Balanced or Efficiency."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4665,11 +4769,19 @@ new file mode 100644
 +
 +    const-string v0, "Aggressive restrictions cover all eligible user and system apps, including Play services and both stores. Selected apps below are additional targets, not exceptions."
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
 +    .line 100
 +    :cond_124
 +    const-string v0, "Full restrictions: choose Play Store, Play services, Galaxy Store or other apps. Applies restricted standby, background execution limits, metered background data blocking and removal of user Doze exemptions. Automatic account sync and Data Saver are separate controls above. Unmetered Wi-Fi is not fully blocked."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4678,12 +4790,20 @@ new file mode 100644
 +
 +    const-string v3, "Choose apps for full restrictions"
 +
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
 +    invoke-direct {p0, v0, v3}, Lio/mesalabs/unica/battery/BatteryActivity;->appButton(Ljava/lang/String;Ljava/lang/String;)V
 +
 +    .line 102
 +    const-string v0, "packages"
 +
 +    const-string v3, "Choose apps for standby only"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v0, v3}, Lio/mesalabs/unica/battery/BatteryActivity;->appButton(Ljava/lang/String;Ljava/lang/String;)V
 +
@@ -4704,11 +4824,27 @@ new file mode 100644
 +
 +    const-string v0, "Rare"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const-string v3, "Restricted"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    const-string v5, "Active"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    const-string v6, "Working set"
++
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
 +
 +    const-string v8, "Frequent"
 +
@@ -4739,10 +4875,18 @@ new file mode 100644
 +
 +    const-string v0, "Exempted App"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
 +    .line 105
 +    const-string v0, "Disable selected apps completely, not just their exemptions. Their services and features will stop. Calls, alarms, notifications, accounts and connectivity can fail. Protected recovery apps cannot be selected. Save and apply will ask before restarting after successful changes. Deselect or turn Battery Saving off to restore saved app states."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4754,10 +4898,18 @@ new file mode 100644
 +
 +    const-string v0, "Doze exemptions"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
 +    .line 108
 +    const-string v0, "Remove only unnecessary user-added exemptions. Essential messaging and service dependencies should retain them. System exemptions may be protected by Android."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4765,6 +4917,10 @@ new file mode 100644
 +    const-string v0, "exemptions"
 +
 +    const-string v3, "Choose exemptions to remove"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    invoke-direct {p0, v0, v3}, Lio/mesalabs/unica/battery/BatteryActivity;->appButton(Ljava/lang/String;Ljava/lang/String;)V
 +
@@ -4777,6 +4933,10 @@ new file mode 100644
 +
 +    const-string v5, "Save and apply"
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    invoke-direct {p0, v5, v0, v3}, Lio/mesalabs/unica/battery/BatteryActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
 +    .line 111
@@ -4784,10 +4944,18 @@ new file mode 100644
 +
 +    const-string v0, "Profile backup"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
 +    .line 112
 +    const-string v0, "Backups contain your choices, not device paths or original system values. Restore validates the file and leaves Battery Saving off until you enable it."
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-direct {p0, v0, v4}, Lio/mesalabs/unica/battery/BatteryActivity;->text(Ljava/lang/String;I)V
 +
@@ -4797,6 +4965,10 @@ new file mode 100644
 +    invoke-direct {v0, p0}, Lio/mesalabs/unica/battery/BatteryActivity$36;-><init>(Lio/mesalabs/unica/battery/BatteryActivity;)V
 +
 +    const-string v1, "Back up profile"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/battery/BatteryActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -4808,6 +4980,10 @@ new file mode 100644
 +    invoke-direct {v1, p0}, Lio/mesalabs/unica/battery/BatteryActivity$37;-><init>(Lio/mesalabs/unica/battery/BatteryActivity;)V
 +
 +    const-string v2, "Restore profile"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {p0, v2, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -4827,6 +5003,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "Could not complete: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -4885,6 +5065,10 @@ new file mode 100644
 +    :goto_16
 +    const-string v0, "No apps selected for disabling"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    :goto_18
 +    const/16 v1, 0xc
 +
@@ -4898,6 +5082,10 @@ new file mode 100644
 +    invoke-direct {v1, p0}, Lio/mesalabs/unica/battery/BatteryActivity$51;-><init>(Lio/mesalabs/unica/battery/BatteryActivity;)V
 +
 +    const-string v2, "Choose Exempted App"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-direct {p0, v2, v0, v1}, Lio/mesalabs/unica/battery/BatteryActivity;->button(Ljava/lang/String;ZLandroid/view/View$OnClickListener;)Landroid/widget/Button;
 +
@@ -4976,6 +5164,10 @@ new file mode 100644
 +
 +    const-string v0, "Automatic"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    return-object v0
 +
 +    :cond_3d
@@ -4986,6 +5178,10 @@ new file mode 100644
 +    if-eqz v2, :cond_46
 +
 +    const-string v0, "Light"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    return-object v0
 +
@@ -4999,6 +5195,10 @@ new file mode 100644
 +    if-eqz v2, :cond_51
 +
 +    const-string v0, "Dark"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    return-object v0
 +
@@ -5139,6 +5339,10 @@ new file mode 100644
 +    move-result v2
 +
 +    const-string v3, "Android default"
++
++    invoke-static/range {v3 .. v3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
 +
 +    if-eqz v2, :cond_d5
 +
@@ -5299,6 +5503,10 @@ new file mode 100644
 +
 +    :cond_15a
 +    const-string v0, "Off"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    :goto_15c
 +    return-object v0
@@ -6223,6 +6431,10 @@ new file mode 100644
 +
 +    const-string v1, "Save, apply and restart?"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
@@ -6230,12 +6442,20 @@ new file mode 100644
 +    .line 292
 +    const-string v1, "Selected Exempted Apps will be disabled completely while Battery Saving is enabled. Apps removed from the selection, or all saved apps when Battery Saving is turned off, will return to their original enabled states. Calls, alarms, notifications and connectivity can stop working. Save your work. After successful app-state changes this phone will restart automatically. If changes fail, it will stay on so you can review the errors. Disabling takes effect immediately; the restart completes this workflow."
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
 +    .line 293
 +    const-string v1, "Cancel"
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    const/4 v2, 0x0
 +
@@ -6248,6 +6468,10 @@ new file mode 100644
 +    invoke-direct {v1, p0, p1, p2}, Lio/mesalabs/unica/battery/BatteryActivity$25;-><init>(Lio/mesalabs/unica/battery/BatteryActivity;Ljava/lang/String;Ljava/lang/String;)V
 +
 +    const-string p1, "Save, apply & restart"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {v0, p1, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -6384,9 +6608,17 @@ new file mode 100644
 +    .line 193
 +    const-string v0, "Search app name or package"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {v8, v0}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
 +
 +    const-string v0, "Search apps"
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {v8, v0}, Landroid/widget/EditText;->setContentDescription(Ljava/lang/CharSequence;)V
 +
@@ -6524,6 +6756,10 @@ new file mode 100644
 +    .line 225
 +    const-string v1, "Cancel"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const/4 v2, 0x0
 +
 +    invoke-virtual {v0, v1, v2}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -6537,6 +6773,10 @@ new file mode 100644
 +    invoke-direct {v1, v2}, Lio/mesalabs/unica/battery/BatteryActivity$8;-><init>(Ljava/lang/Runnable;)V
 +
 +    const-string v2, "Save selection"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v0, v2, v1}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -7850,6 +8090,10 @@ new file mode 100644
 +    :cond_a6
 +    const-string v4, "Exempted (5)"
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    :goto_a8
 +    invoke-virtual {v6, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8209,11 +8453,19 @@ new file mode 100644
 +
 +    const-string v0, "\nRestoration incomplete. Retry with Battery Saving off."
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    .line 315
 +    :cond_88
 +    const-string v0, "\nKernel: "
++
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
 +
 +    invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8266,6 +8518,10 @@ new file mode 100644
 +    if-eqz p1, :cond_be
 +
 +    const-string p1, "\nApp-state changes await restart."
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {p2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -8450,6 +8706,10 @@ new file mode 100644
 +
 +    .line 215
 +    const-string p1, "This app or its shared UID is protected for recovery"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    const/4 p2, 0x1
 +
@@ -8687,17 +8947,29 @@ new file mode 100644
 +
 +    const-string p3, "Restore profile?"
 +
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
++
 +    invoke-virtual {p2, p3}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p2
 +
 +    const-string p3, "This replaces your selected controls and turns Battery Saving off, restoring any current changes. Review the imported values before enabling it."
 +
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
++
 +    invoke-virtual {p2, p3}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object p2
 +
 +    const-string p3, "Cancel"
++
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
 +
 +    const/4 v0, 0x0
 +
@@ -8706,6 +8978,10 @@ new file mode 100644
 +    move-result-object p2
 +
 +    const-string p3, "Restore"
++
++    invoke-static/range {p3 .. p3}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p3
 +
 +    new-instance v0, Lio/mesalabs/unica/battery/BatteryActivity$20;
 +
@@ -8792,6 +9068,10 @@ new file mode 100644
 +
 +    const-string v0, "Wait for the battery operation to finish"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const/4 v1, 0x0
 +
 +    invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -8815,6 +9095,10 @@ new file mode 100644
 +    invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 +
 +    const-string p1, "Battery Saving"
++
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
 +
 +    invoke-virtual {p0, p1}, Lio/mesalabs/unica/battery/BatteryActivity;->setTitle(Ljava/lang/CharSequence;)V
 +
@@ -9530,7 +9814,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/battery/BatteryEngine.smali b/smal
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/battery/BatteryEngine.smali
-@@ -0,0 +1,9362 @@
+@@ -0,0 +1,9458 @@
 +.class public Lio/mesalabs/unica/battery/BatteryEngine;
 +.super Ljava/lang/Object;
 +.source "BatteryEngine.java"
@@ -9928,6 +10212,10 @@ new file mode 100644
 +
 +    const-string v1, "Unknown ("
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -9952,20 +10240,36 @@ new file mode 100644
 +    :sswitch_1d
 +    const-string p0, "Never (50)"
 +
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
 +    return-object p0
 +
 +    :sswitch_20
 +    const-string p0, "Restricted (45)"
++
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
 +
 +    return-object p0
 +
 +    :sswitch_23
 +    const-string p0, "Rare (40)"
 +
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
 +    return-object p0
 +
 +    :sswitch_26
 +    const-string p0, "Frequent (30)"
++
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
 +
 +    return-object p0
 +
@@ -9973,15 +10277,27 @@ new file mode 100644
 +    :sswitch_29
 +    const-string p0, "Working set (20)"
 +
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
 +    return-object p0
 +
 +    :sswitch_2c
 +    const-string p0, "Active (10)"
 +
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
 +    return-object p0
 +
 +    :sswitch_2f
 +    const-string p0, "Exempted (5)"
++
++    invoke-static/range {p0 .. p0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
 +
 +    return-object p0
 +
@@ -10162,6 +10478,10 @@ new file mode 100644
 +
 +    const-string p1, "; requested bucket is not effective"
 +
++    invoke-static/range {p1 .. p1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
 +    invoke-virtual {p0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p0
@@ -10183,6 +10503,10 @@ new file mode 100644
 +    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v2, "Standby bucket readback differs: requested "
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -12148,6 +12472,10 @@ new file mode 100644
 +
 +    const-string v15, "Full background restrictions: "
 +
++    invoke-static/range {v15 .. v15}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v15
++
 +    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v14
@@ -12425,6 +12753,10 @@ new file mode 100644
 +    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v12, "Cannot enumerate background apps: "
++
++    invoke-static/range {v12 .. v12}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v12
 +
 +    invoke-virtual {v5, v12}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -14218,6 +14550,10 @@ new file mode 100644
 +
 +    const-string v6, "CPU ceiling \u00b7 "
 +
++    invoke-static/range {v6 .. v6}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v6
++
 +    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v5
@@ -14290,6 +14626,10 @@ new file mode 100644
 +
 +    const-string v4, "Kernel controls unavailable: "
 +
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
++
 +    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v3
@@ -14327,6 +14667,10 @@ new file mode 100644
 +    iget-object v0, p0, Lio/mesalabs/unica/battery/BatteryEngine;->notes:Ljava/util/List;
 +
 +    const-string v2, "Cached-process effective limit unavailable"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    invoke-interface {v0, v2}, Ljava/util/List;->add(Ljava/lang/Object;)Z
 +
@@ -14642,6 +14986,10 @@ new file mode 100644
 +
 +    const-string v2, "Display modes unavailable; refresh-rate control disabled"
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-interface {v0, v2}, Ljava/util/List;->add(Ljava/lang/Object;)Z
 +
 +    .line 230
@@ -14932,6 +15280,10 @@ new file mode 100644
 +
 +    const-string v5, "Wi-Fi Calling \u00b7 SIM "
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v4
@@ -15012,6 +15364,10 @@ new file mode 100644
 +    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v4, "Wi-Fi Calling discovery unavailable: "
++
++    invoke-static/range {v4 .. v4}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v4
 +
 +    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -15100,6 +15456,10 @@ new file mode 100644
 +    .line 248
 +    const-string v0, "Window animations"
 +
++    invoke-static/range {v0 .. v0}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
 +    const-string v1, "window_animation_scale"
 +
 +    const-string v2, "window_animation"
@@ -15110,6 +15470,10 @@ new file mode 100644
 +
 +    const-string v1, "Transition animations"
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    const-string v2, "transition_animation_scale"
 +
 +    const-string v3, "transition_animation"
@@ -15119,6 +15483,10 @@ new file mode 100644
 +    move-result-object v1
 +
 +    const-string v2, "Animator duration"
++
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
 +
 +    const-string v3, "animator_duration_scale"
 +
@@ -17005,6 +17373,10 @@ new file mode 100644
 +
 +    const-string v5, "Restore failed for "
 +
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
 +    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v3
@@ -17052,6 +17424,10 @@ new file mode 100644
 +    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v5, "Restore deferred for "
++
++    invoke-static/range {v5 .. v5}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
 +
 +    invoke-virtual {v2, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
@@ -18621,6 +18997,10 @@ new file mode 100644
 +
 +    const-string v2, "Readback differs: requested "
 +
++    invoke-static/range {v2 .. v2}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
 +    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v1
@@ -19649,7 +20029,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/battery/Profile.smali b/smali_clas
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/battery/Profile.smali
-@@ -0,0 +1,2300 @@
+@@ -0,0 +1,2308 @@
 +.class public final Lio/mesalabs/unica/battery/Profile;
 +.super Ljava/lang/Object;
 +.source "Profile.java"
@@ -21620,6 +22000,10 @@ new file mode 100644
 +
 +    const-string v1, "Invalid value for "
 +
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v0
@@ -21645,6 +22029,10 @@ new file mode 100644
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 +
 +    const-string v1, "Unknown control: "
++
++    invoke-static/range {v1 .. v1}, Lio/mesalabs/unica/UnicaL10n;->t(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
 +
 +    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
