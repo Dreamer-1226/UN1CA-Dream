@@ -37,6 +37,18 @@ if [ -f "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" ] && \
         "006c69627766645f617564696f747261636b5f7368696d2e736f00000000000000000000000000000000000000"
 fi
 
+# One UI 9 libgui added IGraphicBufferProducer methods, so the old vtable
+# slot (0x7c) in PlaybackSession::addConsumerUsageBits() now hits
+# getFrameTimestamps() instead of getConsumerUsage() (0x84), and the encoder
+# surface ends up with garbage usage bits (black screen on the sink).
+# Drop the CFI check in front of the call and use its slot to move the
+# vtable pointer forward by 8, so [r4, #0x7c] lands on getConsumerUsage().
+if [ -f "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" ]; then
+    HEX_PATCH "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" \
+        "224643f0c2e8e26f" \
+        "2246083400bfe26f"
+fi
+
 # Hex patch libstagefright.so to fix ACodec getProcessNameByPid buffer overflow
 if [ -f "$WORK_DIR/system/system/lib/libstagefright.so" ]; then
     if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "204601214ff400722b46"; then
