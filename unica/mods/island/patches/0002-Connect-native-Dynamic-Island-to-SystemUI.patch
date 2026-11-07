@@ -473,3 +473,39 @@ diff --git a/smali_classes3/com/android/systemui/statusbar/notification/headsup/
 +
  .method public final snooze()V
      .locals 9
+
+diff --git a/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$2.smali b/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$2.smali
+--- a/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$2.smali
++++ b/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$2.smali
+@@ -25,6 +25,14 @@
+ # virtual methods
+ .method public final onTouch(Landroid/view/View;Landroid/view/MotionEvent;)Z
+     .locals 3
++
++    invoke-static/range {p2 .. p2}, Ldev/android/dynamicisland/island/NativeBridge;->skipHandleTouch(Landroid/view/MotionEvent;)Z
++    move-result v0
++    if-eqz v0, :cond_cipher_original
++    const/4 v0, 0x0
++    return v0
++
++    :cond_cipher_original
+
+     iget-object v0, p0, Lcom/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$2;->this$0:Lcom/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder;
+
+diff --git a/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$4.smali b/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$4.smali
+--- a/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$4.smali
++++ b/smali_classes4/com/android/wm/shell/windowdecor/viewholder/MultiTaskingHandleViewHolder$createStatusBarInputLayer$4.smali
+@@ -25,6 +25,14 @@
+ # virtual methods
+ .method public final onTouch(Landroid/view/View;Landroid/view/MotionEvent;)Z
+     .locals 1
++
++    invoke-static/range {p2 .. p2}, Ldev/android/dynamicisland/island/NativeBridge;->skipHandleTouch(Landroid/view/MotionEvent;)Z
++    move-result v0
++    if-eqz v0, :cond_cipher_original
++    const/4 v0, 0x0
++    return v0
++
++    :cond_cipher_original
+
+     invoke-virtual {p2}, Landroid/view/MotionEvent;->getActionMasked()I

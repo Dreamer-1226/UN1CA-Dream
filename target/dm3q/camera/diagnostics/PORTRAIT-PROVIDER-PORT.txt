@@ -1,0 +1,97 @@
+dm3q Portrait provider state and crop investigation - 2026-11-07
+
+Current status
+  The app-only1..3x trial failed during preview. Seamless Portrait is now
+  disabled by renaming patch0006 to .patch.disabled. A separate0007 source
+  baseline now uses the shared feature flag for1..2x only and starts at1x;
+  see PORTRAIT-WIDE-BASELINE.txt. No phone files/settings/processes were changed.
+  A working continuous1..2x capture path is not newly established by this work:
+  the prior1..2x statement was a camera23 metadata capability, not a test result.
+  A provider/crop adaptation for3x has NOT been implemented or validated.
+
+Exact stock/installed identities
+  vendor/lib64/hw/com.qti.chi.override.so:
+    27d0e3939f10f3826f302deb2da29a907a371205019cd4933603c60f40d0ccd2
+  vendor/lib64/com.qualcomm.mcx.policy.mfl.so:
+    c448b0ee8365447d5e3a51234448aec84ad9775cc2deca44f9de1a1428a42935
+  Both match the supplied SM-S918B_EUX vendor. MFL was checked on the connected
+  device this turn with read-only root sha256sum; CHI identity was established
+  in the preceding crash review. Existing crash evidence is retained under
+  out/archived/portrait-crash-20261107-114414/.
+
+Observed runtime failure
+  Camera23 uses main56/sub58. At first preview the app supplies session
+  initialZoomRatio=3, Samsung scaler zoomRatio=3, and a1360x1020 center crop
+  within4080x3060. The provider logs Not enough cameras active0 and rejects
+  frame0. It subsequently aborts in UpdateCameraStateMap/hash insertion.
+  This occurs before still capture/depth processing. A Java verifier failure
+  or RAM exhaustion is not established by these logs.
+
+REA native findings (ELF addresses, not Ghidra analysis addresses)
+  MFL0x240b0 GetActiveCameraMaskBasedOnZoomRatio:
+    Reads the transition zoom value, queries a transition map, then translates
+    active mode bits into physical-camera bits. App zoom metadata and a pinned
+    logical camera ID do not themselves initialize this physical state.
+  MFL0x333c0 ChiTransitionMap::GetInitStateMode<float>:
+    On its initial-state path, exhausting the transition vector can return
+    success without assigning a selected region/mask. The caller initializes
+    these outputs to zero. This is a concrete possible empty-mask path, NOT
+    proof that the failing session used it or that its last region ends at2x.
+    The actual runtime transition entries and failing branch remain unknown.
+  MFL0x253b0 UpdateMasterIndexForBokeh:
+    Counts active camera bits and requires at least two. It checks BokehMaster
+    against that mask. Its fallback can populate configured camera states, but
+    the final count check still uses the original count (assembly cross-check).
+    Blindly forcing a master or suppressing this error is not pair support.
+  MFL0x257e0 UpdateZoomRatiosForBokeh:
+    For each physical metadata buffer, writes a stored full-FOV crop to Android
+    SCALER_CROP_REGION (tag0xd0000). It also writes the primary camera's minimum
+    zoom ratio to Android CONTROL_ZOOM_RATIO (tag0x1002f). This preserves the
+    stock bokeh input convention, rather than forwarding the requested crop.
+    It does not prove that every downstream logical crop is discarded.
+  CHI0x38ecd0 GetBokehControlZoomRatio:
+    AArch64 instructions select float1 or2 from per-camera extension state.
+    This helper does not return an arbitrary user zoom. Its recovered reduced-
+    analysis pseudocode has an incorrect integer return type and omits this
+    float result; use the saved assembly for this finding. These constants do
+    not independently establish the maximum possible digital output zoom.
+  CHI0x39e2d0 GetRecommendedState and0x39eff0 UpdateCameraStateMap:
+    On nonzero request numbers, the successful-policy branch accesses previous
+    state maps before its later mask/master/map validity check. The abort stack
+    reaches this map update. A failed first request followed by history reuse
+    is a plausible contributor; exact invalid history/map contents are unknown.
+    Skipping all history updates would break transition/flush semantics.
+
+Implementation requirements before another3x trial
+  1. Establish a valid baseline on camera23 at1x, then2x: two expected physical
+     states, an in-mask master, usable preview and still capture. Include a
+     session reopened after a failed request. Do not assume metadata proves it.
+  2. Observe the actual transition regions and stream-derived active mask at
+     session initialization and live zoom updates. The provider has both zoom-
+     map and physical-stream branches; identify the branch producing zero.
+     Extend that specific camera23 policy/configuration only after this trace.
+     Require initialized history before comparison and reject invalid current
+     states before updating history. Preserve normal activation/flush behavior.
+  3. Keep the stock full-FOV calibrated image inputs unless the depth engine's
+     crop contract is adapted too. Separate camera-selection zoom from output
+     framing. A later image/depth crop must also transform subject/AF/face ROIs,
+     output coordinates and saved Portrait metadata consistently. Resetting
+     only the remembered zoom, changing max metadata, or passing a3x rectangle
+     is insufficient. Simply deleting the full-FOV rewrite is not justified.
+  4. Resolve the legacy capture interface separately: previous REA establishes
+     that stock set_plugin rejects crop indices0x2a/0x2b sent by the newer JNI
+     adapter. Donor indices have other meanings. Do not replace the plugin or
+     enable v2 without a matched adapter/engine/metadata contract.
+  5. Only then validate2.2x/2.5x/3x, entry directly at each zoom, live transitions,
+     preview versus saved framing, blur boundaries and Gallery depth editing.
+
+Evidence and limitations
+  out/archived/portrait-provider-policy-20261107/REPORT.txt
+  contains exact REA IDs, complete exported evidence and analysis profiles.
+  The main CHI default-analysis request timed out. Focused CLI analysis used
+  a recorded reduced analyzer profile and was checked against AArch64 assembly.
+  MFL uses default Ghidra analysis. Decompiled types/control flow can be wrong;
+  recovered pseudocode is not Samsung source or a runtime observation.
+  No vendor binary patch, APK rebuild, full ROM build or new capture test was
+  performed during that native investigation. The separate0007 baseline must
+  pass its runtime gates before any3x extension; keep failed patch0006 disabled.

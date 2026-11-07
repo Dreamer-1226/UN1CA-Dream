@@ -1,6 +1,20 @@
 {
   "kernel_image_sha256": "8fb32c0b063da9722363d2848c82a7310a32820ec98be2e8e58003b46e850fd4",
   "kernel_release": "5.15.220-g2b8b46da",
+  "kernel_reference_only": true,
+  "kernel_abi": {
+    "release_family": "5.15",
+    "required_config": {
+      "CONFIG_ARM64": "y",
+      "CONFIG_MODULES": "y",
+      "CONFIG_SMP": "y",
+      "CONFIG_PREEMPT": "y",
+      "CONFIG_MODULE_UNLOAD": "y",
+      "CONFIG_MODVERSIONS": "y",
+      "CONFIG_MODULE_REL_CRCS": "n",
+      "CONFIG_CFI_CLANG": "y"
+    }
+  },
   "modules": {
     "wonder.ko": "d4008aa31b2fbf2efe12fec4826db35c3698cef535c8f9700888660d073ad26f",
     "s23u_wonder_provider.ko": "18e45044ecfd01a1f0c613d34ad2f9a6dd25574b4d9a0960d03e9a77f82bed6d",

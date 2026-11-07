@@ -280,3 +280,28 @@ else
     DELETE_FROM_WORK_DIR "system" "system/bin/unica-movecert"
     DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_movecert.rc"
 fi
+
+# dm3q-only GPU image editor and recovery backup policy. Other targets keep no
+# partition access or service; the shared Settings page reports unsupported.
+if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
+    "$MODPATH/gpu/verify-firmware.sh" "$WORK_DIR/kernel/vendor_boot.img" \
+        "$WORK_DIR/vendor_dlkm/lib/modules/msm_kgsl.ko" || ABORT "GPU capability check failed; review the changed table/driver contract before shipping"
+    python3 "$MODPATH/gpu/install-policy.py" "$WORK_DIR" || ABORT "Failed to install GPU tuning service policy"
+else
+    DELETE_FROM_WORK_DIR "system" "system/bin/unica-gpu"
+    DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_gpu.rc"
+    DELETE_FROM_WORK_DIR "system" "system/etc/unica/gpu"
+fi
+
+# User-triggered Troubleshooting worker; no automatic boot-time module changes.
+# Compile verified compatibility rules for this source tree; no network access.
+python3 "$MODPATH/troubleshooting/compile-catalog.py" \
+    --output-dir "$WORK_DIR/system/system/etc/unica" --no-backup || ABORT "Failed to compile compatibility catalog"
+for _UNICA_COMPAT_TABLE in troubleshooting-root-purposes.tsv troubleshooting-lsposed-purposes.json troubleshooting-lsposed-conflicts.json troubleshooting-registry-info.json; do
+    SET_METADATA "system" "system/etc/unica/$_UNICA_COMPAT_TABLE" 0 0 644 "u:object_r:system_file:s0"
+done
+unset _UNICA_COMPAT_TABLE
+python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Troubleshooting policy"
+python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" || ABORT "Failed to index ROM conflict targets"
+SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
+SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"

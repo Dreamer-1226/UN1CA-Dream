@@ -130,7 +130,7 @@ APPLY_PATCH "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSugges
     "$MODPATH/smartsuggestions/SamsungSmartSuggestions.apk/0027-Preserve-WhatsApp-conversation-nudge-on-unknown-autofill.patch"
 if [[ "$UNICA_ENABLE_NATIVE_NOW_NUDGE" == "true" ]]; then
     LOG "- Integrating native V73 Now Nudge after Rezoss patch 0026"
-    for REZOSS_NUDGE_PATCH in "$MODPATH/aioskernel/native-now-nudge/"000[1234567]-*.patch; do
+    for REZOSS_NUDGE_PATCH in "$MODPATH/aioskernel/native-now-nudge/"000[123456789]-*.patch; do
         APPLY_PATCH "system" "system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk" "$REZOSS_NUDGE_PATCH"
     done
     EVAL "bash \"$MODPATH/aioskernel/native-now-nudge/build_client_helper.sh\" \"$APKTOOL_DIR/system/priv-app/SamsungSmartSuggestions/SamsungSmartSuggestions.apk\"" || return 1
@@ -139,6 +139,10 @@ if [[ "$UNICA_ENABLE_NATIVE_NOW_NUDGE" == "true" ]]; then
     APPLY_PATCH "system" "system/priv-app/SemanticSearchCore/SemanticSearchCore.apk" \
         "$MODPATH/aioskernel/native-now-nudge/ssco-patches/0001-Use-compatible-recall-inference.patch"
     EVAL "bash \"$MODPATH/aioskernel/native-now-nudge/build_ssco_helper.sh\" \"$APKTOOL_DIR/system/priv-app/SemanticSearchCore/SemanticSearchCore.apk\"" || return 1
+    DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk" || return 1
+    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+        "$MODPATH/aioskernel/native-now-nudge/shade-reply/0001-Stamp-active-RemoteInput-editor-identity.patch"
+    EVAL "bash \"$MODPATH/aioskernel/native-now-nudge/shade-reply/build_systemui_helper.sh\" \"$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk\"" || return 1
     unset REZOSS_NUDGE_PATCH
 fi
 # Temporarily disabled for CHN SmartSuggestions testing.
@@ -211,7 +215,8 @@ SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_SUPPORT_NAL_PRELOADAPP_
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_AFSENSITIVITY" "FALSE"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_AFSMARTTRACKING" "FALSE"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_AFSPEED" "FALSE"
-SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_CINEMATIC_PORTRAITVIDEO" "FALSE"
+# Experimental cinematic/natural-blur controls; retain the stock S23U portrait backend.
+SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_CINEMATIC_PORTRAITVIDEO" "TRUE"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_FUSION_HIGH_RESOLUTION" "FALSE"
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_SUPPORT_HIGH_RESOLUTION_SWBINNING" "FALSE"
 # These S26U capture pipelines are not exposed by the stock dm3q camera stack.

@@ -16,6 +16,8 @@ import android.content.Context;
 final class ApiSettingsStore {
  static final class Settings {String endpoint="https://provider.invalid/v1/chat/completions",model="test-model",apiKey="test-key";boolean ready(){return true;}}
  static Settings forBackend(Context c,String backend){if(!"custom".equals(backend))throw new IllegalArgumentException("backend_changed");return new Settings();}
+ static String activeBackend="custom";
+ static String backend(Context c,boolean screening){return activeBackend;}
  static void validateEndpoint(String endpoint){}
 }''',
 'io/mesalabs/rezoss/qwen/TransportTest.java': r'''package io.mesalabs.rezoss.qwen;
@@ -41,12 +43,21 @@ public class TransportTest {
    URL.setURLStreamHandlerFactory(protocol->new URLStreamHandler(){protected URLConnection openConnection(URL u){return last=new Fake(u);}});
    check("hello".equals(call("ok",2000,"custom")));
    org.json.JSONObject payload=new org.json.JSONObject(last.body.toString("UTF-8"));check(payload.getInt("max_tokens")==48);check(!payload.getBoolean("stream"));check(payload.getJSONArray("messages").getJSONObject(0).getString("content").equals("private prompt"));check(last.disconnected);
+   Fake consentPrior=last;
+   try{ApiClient.complete(new android.content.Context(),null,"private log",256,SystemClock.elapsedRealtime()+2000,"stale-consent","custom","wrong-fingerprint");throw new AssertionError("stale destination accepted");}
+   catch(ApiClient.ApiException e){check("backend_changed".equals(e.status));}check(last==consentPrior);
+   byte[] digest=java.security.MessageDigest.getInstance("SHA-256").digest("custom\ntest-model\nhttps://provider.invalid/v1/chat/completions".getBytes("UTF-8"));
+   StringBuilder consent=new StringBuilder();for(byte b:digest)consent.append(String.format(java.util.Locale.ROOT,"%02x",b&255));
+   check("hello".equals(ApiClient.complete(new android.content.Context(),null,"reviewed log",256,SystemClock.elapsedRealtime()+2000,"valid-consent","custom",consent.toString())));
+   consentPrior=last;ApiSettingsStore.activeBackend="default";
+   try{ApiClient.complete(new android.content.Context(),null,"private log",256,SystemClock.elapsedRealtime()+2000,"changed-route","custom",consent.toString());throw new AssertionError("changed general route accepted");}
+   catch(ApiClient.ApiException e){check("backend_changed".equals(e.status));}check(last==consentPrior);ApiSettingsStore.activeBackend="custom";
    reason="length";reject("incomplete_output","truncated",2000);
    reason="content_filter";reject("incomplete_output","filtered",2000);
    reason="stop";ApiClient.cancel("cancelled");reject("cancelled","cancelled",2000);
    Fake prior=last;try{call("local",2000,"default");throw new AssertionError();}catch(IllegalArgumentException expected){}check(prior==last);
    block=true;long start=SystemClock.elapsedRealtime();reject("deadline","timeout",100);check(SystemClock.elapsedRealtime()-start<1500);check(last.disconnected);
-   System.out.println("API transport passed: payload, complete/truncated/filtered output, pre-cancel, local no-network, total deadline");System.exit(0);
+   System.out.println("API transport passed: payload, complete/truncated/filtered output, pre-cancel, local no-network, consent fingerprint, changed general route, total deadline");System.exit(0);
   }catch(Throwable e){e.printStackTrace();System.exit(1);}
  }
 }'''

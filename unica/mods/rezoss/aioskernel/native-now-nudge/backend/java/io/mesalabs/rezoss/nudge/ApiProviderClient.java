@@ -62,10 +62,34 @@ final class ApiProviderClient {
         }catch(Exception e){throw new IOException("backend_unavailable",e);}
     }
 
+    Bundle diagnosticConfig() throws Exception {
+        String route=route(false); Bundle result=new Bundle();
+        result.putString("backend",route);result.putBoolean("online",!"default".equals(route));
+        String model="ROM local AI",endpoint="";
+        if(!"default".equals(route)) {
+            Bundle config=context.getContentResolver().call(URI,"backend_config",null,null);
+            if(config==null||!route.equals(config.getString("backend")))throw new IOException("backend_changed");
+            if(config.getInt("diagnostic_protocol",0)!=1)throw new IOException("diagnostic_provider_update_required");
+            model=config.getString("model","");endpoint=config.getString("endpoint","");
+            if(model.isEmpty()||endpoint.isEmpty())throw new IOException("api_unconfigured");
+        } else {
+            android.content.pm.ApplicationInfo info=context.getPackageManager().getApplicationInfo(context.getPackageName(),PackageManager.GET_META_DATA);
+            if(info.metaData!=null)model=info.metaData.getString("unica.local_model_name",model);
+        }
+        result.putString("model",model);result.putString("endpoint",endpoint);
+        byte[] hash=java.security.MessageDigest.getInstance("SHA-256").digest((route+"\n"+model+"\n"+endpoint).getBytes("UTF-8"));
+        StringBuilder fingerprint=new StringBuilder();for(byte b:hash)fingerprint.append(String.format(java.util.Locale.ROOT,"%02x",b&255));
+        result.putString("destination",fingerprint.toString());return result;
+    }
+
     String generate(String prompt, int maxTokens, long deadline, String requestId, String backend) throws Exception {
+        return generate(prompt,maxTokens,deadline,requestId,backend,null);
+    }
+    String generate(String prompt,int maxTokens,long deadline,String requestId,String backend,String destination)throws Exception {
         if (SystemClock.elapsedRealtime() >= deadline) throw new IOException("deadline");
         Bundle extras = new Bundle();
         extras.putString("backend",backend);
+        if(destination!=null)extras.putString("destination",destination);
         extras.putString("prompt", prompt);
         extras.putString("request_id", requestId);
         extras.putLong("deadline", deadline);

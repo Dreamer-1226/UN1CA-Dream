@@ -26,6 +26,7 @@ final class GemmaRuntime {
     private final ScheduledExecutorService idle=Executors.newSingleThreadScheduledExecutor(r->{Thread t=new Thread(r,"gemma-idle");t.setDaemon(true);return t;});
     private volatile long lastUse=SystemClock.elapsedRealtime();
     private volatile boolean loaded;
+    private int engineContext;
     private long engine; // Native objects are created/deleted only on nativeWorker.
     private LiteRtLmJni jni;
     private GemmaRuntime(Context c){
@@ -46,15 +47,17 @@ final class GemmaRuntime {
         }catch(Exception e){return false;}
     }
     String status(){return "Gemma 4 E2B · "+GemmaBuild.BACKEND.toUpperCase()+"\n"+(filesPresent()?(loaded?"Model verified · engine ready":"Model verified · engine not loaded"):"Import the model to enable local inference");}
-    private void load()throws Exception{
-        if(engine!=0)return;
+    private void load()throws Exception{load(1024);}
+    private void load(int contextTokens)throws Exception{
+        if(engine!=0&&engineContext==contextTokens)return;
+        if(engine!=0)unload();
         if(!filesPresent())throw new IOException("gemma_model_missing");
         if(!cache.isDirectory()&&!cache.mkdirs())throw new IOException("gemma_cache_unavailable");
         jni=LiteRtLmJni.INSTANCE;jni.nativeSetMinLogSeverity(2);
         long started=SystemClock.elapsedRealtime();
-        engine=jni.nativeCreateEngine(model.toString(),GemmaBuild.BACKEND,"","",1024,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
+        engine=jni.nativeCreateEngine(model.toString(),GemmaBuild.BACKEND,"","",contextTokens,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
         if(engine==0)throw new IOException("gemma_load_failed");
-        loaded=true;Log.i("RezossGemma","engine_ready backend="+GemmaBuild.BACKEND+" loadMs="+(SystemClock.elapsedRealtime()-started));
+        engineContext=contextTokens;loaded=true;Log.i("RezossGemma","engine_ready backend="+GemmaBuild.BACKEND+" contextTokens="+engineContext+" loadMs="+(SystemClock.elapsedRealtime()-started));
     }
     private void unload(){if(engine!=0){jni.nativeDeleteEngine(engine);engine=0;loaded=false;Log.i("RezossGemma","engine_unloaded");}}
     private abstract class Job<T> implements Callable<T> {
@@ -73,18 +76,21 @@ final class GemmaRuntime {
             }
         }
         abstract T execute()throws Exception;
-        void open(int limit)throws Exception{
-            load();check();
+        void open(int limit)throws Exception{open(limit,1024);}
+        void open(int limit,int contextTokens)throws Exception{
+            load(contextTokens);check();
             synchronized(gate){
                 check();conversation=jni.nativeCreateConversation(engine,new SamplerConfig(1,1.0,0.0,0),"[]","[]",null,"{}",false,null,null,null,null,false,limit,new ThinkingConfig(false,0),false,Boolean.FALSE,null);
             }
         }
-        String send(String prompt,int limit)throws Exception{
-            open(limit);check();
+        String send(String prompt,int limit)throws Exception{return send(prompt,limit,false);}
+        String send(String prompt,int limit,boolean allowPartial)throws Exception{
+            open(limit,prompt.startsWith("You help diagnose Samsung UN1CA")?4096:1024);check();
             String message=new JSONObject().put("role","user").put("content",new JSONArray().put(new JSONObject().put("type","text").put("text",prompt))).toString();
             String raw=jni.nativeSendMessage(conversation,message,"{}",null,null,null,null,limit,new ThinkingConfig(false,0),0,null);
             check();
-            if(limit>1&&jni.nativeConversationGetBenchmarkInfo(conversation).getLastDecodeTokenCount()>=limit)throw new IOException("gemma_output_limit");
+            boolean limited=limit>1&&jni.nativeConversationGetBenchmarkInfo(conversation).getLastDecodeTokenCount()>=limit;
+            if(limited&&!allowPartial)throw new IOException("gemma_output_limit");
             JSONArray parts=new JSONObject(raw).getJSONArray("content");StringBuilder text=new StringBuilder();
             for(int i=0;i<parts.length();i++){
                 JSONObject part=parts.getJSONObject(i);
@@ -92,7 +98,7 @@ final class GemmaRuntime {
                 text.append(part.getString("text"));
             }
             if(text.length()==0&&limit>1)throw new IOException("gemma_empty_output");
-            return text.toString();
+            return text.toString()+(limited?"\n\n[Incomplete: local AI reached its output limit. Ask a narrower follow-up; this is not a complete diagnosis.]":"");
         }
     }
     private <T>T await(Job<T> job)throws Exception{
@@ -113,7 +119,7 @@ final class GemmaRuntime {
     String generate(String prompt,int tokens,TextBackend.Control control)throws Exception{
         if(prompt==null||prompt.isEmpty()||prompt.length()>20000)throw new IOException("gemma_prompt_size");
         long started=SystemClock.elapsedRealtime();
-        String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens);}});
+        String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens,prompt.startsWith("You help diagnose Samsung UN1CA")||prompt.startsWith("Analyze this untrusted Android log excerpt."));}});
         Log.i("RezossGemma","generation backend="+GemmaBuild.BACKEND+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
         return out;
     }
@@ -122,7 +128,7 @@ final class GemmaRuntime {
         // SDK exposes no tokenizer-only JNI call. Native prefill plus one discarded
         // token provides a conservative count including Gemma's chat delimiters.
         return await(new Job<Integer>(actual){Integer execute()throws Exception{
-            send(prompt,1);return jni.nativeConversationGetBenchmarkInfo(conversation).getLastPrefillTokenCount();
+            send(prompt,1,prompt.startsWith("You help diagnose Samsung UN1CA")||prompt.startsWith("Analyze this untrusted Android log excerpt."));return jni.nativeConversationGetBenchmarkInfo(conversation).getLastPrefillTokenCount();
         }});
     }
     void importModel(Uri uri,TextBackend.Control control)throws Exception{

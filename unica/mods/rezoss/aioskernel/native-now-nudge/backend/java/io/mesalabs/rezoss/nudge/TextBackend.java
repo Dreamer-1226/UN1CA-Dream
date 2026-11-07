@@ -239,6 +239,62 @@ public final class TextBackend {
         }
     }
     interface Control { boolean cancelled(); long deadline(); void process(Process process); default void request(String id){} }
+    Bundle diagnosticConfig() throws Exception {
+        Bundle config=api.diagnosticConfig();boolean online=config.getBoolean("online");
+        config.putInt("chat_protocol",1);
+        // Conservative transport budgets; local tokenization remains authoritative.
+        config.putInt("chat_max_chars",online?12000:2200);
+        config.putInt("chat_section_chars",online?8000:800);
+        config.putInt("chat_output_tokens",online?1024:256);
+        config.putInt("chat_context_tokens",online?0:1024);
+        return config;
+    }
+    String generateChat(String input,String destination,boolean consent,Control control)throws Exception {
+        if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
+        try {
+            Bundle config=diagnosticConfig();
+            if(!destination.equals(config.getString("destination"))||(config.getBoolean("online")&&!consent))throw new IOException("backend_changed");
+            String prompt=DiagnosticPrompt.chat(input,config.getInt("chat_max_chars"));
+            if(control.cancelled())throw new InterruptedIOException();
+            String route=config.getString("backend","default");
+            if(!"default".equals(route)){
+                String id=UUID.randomUUID().toString();control.request(id);
+                try{return api.generate(prompt,config.getInt("chat_output_tokens"),control.deadline(),id,route,destination);}finally{control.request(null);}
+            }
+            return diagnosticLocal(prompt,control);
+        } finally { runnerLock.unlock(); }
+    }
+    String generateDiagnostic(String excerpt,String destination,boolean consent,Control control)throws Exception {
+        if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
+        try {
+            Bundle config=diagnosticConfig();
+            if(!destination.equals(config.getString("destination"))||(config.getBoolean("online")&&!consent))throw new IOException("backend_changed");
+            String prompt=DiagnosticPrompt.create(excerpt);
+            if(control.cancelled())throw new InterruptedIOException();
+            String route=config.getString("backend","default");
+            if(!"default".equals(route)) {
+                String id=UUID.randomUUID().toString();control.request(id);
+                try{return api.generate(prompt,256,control.deadline(),id,route,destination);}finally{control.request(null);}
+            }
+            return diagnosticLocal(prompt,control);
+        } finally { runnerLock.unlock(); }
+    }
+    private String diagnosticLocal(String prompt,Control control)throws Exception {
+        prepareModel(control.deadline());
+        if(count(prompt,control)>700)throw new IOException("context_limit");
+        File job=Files.createTempDirectory(context.getCacheDir().toPath(),"diagnostic-").toFile();
+        Process process=null;
+        try {
+            process=launch(job,prompt,null,256);control.process(process);
+            if(control.cancelled())throw new InterruptedIOException();
+            if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");
+            if(process.exitValue()!=0)throw new IOException("runner_failed");
+            return ModelOutput.completion(new String(Files.readAllBytes(new File(job,"output.txt").toPath()),"UTF-8")).trim();
+        } finally {
+            if(process!=null)process.destroyForcibly();control.process(null);
+            File[] files=job.listFiles();if(files!=null)for(File file:files)file.delete();job.delete();
+        }
+    }
     String generateLocal(String input,boolean summary,Control control)throws Exception {
         return generateControlled(input,summary,false,control);
     }
@@ -266,7 +322,7 @@ public final class TextBackend {
             Log.i(TAG,"local task="+(recall?"recall":summary?"summary":"replies")+" route="+route+" lockMs="+(SystemClock.elapsedRealtime()-queued)+" remainingMs="+(control.deadline()-SystemClock.elapsedRealtime()));
             if(!"default".equals(route)){
                 String id=UUID.randomUUID().toString();control.request(id);
-                try{String raw=api.generate(prompt,recall?48:summary?64:96,control.deadline(),id,route);
+                try{String raw=api.generate(prompt,recall?ActionContract.MAX_NEW_TOKENS:summary?64:96,control.deadline(),id,route);
                     if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
                     return recall?ActionContract.output(raw):LocalFormat.output(raw,summary);
                 }finally{control.request(null);}
@@ -278,7 +334,7 @@ public final class TextBackend {
             if(tokens>850)throw new IllegalArgumentException("context_limit");
             if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new InterruptedIOException();
             job=Files.createTempDirectory(context.getCacheDir().toPath(),"local-").toFile();
-            Process process=launch(job,prompt,null,recall?48:96);control.process(process);
+            Process process=launch(job,prompt,null,recall?ActionContract.MAX_NEW_TOKENS:96);control.process(process);
             try{
                 if(control.cancelled()){process.destroyForcibly();throw new InterruptedIOException();}
                 if(!process.waitFor(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("deadline");

@@ -3,6 +3,7 @@ Subject: [PATCH] Supply recall classifier and MT5 inference through the V73 serv
 Apply after paradigm's 0001 neural bypass. Keep the generic embedding bypass,
 Samsung preprocessing, Unsafe gate, t/c.d validation and response_json writer.
 The combined model prediction is consumed once on the same SSCO worker thread.
+Add the missing Mail schema before Samsung derives its allowed parameter sets.
 No register-count change. Requires the generated ssco-java helper classes.
 
 --- a/smali/t/c.smali
@@ -46,3 +47,9 @@ No register-count change. Requires the generated ssco-java helper classes.
 +    </queries>
      <uses-permission android:name="android.permission.WAKE_LOCK"/>
      <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+--- a/smali/n/b.smali
++++ b/smali/n/b.smali
+@@ -337,1 +337,3 @@
++    invoke-static {v2}, Lio/mesalabs/rezoss/ai/RecallPrediction;->addMailSchema(Ljava/util/Map;)V
++
+     invoke-interface {v2}, Ljava/util/Map;->keySet()Ljava/util/Set;

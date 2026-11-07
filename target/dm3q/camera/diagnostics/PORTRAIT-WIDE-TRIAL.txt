@@ -1,0 +1,69 @@
+dm3q wide-pair Portrait1..3x source trial
+
+Status 2026-11-07: failed on device and disabled in source. Patch0006 now has
+the .patch.disabled suffix and is not applied. A separate0007 baseline enables
+only1..2x and starts sessions at1x; see PORTRAIT-WIDE-BASELINE.txt. The shared
+feature flag is true for0007, not permission to restore0006. The connected
+device has not been changed by this source implementation.
+The intended behavior and original validation below describe the failed trial,
+not a working feature. Do not re-enable it merely to retry3x. See
+PORTRAIT-PROVIDER-PORT.txt for native policy/crop findings and remaining gates.
+
+Retained trial source:
+  target/dm3q/camera/camera-feature.xml
+    SUPPORT_PORTRAIT_SEAMLESS_ZOOM=true (for baseline0007 only)
+  unica/mods/rezoss/smali/system/priv-app/SamsungCamera/SamsungCamera.apk/
+    0006-Trial-wide-pair-Portrait-zoom-1-to-3.patch.disabled
+
+Behavior intended for the rebuilt ROM:
+  Rear Photo Portrait uses existing logical camera23 and DualBokehPhotoMaker.
+  The seamless zoom UI advertises1..3x on this pair. The3x position is a digital
+  crop of the wide image; it does not select the physical3x telephoto lens.
+  The second-tele shortcut is omitted. Previous stored zoom values are clamped
+  to1..3x. Front Portrait retains its supplied zoom rather than rear zoom memory.
+  The helper is limited to dm3 devices and the Portrait feature flag.
+  Other camera modes and their zoom ranges retain their original behavior.
+
+Implementation boundary:
+  Existing live zoom path x8/p.n and capture initialization ud/p.o1 submit the
+  zoom ratio and aligned center crop through MakerPublicKey.w0 and .s. Both
+  consult u8/e's per-mode bounds, which this patch overrides only for camera23
+  and ZoomType.PORTRAIT. Existing pair calibration and legacy processing remain.
+  No donor library, guessed calibration, physical handoff or10x path is added.
+
+This is an experimental capture trial, not validated seamless Portrait support.
+The stock native capture plugin rejects newer crop command IDs0x2a/0x2b. This
+patch does not invent translations for them or suppress errors. HAL handling of
+the existing request crops above2x and final image/depth consistency must be
+measured after flashing. A wider slider alone is not acceptance. Capture failure,
+unchanged saved framing, incorrect subject boundaries or invalid Gallery refocus
+are trial failures and require deeper crop processing work.
+
+After rebuilding/flashing through the normal ROM pipeline:
+  Open Camera -> Photo Portrait, rear camera.
+  Check pinch/slider at1x,1.5x,2x,2.2x,2.5x and3x.
+  At each point photograph the same stationary scene with a clear foreground
+  subject and background. Compare preview and saved framing, focus boundaries
+  and blur strength. Check Gallery blur adjustment/refocus if offered.
+  Repeat front Portrait, normal Photo, Video and existing Dual Recording as
+  regression checks. Do not clear Camera data merely to test this feature.
+
+Read-only runtime checks (Windows ADB from WSL):
+  /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF logcat -d -v threadtime > /tmp/portrait-wide-trial-logcat.txt
+  /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF shell dumpsys media.camera > /tmp/portrait-wide-trial-camera.txt
+  rg 'PortraitPresenter|switchCameraInternal|LiveFocusCapture|DualBokeh|ProcessDisparity|ProcessBokeh|crop|recover|fatal' /tmp/portrait-wide-trial-logcat.txt
+  Verify rear Portrait stays on camera23 throughout. A camera20/21/24 route,
+  camera recovery or differing preview/saved crop is not a successful trial.
+
+Historical trial rollback (use PORTRAIT-WIDE-BASELINE.txt for current0007):
+  Set SUPPORT_PORTRAIT_SEAMLESS_ZOOM back tofalse in the dm3q camera XML and
+  rebuild. The helper checks that flag, so routing/bounds/maker overrides become
+  inactive. Alternatively rename0006 to0006-....patch.disabled and also set the
+  flag false; do not disable only the patch while leaving the new flag enabled.
+  Earlier0001/0002 Portrait patches must remain .patch.disabled.
+
+Source/XML backup and build evidence:
+  out/archived/portrait-wide-1to3-trial-20261107/
+  The small helper lives in classes5.dex because classes2 is at its reference
+  limit. Do not move it into classes2. No existing method register count changes.
+  This work does not build/flash a complete ROM or establish device capture success.

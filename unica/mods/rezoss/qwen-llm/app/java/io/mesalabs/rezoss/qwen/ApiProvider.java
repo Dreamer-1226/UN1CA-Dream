@@ -36,7 +36,10 @@ public final class ApiProvider extends ContentProvider {
             result.putString("screening_backend",ApiSettingsStore.backend(getContext(),true));
             result.putString("local_model",ApiSettingsStore.localModel(getContext()));
             result.putString("gemma_backend",ApiSettingsStore.gemmaBackend(getContext()));
-            result.putBoolean("local_qwen_ready",LocalEngine.get(getContext()).usable());return result;
+            result.putBoolean("local_qwen_ready",LocalEngine.get(getContext()).usable());
+            ApiSettingsStore.Settings display=ApiSettingsStore.display(getContext());
+            result.putInt("diagnostic_protocol",1);
+            result.putString("endpoint",display.endpoint);result.putString("model",display.model);return result;
         }
         if ("api_ready".equals(method)) {
             try { result.putBoolean("configured", ApiSettingsStore.configured(getContext())); }
@@ -68,7 +71,7 @@ public final class ApiProvider extends ContentProvider {
             if("default".equals(backend)||(!backend.equals(ApiSettingsStore.backend(getContext(),false))&&!backend.equals(ApiSettingsStore.backend(getContext(),true))))
                 throw new ApiClient.ApiException("backend_changed");
             if(!ApiSettingsStore.matchesEndpoint(backend,ApiSettingsStore.display(getContext()).endpoint))throw new ApiClient.ApiException("provider_mismatch");
-            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend);
+            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend, extras.getString("destination"));
             result.putString("content", content);
             result.putString("status", "generated");
         } catch (ApiClient.ApiException failure) {

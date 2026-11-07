@@ -1,0 +1,165 @@
+In-app Portrait pair diagnostic for the next ROM build
+
+Source integration:
+  unica/mods/rezoss/smali/system/priv-app/SamsungCamera/SamsungCamera.apk/
+    0004-Add-opt-in-in-app-portrait-pair-diagnostic.patch
+
+The normal rezoss smali-patch pipeline applies this after Dual Recording0003.
+The settings module's camera-feature override also applies cleanly afterward.
+CameraSettingActivity.onResume keeps.locals7 and all existing instructions;
+it gains one invoke-static to InAppPortraitPairProbe.maybeStart(Activity).
+Helper classes live in a separate classes5.dex to avoid filling classes2.
+No customize.sh, native library, manifest permission or Portrait feature flag
+is changed. No camera is opened during an unarmed Settings launch.
+
+Trigger, after building and installing the ROM containing this patch:
+  python3 target/dm3q/camera/diagnostics/portrait-pair-probe/arm-inapp.py --serial R5CW72R7SDF
+
+Then open Samsung Camera normally and enter its Settings screen. Keep Settings
+foreground and the screen on for15 seconds. A diagnostic toast appears.
+The arming tool first reads the installed Camera APK and refuses to arm unless
+both helper and Settings reference are present. It creates only the new
+app-private cache/portrait-pair-probe.arm marker, preserving Camera's cache
+owner/group and SELinux context. The helper consumes this marker once, before
+starting work. A second test requires arming again. Going Home or leaving
+Settings stops the current test. No automatic retry occurs.
+
+Do not use a bare am start of CameraSettingActivity as the normal launch route:
+this build expects an internal camera-parcel Bundle and may finish without it.
+The helper also supports the one-shot Boolean Intent extra
+  com.rezoss.camera.extra.RUN_PORTRAIT_PAIR_PROBE
+for a correctly constructed internal Settings launch. No Activity was exported
+and no manifest permission was relaxed to enable this entry.
+
+Geometry/timing profile (requires the updated ROM Camera containing portrait-geometry-v2):
+  python3 target/dm3q/camera/diagnostics/portrait-pair-probe/arm-inapp.py --serial R5CW72R7SDF --geometry --save-frames
+
+Aim the rear cameras at a stationary, detailed, well-lit scene with objects at
+several distances. Hold the phone still or mount it. Open Camera -> Settings
+normally, keep Settings foreground for15 seconds, and avoid moving subjects.
+The profile requests zoom10 first, then zoom1 after5 seconds of streaming.
+Zoom1 tests whether explicitly bound physical outputs can provide their native
+fields; it does not guarantee uncropped output. Actual result crops and samples
+must confirm that. No physical crop override or vendor tag is injected.
+
+--geometry alone records metadata only. --save-frames is a second explicit opt-in
+that saves at most two grayscale PGM samples per physical output per phase
+(up to eight total) in Camera's private report directory. It preserves luma plane
+strides and records timestamps and filenames. Samples can contain personal scene
+content; point at a suitable test scene. They remain private until collected and
+are not automatically deleted. Grayscale samples establish framing, not still
+capture quality. Never treat arrival_phase as authoritative across a transition:
+match the image timestamp to the logical result and its request tag on the host.
+The armer rejects geometry options on the installed older helper before creating
+a marker; a rebuild/install of this source is needed for these new options.
+
+Collect the last run and its explicitly saved samples read-only:
+  python3 target/dm3q/camera/diagnostics/portrait-pair-probe/collect-geometry.py --serial R5CW72R7SDF
+
+This creates a fresh out/archived/portrait-geometry-device-* directory containing
+report.jsonl, geometry.json and any grayscale samples. The analyzer reports crop
+ratios and full-run per-frame sensor timestamp offsets, exposure durations,
+frame intervals and rolling-shutter skew. Its exposure-midpoint estimate omits
+row-dependent shutter timing. Matching Image timestamps is not exposure sync.
+No automatic optical alignment or usable-depth pass is claimed.
+
+Scope:
+- Requests logical20 with physical54 (10x) and52 (3x), two
+  advertised common YUV outputs bounded to640x480..1920x1080.
+- Runs in Samsung Camera's actual UID/PID/context, with no root UID forwarding,
+  client-filter override, camera-service UID override, Frida or AppOps changes.
+- Default/empty marker keeps the original zoom10 metadata-only test. Geometry
+  markers enable the comparison and full-run timing above; pixel persistence
+  requires geometry-frames. Calibration payloads remain length+SHA256 only.
+- Closes the session/device/readers on timeout, error or owner Activity pause.
+  The15-second timeout depends on the Android/HAL calls returning; it is not a
+  replacement for the camera service's own watchdog.
+- Saves append-only JSON lines in Camera's private
+  files/portrait-pair-probe/report.jsonl, with a distinct run_id per attempt.
+- A successful pair probe would establish only this YUV configuration. It
+  would not prove optical identity, calibrated alignment, still Portrait capture,
+  usable depth, refocus or seamless zoom. Those fields remain explicitly false.
+
+Retrieve results after the test (root is needed only for private-file access):
+  /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF exec-out su -c 'cat /data/user/0/com.sec.android.app.camera/files/portrait-pair-probe/report.jsonl' > /tmp/portrait-pair-inapp.jsonl
+  python3 target/dm3q/camera/diagnostics/portrait-pair-probe/summarize.py /tmp/portrait-pair-inapp.jsonl
+
+Live log alternative:
+  /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF logcat -s PortraitPairInApp:I '*:S'
+
+To disarm an unused marker only:
+  /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF shell su -c 'rm -f /data/user/0/com.sec.android.app.camera/cache/portrait-pair-probe.arm'
+
+Regenerate the patch and validate the exact current source APK in/tmp:
+  python3 target/dm3q/camera/diagnostics/portrait-pair-probe/generate-inapp-patch.py --write-patch --build
+
+The generator compiles Java/D8, disassembles the helper, derives a unified
+patch from the exact clean activity, replays active camera patches with
+patch --fuzz=0 dry-run plus real apply, and optionally rebuilds/ZIP-checks a
+temporary unsigned Camera APK. It backs up an existing0004 patch in its fresh
+out/archived/portrait-pair-inapp.* folder before replacing it. It never edits
+out/fw or out/target. Inspect validation.json and validation.log there.
+The unsigned validation APK is not an installable replacement for system Camera;
+use the ROM's normal rebuild/signing pipeline.
+
+Isolated native calibration loader (no production integration):
+  calibration-loader.c resolves ARC_DCIR_InitEx, ARC_DCIR_SetCaliData and
+  ARC_DCIR_Uninit from the installed /system/lib64/libdualcam_refocus_image.so.
+  The arm64 calibration descriptor is {void *data; int32_t bytes; int32_t padding}.
+  Pass the real 760-byte file unchanged; mode1 is the WT reference and mode4 is
+  the donor third-camera reference. Mode4 acceptance does not establish an S23U
+  10x optical profile or successful disparity processing. No synthetic calibration,
+  header changes, vendor metadata publication or camera library replacement.
+  Compile using NDK aarch64-linux-android30-clang -std=c11 -Wall -Wextra -Werror
+  -O2 calibration-loader.c -ldl -o /tmp/portrait-calibration-loader.
+  Run the binary in its own root shell process, with arguments:
+    1 /data/vendor/camera/TripleZTCalibration_wt1.bin
+    4 /data/vendor/camera/TripleZTCalibration_t1t2.bin
+  It reads calibration only, disables core dumps, has a25-second alarm, opens no
+  camera and reports return codes. Success means API acceptance, not measured
+  alignment or depth. Device evidence is archived in
+  out/archived/portrait-geometry-depth-20261107/loader-*.txt.
+
+Current boundary: matched native image info, per-pair lens roles, crop transforms
+and sensor timing still need validation before ARC_DCIR_CalcDisparityData can be
+called with real captures. The newer donor plugin also expects APIs absent from
+this stock engine (including SetNCenterCropSize), so replacing only that plugin
+is not a viable production connection. Do not enable10x Portrait flags yet.
+
+Controlled profile v3c (temporary APK supported; no full ROM build required)
+  arm-inapp.py --serial R5CW72R7SDF --controlled --save-frames
+
+Keep Camera Settings foreground for32 seconds. Three phases at the lowest
+jointly advertised fixed10..30fps range: auto AF/AE; then manual common30ms
+exposure (clamped to supported ranges), low ISO800 and per-lens focus frozen
+from each lens's last focused AF result; then a31-slot ISO800/3200 pulse code.
+Values are clamped to common supported ranges. The pulse varies logical ISO
+and requests a different physical auxiliary code so ignored physical overrides
+are detectable. A small auxiliary focus perturbation also tests physical focus
+control. Fixed-focus fallback0.5diopters is diagnostic only if no AF lock exists.
+No lens is assumed to focus at3m; the device marks focus calibration approximate.
+A detailed well-lit target around1..1.5m can be used if both lenses focus clearly.
+
+Logs actual/requested AF, focus distance, ISO, exposure and frame duration;
+per-image sampled luminance and edge statistics; up to two shared timestamps
+per phase saved as both physical grayscale images (maximum12 PGMs). Individual
+capture/result/image association is retained. Marker consumption, foreground
+checks, pause/destroy stop and normal unarmed behavior remain unchanged.
+
+analyze-controls.py ARCHIVE --calibration REAL_T1T2_FILE
+requires an isolated host Python environment with numpy and OpenCV. It reports
+AF/control acceptance, brightness/ISO correlation over candidate frame offsets,
+SIFT correspondences and empirical fundamental-matrix inliers. It audits real
+calibration intrinsic-to-crop/output mappings only when enough correspondences
+exist. It does not equate an empirical F matrix with validated factory pose,
+apply an assumed distortion transform to YUV, invent transform direction, or
+claim a generated depth map. Focus metadata must be checked against image detail.
+
+The connected ROM rejects adb Camera updates with DUPLICATE_PERMISSION owned
+by AR Emoji. Do not remove that app or permission to bypass it. The tested
+route stages a same-certificate APK and temporarily bind-mounts only Camera's
+APK in the global namespace, verifies the zygote view, force-stops/restarts only
+Camera, then unmounts and verifies the original hash. No persistent module,
+reboot, data clearing or system-image write. Preserve rollback before mounting.
+The experimental package preserves installed Camera DEX1..4, optimized resources,
+manifest and native libraries; only diagnostic classes5.dex and signatures change.

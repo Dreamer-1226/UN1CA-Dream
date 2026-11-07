@@ -1,45 +1,73 @@
 Subject: [PATCH] Add optional Maximum essential app switches
 
---- a/smali/rl/c.smali
-+++ b/smali/rl/c.smali
-@@ -306,6 +306,8 @@
+--- a/smali_classes2/yl/c.smali
++++ b/smali_classes2/yl/c.smali
+@@ -179,8 +179,10 @@
+     goto :goto_2
+
+     :cond_4
+     :goto_0
++    move-object v9, v1
++
+     iget-object p0, p0, Lyl/c;->e:Ljava/util/ArrayList;
+
+     invoke-static {p0, p1}, Lyl/d;->e(Ljava/util/ArrayList;Landroid/content/pm/ApplicationInfo;)Z
+
+@@ -243,12 +245,16 @@
+     iget p0, p1, Landroid/content/pm/ApplicationInfo;->uid:I
 
      iput p0, v0, Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;->f:I
 
-     :goto_4
-+    invoke-static {v3, v0}, Lio/mesalabs/unica/maximum/EssentialApps;->adjust(Landroid/content/Context;Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;)V
++    invoke-static {v9, v0}, Lio/mesalabs/unica/maximum/EssentialApps;->adjust(Landroid/content/Context;Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;)V
 +
      return-object v0
- .end method
---- a/smali/vl/b.smali
-+++ b/smali/vl/b.smali
-@@ -830,8 +830,18 @@
 
-     invoke-virtual {v6, v7}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+     :cond_6
+     :goto_2
++    move-object v9, v1
++
+     new-instance p0, Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;
+
+     invoke-direct {p0}, Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;-><init>()V
+
+@@ -307,6 +313,8 @@
+     iget p1, p1, Landroid/content/pm/ApplicationInfo;->uid:I
+
+     iput p1, p0, Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;->f:I
+
++    invoke-static {v9, p0}, Lio/mesalabs/unica/maximum/EssentialApps;->adjust(Landroid/content/Context;Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;)V
++
+     return-object p0
+ .end method
+--- a/smali_classes2/cm/c.smali
++++ b/smali_classes2/cm/c.smali
+@@ -820,8 +820,18 @@
+
+     invoke-virtual {v6, v0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
      :cond_15
-+    invoke-virtual {v4}, Lvl/a;->v()Lcom/samsung/android/sm/common/view/RoundedCornerRelativeLayout;
++    invoke-virtual {v2}, Lcm/a;->r()Lcom/samsung/android/sm/common/view/RoundedCornerRelativeLayout;
 +
 +    move-result-object v0
 +
-+    invoke-virtual {v4}, Lvl/a;->x()Landroidx/appcompat/widget/SwitchCompat;
++    invoke-virtual {v2}, Lcm/a;->t()Landroidx/appcompat/widget/SwitchCompat;
 +
 +    move-result-object v1
 +
-+    invoke-static {v0, v1, v5}, Lio/mesalabs/unica/maximum/EssentialApps;->bind(Landroid/view/View;Landroid/widget/CompoundButton;Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;)V
++    invoke-static {v0, v1, v4}, Lio/mesalabs/unica/maximum/EssentialApps;->bind(Landroid/view/View;Landroid/widget/CompoundButton;Lcom/samsung/android/sm/powermode/ebs/data/EbsAppData;)V
 +
      return-void
 
      :cond_16
-     invoke-static {v6}, Lkotlin/jvm/internal/k;->n(Ljava/lang/String;)V
---- a/smali/rl/m.smali
-+++ b/smali/rl/m.smali
-@@ -787,8 +787,14 @@
+     invoke-static {v10}, Lkotlin/jvm/internal/l;->m(Ljava/lang/String;)V
+--- a/smali_classes2/yl/i.smali
++++ b/smali_classes2/yl/i.smali
+@@ -980,8 +980,14 @@
 
  .method public final g(Z[Ljava/lang/String;I)V
      .locals 4
 
-+    invoke-virtual {p0}, Lrl/m;->a()Landroid/content/Context;
++    invoke-virtual {p0}, Lyl/i;->a()Landroid/content/Context;
 +
 +    move-result-object v0
 +
@@ -47,35 +75,35 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +
      array-length v0, p2
 
-     const-string v1, "setSuspendAllAppsMode uid: "
+     const-string v1, " + packageNames  size: "
 
---- a/smali/rl/a.smali
-+++ b/smali/rl/a.smali
+--- a/smali_classes2/yl/a.smali
++++ b/smali_classes2/yl/a.smali
 @@ -66,8 +66,22 @@
  # virtual methods
  .method public final a(I)V
      .locals 12
 
-+    iget-object v0, p0, Lrl/a;->a:Lvv/e;
++    iget-object v0, p0, Lyl/a;->a:Lmx/g;
 +
-+    invoke-interface {v0}, Lvv/e;->getValue()Ljava/lang/Object;
++    invoke-interface {v0}, Lmx/g;->getValue()Ljava/lang/Object;
 +
 +    move-result-object v0
 +
-+    check-cast v0, Lrl/m;
++    check-cast v0, Lyl/i;
 +
-+    invoke-virtual {v0}, Lrl/m;->a()Landroid/content/Context;
++    invoke-virtual {v0}, Lyl/i;->a()Landroid/content/Context;
 +
 +    move-result-object v0
 +
 +    invoke-static {v0, p1}, Lio/mesalabs/unica/maximum/EssentialApps;->onMode(Landroid/content/Context;I)V
 +
-     iget-object v0, p0, Lrl/a;->b:Lvv/e;
+     iget-object v0, p0, Lyl/a;->b:Lmx/g;
 
-     iget-object p0, p0, Lrl/a;->a:Lvv/e;
+     iget-object p0, p0, Lyl/a;->a:Lmx/g;
 
---- a/smali/com/samsung/android/sm/powermode/ebs/service/EbsInitService.smali
-+++ b/smali/com/samsung/android/sm/powermode/ebs/service/EbsInitService.smali
+--- a/smali_classes2/com/samsung/android/sm/powermode/ebs/service/EbsInitService.smali
++++ b/smali_classes2/com/samsung/android/sm/powermode/ebs/service/EbsInitService.smali
 @@ -60,8 +60,10 @@
  # virtual methods
  .method public final a(Landroid/content/Intent;)V
@@ -87,8 +115,8 @@ Subject: [PATCH] Add optional Maximum essential app switches
 
      if-nez p1, :cond_0
 
---- a/smali/io/mesalabs/unica/maximum/EssentialApps$0.smali
-+++ b/smali/io/mesalabs/unica/maximum/EssentialApps$0.smali
+--- a/smali_classes2/io/mesalabs/unica/maximum/EssentialApps$0.smali
++++ b/smali_classes2/io/mesalabs/unica/maximum/EssentialApps$0.smali
 @@ -0,0 +1,56 @@
 +.class public final synthetic Lio/mesalabs/unica/maximum/EssentialApps$0;
 +.super Ljava/lang/Object;
@@ -146,8 +174,8 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +
 +    return-void
 +.end method
---- a/smali/io/mesalabs/unica/maximum/EssentialApps$1.smali
-+++ b/smali/io/mesalabs/unica/maximum/EssentialApps$1.smali
+--- a/smali_classes2/io/mesalabs/unica/maximum/EssentialApps$1.smali
++++ b/smali_classes2/io/mesalabs/unica/maximum/EssentialApps$1.smali
 @@ -0,0 +1,56 @@
 +.class public final synthetic Lio/mesalabs/unica/maximum/EssentialApps$1;
 +.super Ljava/lang/Object;
@@ -205,8 +233,8 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +
 +    return-void
 +.end method
---- a/smali/io/mesalabs/unica/maximum/EssentialApps.smali
-+++ b/smali/io/mesalabs/unica/maximum/EssentialApps.smali
+--- a/smali_classes2/io/mesalabs/unica/maximum/EssentialApps.smali
++++ b/smali_classes2/io/mesalabs/unica/maximum/EssentialApps.smali
 @@ -0,0 +1,1377 @@
 +.class public final Lio/mesalabs/unica/maximum/EssentialApps;
 +.super Ljava/lang/Object;
@@ -1358,7 +1386,7 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +    .line 162
 +    if-eqz p2, :cond_5d
 +
-+    invoke-static {v7}, Lrl/m;->e(Z)Ljava/lang/Object;
++    invoke-static {v7}, Lyl/i;->e(Z)Ljava/lang/Object;
 +
 +    move-result-object v3
 +
@@ -1471,9 +1499,9 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +    invoke-virtual {v0, p1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
 +    .line 171
-+    new-instance p1, Lsl/a;
++    new-instance p1, Lzl/a;
 +
-+    invoke-direct {p1, p0}, Lsl/a;-><init>(Landroid/content/Context;)V
++    invoke-direct {p1, p0}, Lzl/a;-><init>(Landroid/content/Context;)V
 +
 +    if-eqz p2, :cond_c5
 +
@@ -1489,7 +1517,7 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +    :goto_c7
 +    move/from16 v1, p3
 +
-+    invoke-virtual {p1, v1, p0, v0}, Lsl/a;->b(ILjava/lang/String;Ljava/util/ArrayList;)V
++    invoke-virtual {p1, v1, v0, p0}, Lzl/a;->a(ILjava/util/ArrayList;Ljava/lang/String;)V
 +
 +    .line 173
 +    return-void
@@ -1585,8 +1613,8 @@ Subject: [PATCH] Add optional Maximum essential app switches
 +
 +    throw p0
 +.end method
---- a/smali/io/mesalabs/unica/maximum/MaximumPolicy.smali
-+++ b/smali/io/mesalabs/unica/maximum/MaximumPolicy.smali
+--- a/smali_classes2/io/mesalabs/unica/maximum/MaximumPolicy.smali
++++ b/smali_classes2/io/mesalabs/unica/maximum/MaximumPolicy.smali
 @@ -0,0 +1,513 @@
 +.class public final Lio/mesalabs/unica/maximum/MaximumPolicy;
 +.super Ljava/lang/Object;

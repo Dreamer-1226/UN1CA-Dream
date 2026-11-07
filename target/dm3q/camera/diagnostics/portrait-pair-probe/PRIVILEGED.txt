@@ -1,0 +1,45 @@
+Privileged diagnostic investigation, 2026-11-06
+
+Build the root-only helper (does not push or run anything):
+  target/dm3q/camera/diagnostics/portrait-pair-probe/build-privileged.sh
+
+PrivilegedProbe.java contains two diagnostic entry paths:
+1. main: temporary root app_process runner, with explicit optional Samsung Camera
+   UID/context and validated real-PID forwarding experiments. These experiments
+   are NOT a working capture route on the tested ROM. Root alone is rejected by
+   Samsung's package policy. Running as the Camera UID resolves that gate, but
+   the standalone process is still rejected during permission checking. Forwarding
+   to the real Camera PID is also rejected as untrusted. These modes must not be
+   described as successful pair tests.
+2. runInApplication(Context): entry intended to execute inside the real Samsung
+   Camera process, using its own application context and UID. It inventories20,
+   54 and52, then requests bounded physical YUV streams for up to15 seconds.
+   It never calls System.exit or changes UIDs in this entry. Results are logged
+   under tag PortraitPairPrivileged. It closes its session/readers and stops its
+   own HandlerThread. This entry compiled successfully; it has NOT executed on
+   the phone because the runtime attachment failed before loading the helper.
+
+Do not call main inside Samsung Camera: main is for a standalone app_process
+and can terminate its own process. In-app diagnostics must use runInApplication.
+Do not infer calibration validity from the existence of the760-byte files.
+Do not change camera-service allowlists, disable SELinux, rewrite calibration
+headers, replace the installed Camera APK, or fake available vendor tags to
+make a probe report success.
+
+Observed on the connected S23U:
+- Privileged characteristics access works. Logical20 contains56,58,52,54.
+- Physical54 advertises27.2mm focal length;52 advertises7.9mm.
+- Explicit lookup of dualCalibrationT_W and dualCalibrationT2_T1 reports that
+  the tags do not exist. Older dualCalibration on20 is760 bytes.
+- The zoom-translator's device T1T2 and WT1 dumps are760 bytes, differ from
+  the bundled calibration, and have byte0x2f3=0 instead of fallback's4.
+  These are promising real-calibration artifacts; pair transform direction,
+  per-unit provenance and Portrait-engine acceptance remain unvalidated.
+- No requested pair image buffers or depth results were obtained.
+
+Full logs, identities, calibration comparisons and failed-attempt details:
+  out/archived/portrait-pair-privileged-20261106/REPORT.txt
+
+Changes to camera provider/framework still require a narrow, reviewed adapter
+and genuine in-process diagnostic execution. This helper is not automatically
+packaged into the ROM and does not enable any Portrait feature.
