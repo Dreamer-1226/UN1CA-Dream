@@ -26,6 +26,17 @@ if [ -f "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" ]; then
     fi
 fi
 
+# One UI 9 changed the AudioTrack constructor, so libremotedisplay_wfd.so
+# fails to link and remotedisplay never starts (system_server then dies in
+# WifiDisplayController). Swap its ubsan NEEDED entry for a shim that forwards
+# the old constructor; the shim pulls the ubsan runtime in itself.
+if [ -f "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" ] && \
+        [ -f "$WORK_DIR/system/system/lib/libwfd_audiotrack_shim.so" ]; then
+    HEX_PATCH "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" \
+        "006c6962636c616e675f72742e756273616e5f7374616e64616c6f6e652d61726d2d616e64726f69642e736f00" \
+        "006c69627766645f617564696f747261636b5f7368696d2e736f00000000000000000000000000000000000000"
+fi
+
 # Hex patch libstagefright.so to fix ACodec getProcessNameByPid buffer overflow
 if [ -f "$WORK_DIR/system/system/lib/libstagefright.so" ]; then
     if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "204601214ff400722b46"; then
