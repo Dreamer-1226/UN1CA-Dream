@@ -52,7 +52,16 @@ def prepare(work, stage):
     (destination / 'audio' / MARKER).write_text('PortROM V1.0.2\n')
     shutil.copyfile(HERE / 'assets/manifest.json', destination / 'manifest.json')
     shutil.copyfile(HERE / 'PortROM-TERMS.txt', destination / 'PortROM-TERMS.txt')
-    speaker.prepare(work, stage)
+    # Speaker tuning is pinned to the dm3q firmware baseline. On the other
+    # covered targets (dm1q/dm2q/b5q/q5q) ship the device-agnostic audio
+    # overlay only, with the static boot-time bind-mount rc.
+    try:
+        speaker.prepare(work, stage)
+        speaker_applied = True
+    except speaker.BaselineError:
+        speaker_applied = False
+        shutil.copyfile(HERE / 'system/etc/init/unica_portrom_audio.rc',
+                        stage / 'system/system/etc/init/unica_portrom_audio.rc')
     for path in destination.rglob('*'):
         if path.is_symlink():
             raise ValueError('Symlink in merged audio: ' + str(path))
@@ -71,15 +80,18 @@ def prepare(work, stage):
     escapes = str.maketrans({char: '\\' + char for char in '.+[]*'})
     (stage / 'file_context-system').write_text(''.join(
         f'/{name.translate(escapes)} u:object_r:{speaker.label(p.relative_to(stage).as_posix())}:s0\n' for name, p in entries))
-    vendor = stage / 'vendor'
-    vendor_paths = [vendor, *sorted(vendor.rglob('*'))]
-    (stage / 'fs_config-vendor').write_text(''.join(
-        f'{p.relative_to(stage).as_posix()} 0 0 {"755" if p.is_dir() else "644"} capabilities=0x0\n'
-        for p in vendor_paths))
-    (stage / 'file_context-vendor').write_text(''.join(
-        f'/{p.relative_to(stage).as_posix().translate(escapes)} u:object_r:{speaker.label(p.relative_to(stage).as_posix())}:s0\n'
-        for p in vendor_paths))
-    print('Prepared 298 PortROM assets and all three speaker stages; originals untouched')
+    if speaker_applied:
+        vendor = stage / 'vendor'
+        vendor_paths = [vendor, *sorted(vendor.rglob('*'))]
+        (stage / 'fs_config-vendor').write_text(''.join(
+            f'{p.relative_to(stage).as_posix()} 0 0 {"755" if p.is_dir() else "644"} capabilities=0x0\n'
+            for p in vendor_paths))
+        (stage / 'file_context-vendor').write_text(''.join(
+            f'/{p.relative_to(stage).as_posix().translate(escapes)} u:object_r:{speaker.label(p.relative_to(stage).as_posix())}:s0\n'
+            for p in vendor_paths))
+        print('Prepared 298 PortROM assets and all three speaker stages; originals untouched')
+    else:
+        print('Prepared 298 PortROM assets; speaker tuning skipped (non-dm3q baseline)')
 
 
 if __name__ == '__main__':

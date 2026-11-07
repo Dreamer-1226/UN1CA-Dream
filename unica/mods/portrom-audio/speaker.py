@@ -9,6 +9,10 @@ from pathlib import Path
 import hashlib
 import json
 import struct
+class BaselineError(ValueError):
+    """The device's audio baseline does not match the pinned dm3q firmware."""
+
+
 profile_ORIGINAL = '6edeb2dfdb96baa553093f236ecb79909d674e855d9c1ebdaa6878fa48eb6e6f'
 
 def profile_generate(inputs):
@@ -260,7 +264,7 @@ def generate(work):
     inputs = {p: (work / p).read_bytes() for p in SOURCE}
     for path, digest in SOURCE.items():
         if hashlib.sha256(inputs[path]).hexdigest() != digest:
-            raise ValueError('Unexpected speaker baseline: ' + path)
+            raise BaselineError('Unexpected speaker baseline: ' + path)
     tuning, profile_report = profile_generate(inputs)
     inputs['vendor/etc/SoundBoosterParam.txt'] = tuning
     legacy, legacy_report = legacy_generate(inputs)
