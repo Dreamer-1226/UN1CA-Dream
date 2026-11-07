@@ -162,6 +162,13 @@ jobs:
       - name: Build ROM
         run: ./scripts/make_rom.sh
 
+      - name: Upload HoneyBoard smali
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: honeyboard-smali
+          path: out/target/*/apktool/system/app/HoneyBoard/HoneyBoard.apk/smali_classes*/
+
       - name: Upload to GoFile
         id: gofile
         continue-on-error: true
