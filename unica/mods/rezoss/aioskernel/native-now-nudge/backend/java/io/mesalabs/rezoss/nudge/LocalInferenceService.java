@@ -17,9 +17,9 @@ public final class LocalInferenceService extends Service {
     private TextBackend backend;
     private Messenger endpoint;
     private final class Job implements Runnable,TextBackend.Control,IBinder.DeathRecipient {
-        final Messenger callback;final int uid;final String input;final boolean summary,recall,diagnostic,consent;final String destination;final long deadline,submitted=SystemClock.elapsedRealtime();
+        final Messenger callback;final int uid;final String input;final boolean summary,recall,diagnostic,chat,consent;final String destination;final long deadline,submitted=SystemClock.elapsedRealtime();
         volatile Process process;volatile String cancellation;volatile String requestId;volatile Thread thread;
-        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));diagnostic="diagnostic".equals(b.getString("task"));consent=b.getBoolean("online_consent");destination=b.getString("destination","");deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
+        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));diagnostic="diagnostic".equals(b.getString("task"));chat="diagnostic_chat".equals(b.getString("task"));consent=b.getBoolean("online_consent");destination=b.getString("destination","");deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
         public boolean cancelled(){return cancellation!=null;}
         public long deadline(){return deadline;}
         public void process(Process p){process=p;if(p!=null&&cancelled())p.destroyForcibly();}
@@ -29,7 +29,7 @@ public final class LocalInferenceService extends Service {
         public void run(){
             thread=Thread.currentThread();long started=SystemClock.elapsedRealtime();String value=null,status="unavailable";
             Log.i("RezossV73Local","task="+(recall?"recall":summary?"summary":"replies")+" queueMs="+(started-submitted)+" remainingMs="+(deadline-started));
-            try{if(!cancelled()){value=diagnostic?backend.generateDiagnostic(input,destination,consent,this):recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
+            try{if(!cancelled()){value=chat?backend.generateChat(input,destination,consent,this):diagnostic?backend.generateDiagnostic(input,destination,consent,this):recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
             catch(Exception e){
                 if(SystemClock.elapsedRealtime()>=deadline)status="deadline";
                 else if(e instanceof IOException && "deadline".equals(e.getMessage()))status="deadline";
@@ -67,7 +67,7 @@ public final class LocalInferenceService extends Service {
                     }
                     if(message.what!=1)return;
                     Bundle request=message.getData();boolean recall="recall".equals(request.getString("task"));
-                    if("diagnostic".equals(request.getString("task"))){
+                    if("diagnostic".equals(request.getString("task"))||"diagnostic_chat".equals(request.getString("task"))){
                         if(!diagnosticCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
                     }else if(recall){
                         if(!recallCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");

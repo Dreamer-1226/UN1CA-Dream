@@ -10,6 +10,7 @@ write('android/content/Context.java','package android.content; public class Cont
 write('android/content/pm/ApplicationInfo.java','package android.content.pm; public class ApplicationInfo {}')
 write('android/content/pm/PackageInfo.java','package android.content.pm; public class PackageInfo {public ApplicationInfo applicationInfo=new ApplicationInfo();public long getLongVersionCode(){return 1;}}')
 write('android/content/pm/PackageManager.java','package android.content.pm; public class PackageManager {public static final int CERT_INPUT_SHA256=1;public static class NameNotFoundException extends Exception {} public PackageInfo getPackageInfo(String p,int f)throws NameNotFoundException{if(p.equals("missing.package"))throw new NameNotFoundException();return new PackageInfo();} public CharSequence getApplicationLabel(ApplicationInfo i){return "Test module";}public boolean hasSigningCertificate(String p,byte[] d,int t){return true;}}')
+write('io/mesalabs/unica/settings/wm/SecureScreenshotPreferenceController.java','package io.mesalabs.unica.settings.wm;public class SecureScreenshotPreferenceController {}')
 write('io/mesalabs/unica/HmaPolicy.java','package io.mesalabs.unica;public class HmaPolicy {}')
 write('io/mesalabs/unica/troubleshooting/InstalledModulesTest.java',r'''
 package io.mesalabs.unica.troubleshooting;
@@ -23,6 +24,21 @@ static JSONArray scan(String pkg,boolean enabled,String scope,boolean available)
 static void check(boolean value){if(!value)throw new AssertionError();}
 public static void main(String[]args)throws Exception{
  purposes=new File(args[0]);conflicts=new File(args[1]);
+ check(scan("com.google.android.hmal",true,"android",true).length()==1);
+ check(scan("com.google.android.hmal",false,"android",true).length()==0);
+ check(scan("com.google.android.hmal",true,"com.whatsapp",true).length()==0);
+ check(scan("org.frknkrc44.hma_oss",true,"android",true).length()==1);
+ check(scan("org.frknkrc44.hma_oss",true,"system",true).length()==1);
+ check(scan("org.frknkrc44.hma_oss",false,"system",true).length()==0);
+ check(scan("qyz.onedesign",true,"android",true).length()==0); // identity verified, scope rule not invented
+ check(scan("io.github.pbzin.googlephotosmod",true,"com.google.android.apps.photos",true).length()==0); // no false unlimited-spoof claim
+ check(scan("io.github.soclear.oneuix",true,"system",true).length()==1);
+ check(scan("io.github.soclear.oneuix",true,"android",true).length()==1);
+ check(scan("io.github.soclear.oneuix",false,"system",true).length()==0);
+ check(scan("io.github.soclear.oneuix",true,"com.whatsapp",true).length()==0);
+ check(scan("io.github.soclear.oneuix.clone",true,"system",true).length()==0);
+ check(scan("io.github.lsposed.disableflagsecure",true,"system",true).length()==1);
+ check(scan("org.lsposed.corepatch",true,"system",true).length()==0); // built-in gates absent in fixture
  JSONArray found=scan("com.tsng.hidemyapplist",true,"android",true);
  check(found.length()==1&&found.getJSONObject(0).getBoolean("duplicate")&&!found.getJSONObject(0).getBoolean("confirmed"));
  check(found.getJSONObject(0).getString("unica_mod").equals("HMA"));

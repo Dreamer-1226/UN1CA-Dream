@@ -1,0 +1,120 @@
+UN1CA Troubleshooting compatibility registry
+==========================================
+Edit compatibility-catalog.json. The ROM uses generated offline tables, not
+project-name searches or an online blacklist. Updates take effect after a ROM
+rebuild/install and a manual scan. Opening Troubleshooting never runs a scan.
+
+Identity and conflict are separate facts
+---------------------------------------
+root: exact id= from module.prop, case-sensitive. Keep directory and metadata
+      identities consistent. Forks may share an ID; do not identify a fork just
+      from this value. Display names/keywords are not sufficient to flag it.
+lsposed: exact applicationId/package of the HOOK APK, not a separate manager APK,
+         repository name, ZIP filename or label. Resolve Gradle variables and
+         app/library dependencies: when no applicationId override exists, AGP
+         defaults it to the app namespace. Confirm library code is bundled into
+         that app, rather than assuming the library namespace is an APK ID.
+app: recorded for research only. Standalone overlay apps do not enter the
+     LSPosed/root inventory or generate a module-conflict warning.
+
+Identity verification and maintainer classification are separate. policy_conflict
+records the 28 retained maintainer classifications. Upstream verification resolves
+27 of their install identities; ForgeStore is classified under TEE and remains
+verification=unverified because no authoritative Android upstream was found.
+KeyboxHub was removed from the catalog at the maintainer's request.
+
+The original input has 61 numbered entries, despite its stated 79. Shared
+identifiers and repeated projects are retained for traceability and deduplicated
+in runtime tables. Identity verification can be complete while a runtime rule
+is withheld: for example, OneDesign's package is verified but its declared scopes
+were not available in the audited upstream metadata. Standalone apps are also
+verified identities, but remain outside module-only detection.
+
+A verified identity is NOT a confirmed conflict. classification=duplicate
+means independently documented overlapping purpose with a built-in feature.
+It displays the existing red "Same purpose as UN1CA's ..." recommendation.
+It does not establish which optional module switch is enabled, hook execution,
+a crash, Google rejection, or that a built-in toggle is enabled.
+
+classification=confirmed_conflict is supported for LSPosed only, and requires
+version_code, signer_sha256 (64 lowercase hex), and conflict_evidence. Only
+add one after verifying the incompatible behavior. The initial catalog has no
+confirmed-conflict cases; it must not invent them from a project list.
+
+For every new identity
+----------------------
+1. Add a unique entry key and readable name, with verification=unverified first.
+   Record any maintainer conflict policy in policy_conflict, using a defined
+   classification_groups key. Do not invent an identity to enable a policy.
+2. Inspect the exact upstream module.prop or APK/applicationId build definition.
+   Resolve Gradle variables and APK splits; namespaces can differ from APK IDs.
+3. Record sources (prefer commit-pinned upstream URLs), verified_on, kind/value.
+4. Establish a specific overlap against features.<key>.sources in this repo.
+   An app being patched by UN1CA is not enough to flag every module targeting it.
+5. Set verification=verified. Add a rule only when that overlap is established.
+6. LSPosed rules must name exact scopes. Framework scopes are explicitly listed
+   as android/system where legacy/new API naming differs; this is not a wildcard.
+   The scanner also requires the enabled LSPosed state and built-in class gate.
+7. Root rules also require the feature's installed ROM files. Source features
+   with a missing source or any ancestor disable marker are omitted by compiler.
+
+Example identity and rule (inside an entry)
+------------------------------------------
+"verification": "verified",
+"identities": [{"kind": "lsposed", "value": "com.example.module",
+  "verified_on": "2026-11-07", "sources": ["https://upstream/commit/file"]}],
+"rules": [{"classification": "duplicate", "feature": "secure_windows",
+           "scopes": ["android", "system"]}]
+
+Maintenance commands (from repository root)
+-------------------------------------------
+python3 unica/mods/settings/troubleshooting/compile-catalog.py
+python3 unica/mods/settings/troubleshooting/compile-catalog.py --check
+python3 unica/mods/settings/troubleshooting/tests/catalog_test.py
+python3 unica/mods/settings/troubleshooting/tests/run.py
+python3 unica/mods/settings/troubleshooting/tests/installed_modules.py /path/to/json-20240303.jar
+
+compile-catalog.py validates before writing and backs up changed output tables.
+It runs both in troubleshooting/build.sh and settings/customize.sh. The latter
+writes directly to the build's work directory with --no-backup (generated files
+only), and assigns system_file metadata. Source table updates retain backups.
+Do not hand-edit generated system/etc/unica/troubleshooting-*.{json,tsv} tables.
+The compiler does not fetch from the network, download modules, or disable apps.
+Normal source APK builds use build.sh to regenerate the backed-up smali patch.
+
+Current scope
+-------------
+One UI X is mapped specifically to secure-screenshot functionality, verified
+in its upstream DisableFlagSecure hook and UN1CA's secure-window patch. It is
+not a blanket warning for every app it can hook. CorePatch maps to signature
+and downgrade controls, Photos modules to Photos spoofing, KnoxPatch to the
+built-in KnoxPatch hooks, and PIF/TEE/HMA root modules to their built-in feature.
+Font tools, standalone islands, and other verified identities without a proven
+matching implementation stay catalog-only. The HMA forks have now been resolved from their app build definitions and
+bundled xposed library dependencies: HMAL uses com.google.android.hmal; the
+three audited HMA-OSS LSPosed forks share org.frknkrc44.hma_oss. Disabled LSPosed
+state and nonmatching scopes remain excluded.
+
+Upstream audit details
+----------------------
+AlwaysStrong moved from GitHub to GitLab and shares tricky_store with several
+TEE forks. TEESimulator-RS also uses tricky_store. Strong Integrity Fix's
+published ZIP shares playintegrityfix; it cannot be distinguished from every
+other PIF fork by ID alone. Pixelify uses Pixelify, while the unrelated GPhotos
+Zygisk project uses PixelifyPhotos. IDs and package names are case-sensitive.
+TS-Enhancer-Extreme's current upstream renamed it to FS-Enhancer-Extreme and
+resolves its template to fs_enhancer_extreme; an old ts_ alias is not guessed.
+
+The font collection publishes 105 concrete per-font IDs. All are recorded from
+its maintainer's release index; one published ZIP module.prop was cross-checked.
+The complete root table currently has 123 rules and the worker limit is 128.
+Adding new identities beyond this limit deliberately fails compilation; review
+worker/table limits and tests before expanding the limit. Custom font builds may
+choose a different prefix and are not matched by a wildcard.
+
+GooglePhotosMod's verified upstream documents filename and backup-job hooks,
+not unlimited-storage spoofing. Its maintainer conflict policy is retained,
+but it is not misrepresented as a proven duplicate of the ROM's Photos spoof.
+GravityBox and XTouchWiz exact variants are cataloged with scope evidence;
+broad customization categories are not fabricated into method-level rules.
+

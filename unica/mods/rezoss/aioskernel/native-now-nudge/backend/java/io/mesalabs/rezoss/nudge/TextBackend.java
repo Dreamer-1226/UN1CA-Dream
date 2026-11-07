@@ -239,7 +239,31 @@ public final class TextBackend {
         }
     }
     interface Control { boolean cancelled(); long deadline(); void process(Process process); default void request(String id){} }
-    Bundle diagnosticConfig() throws Exception { return api.diagnosticConfig(); }
+    Bundle diagnosticConfig() throws Exception {
+        Bundle config=api.diagnosticConfig();boolean online=config.getBoolean("online");
+        config.putInt("chat_protocol",1);
+        // Conservative transport budgets; local tokenization remains authoritative.
+        config.putInt("chat_max_chars",online?12000:2200);
+        config.putInt("chat_section_chars",online?8000:800);
+        config.putInt("chat_output_tokens",online?1024:256);
+        config.putInt("chat_context_tokens",online?0:1024);
+        return config;
+    }
+    String generateChat(String input,String destination,boolean consent,Control control)throws Exception {
+        if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
+        try {
+            Bundle config=diagnosticConfig();
+            if(!destination.equals(config.getString("destination"))||(config.getBoolean("online")&&!consent))throw new IOException("backend_changed");
+            String prompt=DiagnosticPrompt.chat(input,config.getInt("chat_max_chars"));
+            if(control.cancelled())throw new InterruptedIOException();
+            String route=config.getString("backend","default");
+            if(!"default".equals(route)){
+                String id=UUID.randomUUID().toString();control.request(id);
+                try{return api.generate(prompt,config.getInt("chat_output_tokens"),control.deadline(),id,route,destination);}finally{control.request(null);}
+            }
+            return diagnosticLocal(prompt,control);
+        } finally { runnerLock.unlock(); }
+    }
     String generateDiagnostic(String excerpt,String destination,boolean consent,Control control)throws Exception {
         if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
         try {

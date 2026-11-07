@@ -287,6 +287,13 @@ else
 fi
 
 # User-triggered Troubleshooting worker; no automatic boot-time module changes.
+# Compile verified compatibility rules for this source tree; no network access.
+python3 "$MODPATH/troubleshooting/compile-catalog.py" \
+    --output-dir "$WORK_DIR/system/system/etc/unica" --no-backup || ABORT "Failed to compile compatibility catalog"
+for _UNICA_COMPAT_TABLE in troubleshooting-root-purposes.tsv troubleshooting-lsposed-purposes.json troubleshooting-lsposed-conflicts.json troubleshooting-registry-info.json; do
+    SET_METADATA "system" "system/etc/unica/$_UNICA_COMPAT_TABLE" 0 0 644 "u:object_r:system_file:s0"
+done
+unset _UNICA_COMPAT_TABLE
 python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Troubleshooting policy"
 python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" || ABORT "Failed to index ROM conflict targets"
 SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"

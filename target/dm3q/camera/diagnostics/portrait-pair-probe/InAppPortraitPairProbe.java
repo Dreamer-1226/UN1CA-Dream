@@ -1,0 +1,519 @@
+// SPDX-License-Identifier: Apache-2.0
+package com.rezoss.camera.diagnostics;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Intent;
+import android.graphics.ImageFormat;
+import android.hardware.camera2.*;
+import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.Image;
+import android.media.ImageReader;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.util.Log;
+import android.util.Range;
+import android.util.Size;
+import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.util.*;
+
+/** Opt-in probe in Samsung Camera's own process. Pixel samples require a second opt-in. */
+public final class InAppPortraitPairProbe implements Application.ActivityLifecycleCallbacks {
+    public static final String EXTRA = "com.rezoss.camera.extra.RUN_PORTRAIT_PAIR_PROBE";
+    private static final String TAG = "PortraitPairInApp", LOGICAL = "20", MAIN = "54", AUX = "52";
+    private static final Handler UI = new Handler(Looper.getMainLooper());
+    private static InAppPortraitPairProbe active;
+    private final Activity owner;
+    private final HandlerThread worker = new HandlerThread("portrait-pair-inapp");
+    private final Map<String, Set<Long>> images = new LinkedHashMap<>();
+    private final Set<Long> pairedResults = new HashSet<>();
+    private final List<ImageReader> readers = new ArrayList<>();
+    private final String runId = Long.toString(System.currentTimeMillis());
+    private final File report;
+    private Handler handler;
+    private CameraDevice camera;
+    private CameraCaptureSession session;
+    private boolean stopped;
+    // Installed armer checks this version before requesting new behavior.
+    private static final String VERSION = "portrait-controls-v3c";
+    private final boolean geometry, saveFrames, controlled;
+    private final Map<String, CameraCharacteristics> physicalCharacteristics = new HashMap<>();
+    private final Map<String, Set<Long>> selectedSampleTicks = new HashMap<>();
+    private final Map<String, Long> lastSampleAt = new HashMap<>();
+    private Set<CaptureRequest.Key<?>> physicalKeys;
+    private Range<Integer> commonFps;
+    private final Map<String, Float> focusedDistances = new HashMap<>();
+    private long exposureNs, frameNs;
+    private int lowIso, highIso;
+    private boolean manualSupported;
+    private String arrivalPhase = "zoom10";
+    private long phaseStarted;
+    private final Map<String, Integer> saved = new HashMap<>();
+    private int results;
+    private final Runnable timeout = () -> stop("timeout");
+
+    private InAppPortraitPairProbe(Activity activity, String options) {
+        owner = activity;
+        controlled = options.equals("controlled") || options.equals("controlled-frames");
+        geometry = controlled || options.equals("geometry") || options.equals("geometry-frames");
+        saveFrames = options.equals("geometry-frames") || options.equals("controlled-frames");
+        report = new File(activity.getFilesDir(), "portrait-pair-probe/report.jsonl");
+    }
+
+    /** Called from CameraSettingActivity.onResume; unarmed launches do not open a camera. */
+    public static void maybeStart(Activity activity) {
+        try {
+            Intent intent = activity.getIntent();
+            File arm = new File(activity.getCacheDir(), "portrait-pair-probe.arm");
+            boolean requested = intent != null && intent.getBooleanExtra(EXTRA, false);
+            if (!requested && !arm.isFile()) return;
+            if (intent != null) intent.removeExtra(EXTRA);
+            String options = arm.isFile() ? new String(Files.readAllBytes(arm.toPath()), StandardCharsets.UTF_8).trim() : "";
+            if (!options.isEmpty() && !options.equals("geometry") && !options.equals("geometry-frames") && !options.equals("controlled") && !options.equals("controlled-frames")) {
+                Log.e(TAG, "Unknown diagnostic profile; refusing to run"); return;
+            }
+            // The marker is app-private; root can create it before a normal Settings launch.
+            if (arm.isFile() && !arm.delete()) {
+                Log.e(TAG, "Cannot consume diagnostic marker"); return;
+            }
+            if (!"com.sec.android.app.camera".equals(activity.getPackageName()) ||
+                    android.os.Process.myUid() != activity.getApplicationInfo().uid) return;
+            synchronized (InAppPortraitPairProbe.class) {
+                if (active != null) return;
+                active = new InAppPortraitPairProbe(activity, options);
+                InAppPortraitPairProbe probe = active;
+                activity.getApplication().registerActivityLifecycleCallbacks(probe);
+                probe.worker.start();
+                probe.handler = new Handler(probe.worker.getLooper());
+                UI.postDelayed(() -> {
+                    if (activity.isFinishing() || activity.isDestroyed() || !activity.hasWindowFocus()) {
+                        probe.handler.post(() -> probe.stop("owner_not_foreground"));
+                        return;
+                    }
+                    Toast.makeText(activity, probe.controlled ? "Portrait controls diagnostic: 32 seconds" : "Portrait pair diagnostic: 15 seconds", Toast.LENGTH_SHORT).show();
+                    probe.handler.post(probe::begin);
+                }, 800);
+            }
+        } catch (Exception error) {
+            Log.e(TAG, "Cannot start opt-in diagnostic", error);
+        }
+    }
+
+    private void emit(String event, Object... fields) {
+        try {
+            JSONObject row = new JSONObject().put("event", event).put("run_id", runId);
+            for (int i = 0; i < fields.length; i += 2) row.put(fields[i].toString(), fields[i+1]);
+            Log.i(TAG, row.toString());
+            File parent = report.getParentFile();
+            if (!parent.isDirectory() && !parent.mkdirs()) throw new IllegalStateException("Cannot create report directory");
+            try (FileOutputStream output = new FileOutputStream(report, true)) {
+                output.write((row + "\n").getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Exception error) { Log.e(TAG, "Cannot write diagnostic report", error); }
+    }
+    private void fail(String stage, Exception error) {
+        emit("error", "stage", stage, "type", error.getClass().getName(), "message", String.valueOf(error.getMessage()));
+        stop(stage);
+    }
+    private static String hash(byte[] bytes) throws Exception {
+        StringBuilder s = new StringBuilder();
+        for (byte b : MessageDigest.getInstance("SHA-256").digest(bytes)) s.append(String.format(Locale.ROOT, "%02x", b & 255));
+        return s.toString();
+    }
+    private void inventory(CameraManager manager, String id) throws Exception {
+        CameraCharacteristics c = manager.getCameraCharacteristics(id);
+        emit("camera", "id", id, "physical_ids", new JSONArray(c.getPhysicalCameraIds()),
+            "focal_lengths", Arrays.toString(c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)),
+            "active_array", String.valueOf(c.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)),
+            "sync_type", String.valueOf(c.get(CameraCharacteristics.LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE)),
+            "timestamp_source", String.valueOf(c.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)),
+            "intrinsics", Arrays.toString(c.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)),
+            "distortion", Arrays.toString(c.get(CameraCharacteristics.LENS_DISTORTION)),
+            "pose_rotation", Arrays.toString(c.get(CameraCharacteristics.LENS_POSE_ROTATION)),
+            "pose_translation", Arrays.toString(c.get(CameraCharacteristics.LENS_POSE_TRANSLATION)),
+            "physical_request_keys", String.valueOf(c.getAvailablePhysicalCameraRequestKeys()),
+            "af_modes", Arrays.toString(c.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES)),
+            "min_focus_diopters", String.valueOf(c.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)),
+            "focus_calibration", String.valueOf(c.get(CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION)),
+            "orientation", String.valueOf(c.get(CameraCharacteristics.SENSOR_ORIENTATION)),
+            "fps_ranges", Arrays.toString(c.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)),
+            "exposure_range", String.valueOf(c.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)),
+            "sensitivity_range", String.valueOf(c.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)),
+            "capabilities", Arrays.toString(c.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)));
+        for (String name : new String[]{"samsung.android.logicalMultiCamera.dualCalibration",
+                "samsung.android.logicalMultiCamera.dualCalibrationT_W", "samsung.android.logicalMultiCamera.dualCalibrationT2_T1"}) {
+            try {
+                byte[] data = c.get(new CameraCharacteristics.Key<byte[]>(name, byte[].class));
+                if (data == null) emit("calibration_blob", "id", id, "key", name, "present", false);
+                else emit("calibration_blob", "id", id, "key", name, "present", true, "bytes", data.length, "sha256", hash(data));
+            } catch (IllegalArgumentException missing) {
+                emit("calibration_blob", "id", id, "key", name, "present", false, "error", String.valueOf(missing.getMessage()));
+            }
+        }
+    }
+    private void begin() {
+        if (stopped) return;
+        emit("begin", "route", "camera_settings_in_process", "logical", LOGICAL, "main", MAIN, "aux", AUX,
+            "uid", android.os.Process.myUid(), "pid", android.os.Process.myPid(),
+            "version", VERSION, "geometry", geometry, "controlled", controlled, "save_frames", saveFrames);
+        handler.postDelayed(timeout, controlled ? 32000 : 15000);
+        try {
+            CameraManager manager = owner.getApplication().getSystemService(CameraManager.class);
+            for (String id : new String[]{LOGICAL, MAIN, AUX}) inventory(manager, id);
+            CameraCharacteristics logical = manager.getCameraCharacteristics(LOGICAL);
+            if (!logical.getPhysicalCameraIds().containsAll(Arrays.asList(MAIN, AUX)))
+                throw new IllegalStateException("Requested physical pair absent from logical camera");
+            if (controlled) prepareControls(manager, logical);
+            Range<Float> zoom = logical.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
+            if (zoom == null || !zoom.contains(10f) || (geometry && !zoom.contains(1f))) throw new IllegalStateException("Logical zoom10 not advertised");
+            StreamConfigurationMap a = manager.getCameraCharacteristics(MAIN).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            StreamConfigurationMap b = manager.getCameraCharacteristics(AUX).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            if (a == null || b == null) throw new IllegalStateException("Missing physical stream map");
+            Size[] sa = a.getOutputSizes(ImageFormat.YUV_420_888), sb = b.getOutputSizes(ImageFormat.YUV_420_888);
+            if (sa == null || sb == null) throw new IllegalStateException("Missing physical YUV outputs");
+            Set<Size> other = new HashSet<>(Arrays.asList(sb));
+            List<Size> common = new ArrayList<>();
+            for (Size s : sa) if (other.contains(s) && s.getWidth() >= 640 && s.getHeight() >= 480 &&
+                    s.getWidth() <= 1920 && s.getHeight() <= 1080) common.add(s);
+            common.sort(Comparator.comparingLong(s -> (long)s.getWidth()*s.getHeight()));
+            if (common.isEmpty()) throw new IllegalStateException("No common bounded YUV size");
+            Size size = common.get(0);
+            emit("chosen_size", "size", size.toString());
+            List<OutputConfiguration> outputs = new ArrayList<>();
+            for (String id : new String[]{MAIN, AUX}) {
+                images.put(id, new HashSet<>());
+                ImageReader reader = ImageReader.newInstance(size.getWidth(), size.getHeight(), ImageFormat.YUV_420_888, 3);
+                reader.setOnImageAvailableListener(r -> {
+                    try (Image image = r.acquireNextImage()) {
+                        if (image != null && !stopped) {
+                            Set<Long> timestamps = images.get(id);
+                            if (timestamps.size() < 900) timestamps.add(image.getTimestamp());
+                            if (geometry || timestamps.size() <= 5) emit("image", "physical_output", id,
+                                "timestamp_ns", image.getTimestamp(), "arrival_phase", arrivalPhase,
+                                "luma", lumaStats(image), "arrival_elapsed_ns", android.os.SystemClock.elapsedRealtimeNanos());
+                            if (saveFrames) saveLuma(image, id);
+                        }
+                    } catch (Exception error) { if (!stopped) fail("image", error); }
+                }, handler);
+                readers.add(reader);
+                OutputConfiguration output = new OutputConfiguration(reader.getSurface());
+                output.setPhysicalCameraId(id); outputs.add(output);
+            }
+            manager.openCamera(LOGICAL, new CameraDevice.StateCallback() {
+                @Override public void onOpened(CameraDevice device) {
+                    if (stopped) { device.close(); return; } camera = device;
+                    emit("opened", "id", device.getId());
+                    try {
+                        SessionConfiguration configuration = new SessionConfiguration(SessionConfiguration.SESSION_REGULAR,
+                            outputs, task -> handler.post(task), new CameraCaptureSession.StateCallback() {
+                                @Override public void onConfigured(CameraCaptureSession configured) {
+                                    if (stopped) { configured.close(); return; } session = configured;
+                                    try {
+                                        if (controlled) {
+                                            requestControlled("auto");
+                                            handler.postDelayed(() -> controlledStep("manual"), 10000);
+                                            handler.postDelayed(() -> controlledStep("pulse"), 20000);
+                                        } else requestPhase(10f);
+                                        if (geometry && !controlled) handler.postDelayed(() -> {
+                                            if (!stopped) try { requestPhase(1f); }
+                                            catch (Exception error) { fail("native_request", error); }
+                                        }, 5000);
+                                    } catch (Exception error) { fail("request", error); }
+                                }
+                                @Override public void onConfigureFailed(CameraCaptureSession failed) {
+                                    emit("configure_failed"); stop("configure_failed");
+                                }
+                            });
+                        camera.createCaptureSession(configuration);
+                    } catch (Exception error) { fail("session", error); }
+                }
+                @Override public void onDisconnected(CameraDevice device) { device.close(); stop("disconnected"); }
+                @Override public void onError(CameraDevice device, int error) {
+                    device.close(); if (!stopped) { emit("device_error", "code", error); stop("device_error"); }
+                }
+            }, handler);
+        } catch (Exception error) { fail("inventory_or_open", error); }
+    }
+
+    private static boolean has(int[] values, int wanted) {
+        if (values != null) for (int value : values) if (value == wanted) return true;
+        return false;
+    }
+
+    private void prepareControls(CameraManager manager, CameraCharacteristics logical) throws Exception {
+        List<CaptureRequest.Key<?>> available = logical.getAvailablePhysicalCameraRequestKeys();
+        physicalKeys = available == null ? Collections.emptySet() : new HashSet<>(available);
+        for (CaptureRequest.Key<?> key : Arrays.asList(CaptureRequest.CONTROL_AF_MODE,
+                CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE))
+            if (!physicalKeys.contains(key)) throw new IllegalStateException("Missing per-physical control: " + key);
+        List<Range<Integer>> common = new ArrayList<>(Arrays.asList(logical.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)));
+        long exposureLow = 1, exposureHigh = Long.MAX_VALUE, minDuration = 1;
+        int isoLow = 1, isoHigh = Integer.MAX_VALUE;
+        manualSupported = true;
+        for (String id : new String[]{MAIN, AUX}) {
+            CameraCharacteristics c = manager.getCameraCharacteristics(id);
+            physicalCharacteristics.put(id, c);
+            common.retainAll(Arrays.asList(c.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)));
+            Range<Long> exposure = c.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+            Range<Integer> iso = c.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+            manualSupported &= has(c.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES), CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR);
+            if (exposure == null || iso == null) manualSupported = false;
+            else {
+                exposureLow = Math.max(exposureLow, exposure.getLower()); exposureHigh = Math.min(exposureHigh, exposure.getUpper());
+                isoLow = Math.max(isoLow, iso.getLower()); isoHigh = Math.min(isoHigh, iso.getUpper());
+            }
+            StreamConfigurationMap map = c.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            minDuration = Math.max(minDuration, map.getOutputMinFrameDuration(ImageFormat.YUV_420_888, new Size(640, 480)));
+        }
+        common.removeIf(r -> r.getUpper() > 30 || r.getLower() < 10);
+        common.sort((left, right) -> {
+            boolean a = left.getLower().equals(left.getUpper()), b = right.getLower().equals(right.getUpper());
+            return a == b ? Integer.compare(left.getUpper(), right.getUpper()) : a ? -1 : 1;
+        });
+        if (common.isEmpty()) throw new IllegalStateException("No common bounded FPS range");
+        commonFps = common.get(0);
+        frameNs = Math.max(minDuration, 1000000000L / commonFps.getUpper());
+        exposureNs = Math.max(exposureLow, Math.min(30000000L, Math.min(exposureHigh, frameNs - 1000000L)));
+        lowIso = Math.max(isoLow, Math.min(800, isoHigh));
+        highIso = Math.max(isoLow, Math.min(3200, isoHigh));
+        for (CaptureRequest.Key<?> key : Arrays.asList(CaptureRequest.SENSOR_EXPOSURE_TIME,
+                CaptureRequest.SENSOR_FRAME_DURATION, CaptureRequest.SENSOR_SENSITIVITY)) manualSupported &= physicalKeys.contains(key);
+        manualSupported &= exposureLow <= exposureHigh && exposureNs < frameNs && lowIso < highIso;
+        emit("control_plan", "fps", commonFps.toString(), "frame_duration_ns", frameNs,
+            "exposure_ns", exposureNs, "low_iso", lowIso, "high_iso", highIso, "manual_supported", manualSupported,
+            "pulse_code", "31-slot PRBS; aux offset11; intensity is diagnostic only");
+    }
+
+    private void controlledStep(String phase) {
+        if (!stopped) try { requestControlled(phase); } catch (Exception error) { fail("controlled_" + phase, error); }
+    }
+
+    private int afMode(String id) {
+        int[] modes = physicalCharacteristics.get(id).get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
+        if (has(modes, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) return CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+        if (has(modes, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO)) return CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+        if (has(modes, CaptureRequest.CONTROL_AF_MODE_AUTO)) return CaptureRequest.CONTROL_AF_MODE_AUTO;
+        throw new IllegalStateException("No physical autofocus mode for " + id);
+    }
+
+    private static boolean pulseHigh(int slot) {
+        int state = 31;
+        for (int i = 0; i <= slot % 31; i++) state = (state >> 1) | (((state ^ (state >> 2)) & 1) << 4);
+        return (state & 1) != 0;
+    }
+
+    private float manualFocus(String id, String phase) {
+        Float maximum = physicalCharacteristics.get(id).get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+        float value = focusedDistances.getOrDefault(id, 0.5f);
+        // Small auxiliary perturbation tests independent focus control in pulse phase.
+        if (phase.equals("pulse") && id.equals(AUX)) value += 0.05f;
+        return Math.max(0f, Math.min(value, maximum == null ? value : maximum));
+    }
+
+    private CaptureRequest.Builder controlledRequest(String phase, int slot) throws Exception {
+        CaptureRequest.Builder request = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW, new HashSet<>(Arrays.asList(MAIN, AUX)));
+        for (ImageReader reader : readers) request.addTarget(reader.getSurface());
+        request.set(CaptureRequest.CONTROL_ZOOM_RATIO, 1f);
+        request.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, commonFps);
+        boolean manual = !phase.equals("auto");
+        request.set(CaptureRequest.CONTROL_AE_MODE, manual ? CaptureRequest.CONTROL_AE_MODE_OFF : CaptureRequest.CONTROL_AE_MODE_ON);
+        if (manual) {
+            request.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposureNs);
+            request.set(CaptureRequest.SENSOR_FRAME_DURATION, frameNs);
+            request.set(CaptureRequest.SENSOR_SENSITIVITY, phase.equals("pulse") && pulseHigh(slot) ? highIso : lowIso);
+            request.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
+            request.set(CaptureRequest.LENS_FOCUS_DISTANCE, manualFocus(MAIN, phase));
+        }
+        for (String id : new String[]{MAIN, AUX}) {
+            request.setPhysicalCameraKey(CaptureRequest.CONTROL_AF_MODE, manual && physicalKeys.contains(CaptureRequest.LENS_FOCUS_DISTANCE) ? CaptureRequest.CONTROL_AF_MODE_OFF : afMode(id), id);
+            if (manual && physicalKeys.contains(CaptureRequest.LENS_FOCUS_DISTANCE)) request.setPhysicalCameraKey(CaptureRequest.LENS_FOCUS_DISTANCE,
+                manualFocus(id, phase), id);
+            request.setPhysicalCameraKey(CaptureRequest.CONTROL_AE_MODE, manual ? CaptureRequest.CONTROL_AE_MODE_OFF : CaptureRequest.CONTROL_AE_MODE_ON, id);
+            request.setPhysicalCameraKey(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, commonFps, id);
+            if (physicalKeys.contains(CaptureRequest.CONTROL_ZOOM_RATIO)) request.setPhysicalCameraKey(CaptureRequest.CONTROL_ZOOM_RATIO, 1f, id);
+            if (physicalKeys.contains(CaptureRequest.SCALER_CROP_REGION)) request.setPhysicalCameraKey(CaptureRequest.SCALER_CROP_REGION,
+                physicalCharacteristics.get(id).get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE), id);
+            if (manual) {
+                request.setPhysicalCameraKey(CaptureRequest.SENSOR_EXPOSURE_TIME, exposureNs, id);
+                request.setPhysicalCameraKey(CaptureRequest.SENSOR_FRAME_DURATION, frameNs, id);
+                int iso = phase.equals("pulse") && pulseHigh(slot + (id.equals(AUX) ? 11 : 0)) ? highIso : lowIso;
+                request.setPhysicalCameraKey(CaptureRequest.SENSOR_SENSITIVITY, iso, id);
+            }
+        }
+        request.setTag(phase.equals("pulse") ? "pulse_" + slot : phase);
+        return request;
+    }
+
+    private void requestControlled(String phase) throws Exception {
+        if (!phase.equals("auto") && !manualSupported) {
+            emit("phase_skipped", "phase", phase, "reason", "manual sensor controls not jointly advertised"); return;
+        }
+        List<CaptureRequest> burst = new ArrayList<>();
+        for (int slot = 0; slot < (phase.equals("pulse") ? 31 : 1); slot++) burst.add(controlledRequest(phase, slot).build());
+        session.setRepeatingBurst(burst, captureCallback, handler);
+        arrivalPhase = phase;
+        phaseStarted = android.os.SystemClock.elapsedRealtime();
+        emit("stream_request", "phase", phase, "zoom", 1f, "fps", commonFps.toString(), "burst_length", burst.size());
+        // AUTO fallback needs one trigger, never repeat START on every frame.
+        if (phase.equals("auto") && physicalKeys.contains(CaptureRequest.CONTROL_AF_TRIGGER)) {
+            CaptureRequest.Builder trigger = controlledRequest(phase, 0);
+            boolean needed = false;
+            for (String id : new String[]{MAIN, AUX}) if (afMode(id) == CaptureRequest.CONTROL_AF_MODE_AUTO) {
+                trigger.setPhysicalCameraKey(CaptureRequest.CONTROL_AF_TRIGGER, CaptureRequest.CONTROL_AF_TRIGGER_START, id); needed = true;
+            }
+            if (needed) session.capture(trigger.build(), captureCallback, handler);
+        }
+    }
+
+    private String requestedIso(CaptureRequest request, String id) {
+        String tag = String.valueOf(request.getTag());
+        if (tag.equals("auto")) return "auto";
+        int slot = tag.startsWith("pulse_") ? Integer.parseInt(tag.substring(6)) : 0;
+        return String.valueOf(tag.startsWith("pulse_") && pulseHigh(slot + (id.equals(AUX) ? 11 : 0)) ? highIso : lowIso);
+    }
+
+    private static String phaseOf(CaptureRequest request) {
+        String tag = String.valueOf(request.getTag());
+        return tag.startsWith("pulse_") ? "pulse" : tag;
+    }
+
+    private static JSONObject lumaStats(Image image) throws Exception {
+        Image.Plane plane = image.getPlanes()[0]; ByteBuffer data = plane.getBuffer().duplicate();
+        int base = data.position(), count = 0; double sum = 0, square = 0, edges = 0;
+        for (int y = 8; y < image.getHeight() - 8; y += 8) for (int x = 8; x < image.getWidth() - 8; x += 8) {
+            int at = base + y * plane.getRowStride() + x * plane.getPixelStride();
+            int value = data.get(at) & 255, previous = data.get(at - 8 * plane.getPixelStride()) & 255;
+            sum += value; square += value * value; edges += Math.abs(value - previous); count++;
+        }
+        return new JSONObject().put("mean", sum/count).put("stddev", Math.sqrt(Math.max(0, square/count - sum*sum/count/count)))
+            .put("edge_mean", edges/count).put("sample_count", count);
+    }
+
+    private void requestPhase(float zoom) throws Exception {
+        CaptureRequest.Builder request = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        for (ImageReader reader : readers) request.addTarget(reader.getSurface());
+        request.set(CaptureRequest.CONTROL_ZOOM_RATIO, zoom);
+        String phase = zoom == 10f ? "zoom10" : "zoom1";
+        request.setTag(phase);
+        session.setRepeatingRequest(request.build(), captureCallback, handler);
+        arrivalPhase = phase;
+        phaseStarted = android.os.SystemClock.elapsedRealtime();
+        emit("stream_request", "phase", phase, "zoom", zoom, "template", "PREVIEW", "format", "YUV_420_888");
+    }
+
+    private void saveLuma(Image image, String id) throws Exception {
+        String group = arrivalPhase + "-" + id;
+        Set<Long> selected = selectedSampleTicks.computeIfAbsent(arrivalPhase, k -> new HashSet<>());
+        long elapsed = android.os.SystemClock.elapsedRealtime() - phaseStarted;
+        long timestamp = image.getTimestamp();
+        if (!selected.contains(timestamp) && selected.size() < 2 && elapsed >= 2500 &&
+                elapsed - lastSampleAt.getOrDefault(arrivalPhase, 0L) >= 1500) {
+            selected.add(timestamp); lastSampleAt.put(arrivalPhase, elapsed);
+        }
+        if (!selected.contains(timestamp)) return;
+        int count = saved.getOrDefault(group, 0);
+        if (count >= 2) return;
+        // Arrival phase is advisory: match image timestamp to result timestamp on host.
+        String name = runId + "-" + group + "-" + image.getTimestamp() + ".pgm";
+        File file = new File(report.getParentFile(), name);
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer data = plane.getBuffer().duplicate();
+        int base = data.position(), width = image.getWidth(), height = image.getHeight();
+        byte[] row = new byte[width];
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            output.write(("P5\n" + width + " " + height + "\n255\n").getBytes(StandardCharsets.US_ASCII));
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) row[x] = data.get(base + y * plane.getRowStride() + x * plane.getPixelStride());
+                output.write(row);
+            }
+        }
+        saved.put(group, count + 1);
+        emit("saved_luma", "id", id, "timestamp_ns", image.getTimestamp(), "arrival_phase", arrivalPhase,
+            "file", name, "width", width, "height", height, "row_stride", plane.getRowStride(),
+            "pixel_stride", plane.getPixelStride());
+    }
+
+    private final CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback() {
+        @Override public void onCaptureCompleted(CameraCaptureSession s, CaptureRequest q, TotalCaptureResult r) {
+            if (stopped) return; results++;
+            Map<String, CaptureResult> physical = r.getPhysicalCameraResults();
+            if (physical.containsKey(MAIN) && physical.containsKey(AUX)) pairedResults.add(r.getFrameNumber());
+            if (geometry || results <= 5) {
+                emit("result", "phase", phaseOf(q), "frame", r.getFrameNumber(), "timestamp_ns", String.valueOf(r.get(CaptureResult.SENSOR_TIMESTAMP)),
+                    "physical_results", new JSONArray(physical.keySet()), "request_tag", String.valueOf(q.getTag()));
+                for (Map.Entry<String, CaptureResult> entry : physical.entrySet()) {
+                    Integer state = entry.getValue().get(CaptureResult.CONTROL_AF_STATE);
+                    Float distance = entry.getValue().get(CaptureResult.LENS_FOCUS_DISTANCE);
+                    if (controlled && phaseOf(q).equals("auto") && state != null && (state == 2 || state == 4) && distance != null)
+                        focusedDistances.put(entry.getKey(), distance);
+                    emit("physical_result", "phase", phaseOf(q), "id", entry.getKey(),
+                    "frame", r.getFrameNumber(), "timestamp_ns", String.valueOf(entry.getValue().get(CaptureResult.SENSOR_TIMESTAMP)),
+                    "focal_length", String.valueOf(entry.getValue().get(CaptureResult.LENS_FOCAL_LENGTH)),
+                    "crop", String.valueOf(entry.getValue().get(CaptureResult.SCALER_CROP_REGION)),
+                    "zoom", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_ZOOM_RATIO)),
+                    "exposure_ns", String.valueOf(entry.getValue().get(CaptureResult.SENSOR_EXPOSURE_TIME)),
+                    "frame_duration_ns", String.valueOf(entry.getValue().get(CaptureResult.SENSOR_FRAME_DURATION)),
+                    "rolling_shutter_skew_ns", String.valueOf(entry.getValue().get(CaptureResult.SENSOR_ROLLING_SHUTTER_SKEW)),
+                    "intrinsics", Arrays.toString(entry.getValue().get(CaptureResult.LENS_INTRINSIC_CALIBRATION)),
+                    "af_mode", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_AF_MODE)),
+                    "af_state", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_AF_STATE)),
+                    "focus_diopters", String.valueOf(entry.getValue().get(CaptureResult.LENS_FOCUS_DISTANCE)),
+                    "lens_state", String.valueOf(entry.getValue().get(CaptureResult.LENS_STATE)),
+                    "ae_mode", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_AE_MODE)),
+                    "ae_state", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_AE_STATE)),
+                    "iso", String.valueOf(entry.getValue().get(CaptureResult.SENSOR_SENSITIVITY)),
+                    "fps", String.valueOf(entry.getValue().get(CaptureResult.CONTROL_AE_TARGET_FPS_RANGE)),
+                    "requested_af_mode", controlled ? (phaseOf(q).equals("auto") || !physicalKeys.contains(CaptureRequest.LENS_FOCUS_DISTANCE) ? String.valueOf(afMode(entry.getKey())) : "0") : "not_requested",
+                    "requested_focus_diopters", controlled && !phaseOf(q).equals("auto") && physicalKeys.contains(CaptureRequest.LENS_FOCUS_DISTANCE) ? String.valueOf(manualFocus(entry.getKey(), phaseOf(q))) : "auto",
+                    "requested_iso", controlled ? requestedIso(q, entry.getKey()) : "not_requested",
+                    "request_tag", String.valueOf(q.getTag()));
+                }
+            }
+        }
+        @Override public void onCaptureFailed(CameraCaptureSession s, CaptureRequest q, CaptureFailure failure) {
+            if (!stopped) { emit("capture_failed", "reason", failure.getReason(), "frame", failure.getFrameNumber()); stop("capture_failed"); }
+        }
+    };
+
+    private void stop(String reason) {
+        if (stopped) return; stopped = true;
+        handler.removeCallbacks(timeout);
+        if (session != null) session.close();
+        if (camera != null) camera.close();
+        for (ImageReader reader : readers) reader.close();
+        Set<Long> a = images.getOrDefault(MAIN, Collections.emptySet()), b = images.getOrDefault(AUX, Collections.emptySet());
+        Set<Long> matched = new HashSet<>(a); matched.retainAll(b);
+        emit("summary", "reason", reason, "main_images", a.size(), "aux_images", b.size(), "results", results,
+            "exact_timestamp_matches", matched.size(), "frames_with_both_physical_results", pairedResults.size(),
+            "calibration_validated", false, "depth_validated", false);
+        UI.post(() -> {
+            owner.getApplication().unregisterActivityLifecycleCallbacks(this);
+            synchronized (InAppPortraitPairProbe.class) { if (active == this) active = null; }
+        });
+        // Keep callbacks alive briefly so a late onOpened can close its device.
+        handler.postDelayed(worker::quitSafely, 3000);
+    }
+    @Override public void onActivityPaused(Activity activity) {
+        if (activity == owner) handler.post(() -> stop("owner_paused"));
+    }
+    @Override public void onActivityDestroyed(Activity activity) {
+        if (activity == owner) handler.post(() -> stop("owner_destroyed"));
+    }
+    @Override public void onActivityCreated(Activity a, Bundle b) { }
+    @Override public void onActivityStarted(Activity a) { }
+    @Override public void onActivityResumed(Activity a) { }
+    @Override public void onActivityStopped(Activity a) { }
+    @Override public void onActivitySaveInstanceState(Activity a, Bundle b) { }
+}

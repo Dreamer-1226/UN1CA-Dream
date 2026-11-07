@@ -2,7 +2,7 @@ Subject: [PATCH] Use the active Gemma runtime for diagnostic analysis
 
 --- a/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
 +++ b/backend/java/io/mesalabs/rezoss/nudge/TextBackend.java
-@@ -256,20 +256,7 @@
+@@ -256,20 +256,8 @@
          } finally { runnerLock.unlock(); }
      }
      private String diagnosticLocal(String prompt,Control control)throws Exception {
@@ -20,6 +20,7 @@ Subject: [PATCH] Use the active Gemma runtime for diagnostic analysis
 -            if(process!=null)process.destroyForcibly();control.process(null);
 -            File[] files=job.listFiles();if(files!=null)for(File file:files)file.delete();job.delete();
 -        }
++        if(gemma.count(prompt,control)>700)throw new IOException("context_limit");
 +        return gemma.generate(prompt,256,control);
      }
      String generateLocal(String input,boolean summary,Control control)throws Exception {

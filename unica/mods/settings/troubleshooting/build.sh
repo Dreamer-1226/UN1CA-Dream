@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -euo pipefail
 SOURCE_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+python3 "$SOURCE_DIR/compile-catalog.py"
 SDK="${ANDROID_HOME:-$HOME/Android/Sdk}"
 ANDROID_JAR="${ANDROID_JAR:-$SDK/platforms/android-37.0/android.jar}"
 D8="${D8:-$SDK/build-tools/37.0.0/d8}"

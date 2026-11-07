@@ -1,0 +1,51 @@
+Ask aI — Troubleshooting chat
+
+Uses the active AI Settings backend through the existing signed AIOS service.
+The Qwen API app retains its keys; Settings never reads them. No new provider
+configuration or network permission is added to Settings.
+
+The page uses the existing One UI 9 grouped cards, theme colors and wallpaper
+transparency settings. It supports pasted logs, Android's document picker for
+UTF-8 text/log files up to 1 MiB, editable log sections, selectable answers,
+copy answer, request cancellation and clearing the session.
+
+Each send requires a preview of the exact question, selected log section and
+included conversation. Online sends identify the endpoint and model and need
+explicit consent each time. Existing redaction runs before preview; users must
+still inspect for private data. Backend/model/endpoint changes invalidate the
+reviewed destination. No suggested command or fix runs automatically.
+
+History is held only in memory: at most 12 successful question/answer pairs,
+bounded to 64,000 characters. It survives configuration recreation and returning
+from the chat to Troubleshooting. Closing Troubleshooting or process death clears
+it. Failed or cancelled requests preserve the draft and selected evidence.
+
+Only complete recent pairs that fit are submitted, up to six. The preview states
+how many were omitted. Evidence from included prior questions stays with its
+question. Larger files remain available in sections; they are not silently
+uploaded in full or claimed to have been fully analyzed. Section navigation
+retains edits. Changing between local/online section sizes resets section edits
+to the original redacted attachment.
+After an answer, the Include log checkbox is unchecked to avoid duplicating
+evidence already in the recent conversation. Selecting another section checks it
+again. The send preview always shows which previous evidence is still included.
+
+Conservative budgets reported by the backend:
+  Local: 2,200 serialized input characters, 800-character log sections,
+         700 prompt tokens checked by the runtime, 256 output tokens.
+         The existing 1,024-token runtime context stays unchanged.
+  Online: 12,000 serialized input characters, 8,000-character log sections,
+          1,024 output tokens. These are transport caps, not claims about an
+          arbitrary provider model's actual context size; provider limits apply.
+Longer questions, escaped characters and history consume the same input budget.
+Over-budget requests fail visibly; current evidence is not silently truncated.
+
+Verification (run from repository root):
+  bash unica/mods/settings/troubleshooting/tests/run_chat_tests.sh /path/to/host-org-json.jar
+  source buildenv.sh dm3q
+  bash unica/mods/settings/troubleshooting/build.sh
+  bash unica/mods/rezoss/aioskernel/native-now-nudge/build_rom_backend.sh /tmp/new-chat-backend.apk
+
+Both regenerated Settings patch and rebuilt AIOS backend must be packaged into
+the ROM. An older backend reports that the updated ROM backend is required.
+Host compilation and APK checks do not establish on-device UI or inference.

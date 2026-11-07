@@ -16,6 +16,8 @@ import java.util.concurrent.*;
 
 /** User-reviewed diagnostics. AI output is plain text and never becomes an action request. */
 public final class TroubleshootingActivity extends Activity {
+    private AskAiChat chat;private ChatHistory chatHistory=new ChatHistory();
+    private final android.window.OnBackInvokedCallback back=()->{if(chat!=null)closeChat();else finish();};
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private final ArrayList<View> cards=new ArrayList<>();
     private LinearLayout content,page;private ScrollView rootScroll;
@@ -32,14 +34,21 @@ public final class TroubleshootingActivity extends Activity {
     private boolean owner(){return android.os.Process.myUid()==1000;}
     @Override public void onCreate(Bundle state){super.onCreate(state);setTitle("Troubleshooting");if(getActionBar()!=null)getActionBar().setDisplayHomeAsUpEnabled(true);
         if(!owner()){new AlertDialog.Builder(this).setMessage("Troubleshooting is available to the device owner only.").setPositiveButton("Close",(d,w)->finish()).setOnCancelListener(d->finish()).show();return;}
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,back);
         scanned=getPreferences(0).getBoolean("scanned",false);try{modules=new JSONArray(getPreferences(0).getString("modules","[]"));apps=new JSONArray(getPreferences(0).getString("apps","[]"));}catch(JSONException ignored){}
-        if(getPreferences(0).getInt("scan_schema",0)!=4){modules=new JSONArray();apps=new JSONArray();scanned=false;}
+        if(getPreferences(0).getInt("scan_schema",0)!=5){modules=new JSONArray();apps=new JSONArray();scanned=false;}
         try{lsposedState=new JSONObject(getPreferences(0).getString("lsposed_state","{}"));}catch(JSONException ignored){}
-        draw();
+        if(getLastNonConfigurationInstance() instanceof ChatHistory)chatHistory=(ChatHistory)getLastNonConfigurationInstance();
+        draw();if(state!=null&&state.getBoolean("ask_ai_open"))openChat();
     }
-    @Override public boolean onOptionsItemSelected(MenuItem item){if(item.getItemId()==android.R.id.home){finish();return true;}return super.onOptionsItemSelected(item);}
-    @Override protected void onDestroy(){cancelled=true;if(ai!=null)ai.close();worker.shutdownNow();super.onDestroy();}
-    @Override protected void onResume(){super.onResume();if(content!=null)background();}
+    @Override public Object onRetainNonConfigurationInstance(){return chatHistory;}
+    @Override protected void onSaveInstanceState(Bundle state){state.putBoolean("ask_ai_open",chat!=null);super.onSaveInstanceState(state);}
+    @Override public boolean onOptionsItemSelected(MenuItem item){if(item.getItemId()==android.R.id.home){if(chat!=null)closeChat();else finish();return true;}return super.onOptionsItemSelected(item);}
+    @Override public void onBackPressed(){if(chat!=null)closeChat();else super.onBackPressed();}
+    @Override protected void onDestroy(){cancelled=true;getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(back);if(chat!=null)chat.close();if(ai!=null)ai.close();worker.shutdownNow();super.onDestroy();}
+    @Override protected void onResume(){super.onResume();if(chat!=null)chat.background();else if(content!=null)background();}
+    private void openChat(){if(busy||chat!=null)return;chat=new AskAiChat(this,chatHistory,this::closeChat);}
+    private void closeChat(){if(chat==null)return;chat.close();chat=null;setTitle("Troubleshooting");setContentView(rootScroll);draw();}
     private int dp(int n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private void ui(Runnable work){runOnUiThread(()->{if(!isFinishing()&&!isDestroyed())work.run();});}
     private boolean dark(){return (getResources().getConfiguration().uiMode&0x30)==0x20;}
@@ -121,7 +130,7 @@ public final class TroubleshootingActivity extends Activity {
         }
         for(int i=0;i<apps.length();i++){JSONObject app=apps.optJSONObject(i);if(!app.optBoolean("confirmed"))continue;
             text(app.optString("name"),17).setTypeface(null,Typeface.BOLD);
-            text("Conflicts with UN1CA mod: "+app.optString("unica_mod"),14);
+            text("Conflicts with UN1CA mod: "+app.optString("unica_mod"),14).setTextColor(dark()?0xffff8a80:0xffb3261e);
             button("Review in LSPosed Manager",()->reviewLsposed(app));
         }
         card("LSPosed duplicate features");
@@ -142,6 +151,7 @@ public final class TroubleshootingActivity extends Activity {
             button("View setup results","Configuration, runtime evidence and verification steps",()->info("PIF and TEE setup",setupReport));
             button("Explain setup results with AI","Review the report before using your active backend",this::explainSetup);
         }
+        card("Ask aI");button("Ask aI","Chat with your active AI backend · paste or attach a log",this::openChat);
         card("Analyze logs");text("Find system crashes, app crashes and apps that fail to open. Uses your active AI backend.",15);
         button("Collect recent device log","Read recent logs from this device",this::collect);button("Import log file","Choose a text log to review",this::importLog);
         logProgress=progress("logs");logStatusView=text(logStatus,15);
@@ -175,7 +185,7 @@ public final class TroubleshootingActivity extends Activity {
         try{inventory=ModuleTransport.request("scan",null);}catch(Exception e){inventory=new JSONObject().put("modules",new JSONArray());failed=describe(e);}
         JSONObject savedState=inventory.optJSONObject("lsposed");if(savedState==null)savedState=new JSONObject();JSONArray installed=InstalledModules.scan(this,savedState);JSONObject result=inventory,state=savedState;String issue=failed;
         ui(()->{modules=result.optJSONArray("modules");if(modules==null)modules=new JSONArray();apps=installed;lsposedState=state;warning=issue.isEmpty()?result.optString("warning"):issue;scanned=true;setStatus("Scan completed. Review evidence below.");
-            getPreferences(0).edit().putBoolean("scanned",true).putInt("scan_schema",4).putString("lsposed_state",lsposedState.toString()).putString("modules",modules.toString()).putString("apps",apps.toString()).putString("last_scan",java.text.DateFormat.getDateTimeInstance().format(new Date())).apply();});
+            getPreferences(0).edit().putBoolean("scanned",true).putInt("scan_schema",5).putString("lsposed_state",lsposedState.toString()).putString("modules",modules.toString()).putString("apps",apps.toString()).putString("last_scan",java.text.DateFormat.getDateTimeInstance().format(new Date())).apply();});
     });}
     private void history(String text){String old=getPreferences(0).getString("history","");String value=java.text.DateFormat.getDateTimeInstance().format(new Date())+" — "+text+"\n"+old;if(value.length()>16000)value=value.substring(0,16000);getPreferences(0).edit().putString("history",value).apply();}
     private Set<String> declined(){return new HashSet<>(getPreferences(0).getStringSet("declined_modules",Collections.emptySet()));}
@@ -210,6 +220,7 @@ public final class TroubleshootingActivity extends Activity {
     }
     private void importLog(){activeSection="logs";Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE);try{startActivityForResult(intent,41);}catch(ActivityNotFoundException e){setStatus("No document picker available");draw();}}
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);
+        if(request==43){if(chat!=null&&result==RESULT_OK&&data!=null&&data.getData()!=null)chat.file(data.getData());return;}
         if(request==42&&result==RESULT_OK&&data!=null&&data.getData()!=null){Uri uri=data.getData();String original=raw;run("logs","Saving original log…",()->{try(OutputStream out=getContentResolver().openOutputStream(uri,"wt")){if(out==null)throw new IOException("Cannot write selected document");out.write(original.getBytes("UTF-8"));}ui(()->{setStatus("Original log saved. It may contain sensitive information.");});});return;}
         if(request==41&&result==RESULT_OK&&data!=null&&data.getData()!=null){Uri uri=data.getData();run("logs","Reading selected log…",()->{String value;try(InputStream in=getContentResolver().openInputStream(uri)){value=LogTools.read(in,LogTools.MAX_IMPORT);}if(value.indexOf('\0')>=0)throw new IOException("Select a plain text log; extract compressed or binary files first");ui(()->{raw=value;source="Imported file (device provenance unverified)";analysis="";analysisParts.clear();analysisTitles.clear();expandedAnalysis.clear();setStatus("File imported. Review crash details before analysis.");});});}}
     private void collect(){run("logs","Collecting recent logcat…",()->{

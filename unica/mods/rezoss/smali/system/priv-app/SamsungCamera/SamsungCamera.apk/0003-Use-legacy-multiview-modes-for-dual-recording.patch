@@ -3,7 +3,7 @@ Subject: [PATCH] Use legacy multiview modes for integrated dual recording
 
 Keep DualRecordingVideoMaker callbacks and refresh all cached request maps
 with S23U shooting modes 32/37 instead of 45. Preserve register counts.
-Pair with dm3q FHD30 dual_recording XML allowlists. This shared maker also
+Pair with dm3q dual_recording XML allowlists. This shared maker also
 covers dedicated mode 42 if that mode is exposed later. Runtime experimental.
 
 --- a/smali_classes2/com/samsung/android/camera/core2/maker/DualRecordingVideoMaker.smali

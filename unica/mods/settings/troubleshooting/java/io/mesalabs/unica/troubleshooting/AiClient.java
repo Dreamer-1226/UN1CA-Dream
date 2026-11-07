@@ -46,6 +46,11 @@ final class AiClient implements AutoCloseable {
         b.putBoolean("online_consent",destination.getBoolean("online"));b.putLong("deadline",SystemClock.elapsedRealtime()+45000);
         Bundle result=request(1,b);String content=result.getString("content","");if(content.trim().isEmpty())throw new IOException("No analysis returned");return content;
     }
+    String chat(String input,Bundle destination)throws Exception{
+        Bundle b=new Bundle();b.putString("task","diagnostic_chat");b.putString("input",input);b.putString("destination",destination.getString("destination"));
+        b.putBoolean("online_consent",destination.getBoolean("online"));b.putLong("deadline",SystemClock.elapsedRealtime()+45000);
+        Bundle result=request(1,b);String content=result.getString("content","");if(content.trim().isEmpty())throw new IOException("No answer returned");return content;
+    }
     @Override public void close(){closed=true;main.post(()->{
         if(remote!=null)try{Message m=Message.obtain(null,2);m.replyTo=callback;remote.send(m);}catch(Exception ignored){}
         fail("Analysis cancelled");if(bound){context.unbindService(connection);bound=false;}
