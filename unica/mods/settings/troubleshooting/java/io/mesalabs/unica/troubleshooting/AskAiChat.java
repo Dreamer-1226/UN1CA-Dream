@@ -39,8 +39,9 @@ final class AskAiChat implements AutoCloseable {
         if(!title.isEmpty()){TextView heading=text(title,22,false);heading.setTypeface(Typeface.create("sans-serif-medium",0));box.addView(heading);}return box;
     }
     private Button button(LinearLayout parent,String title,Runnable action){
-        Button b=new Button(host);b.setText(title);b.setTextSize(16);b.setAllCaps(false);b.setMinHeight(dp(52));
-        b.setOnClickListener(v->action.run());parent.addView(b,new LinearLayout.LayoutParams(-1,-2));controls.add(b);return b;
+        Button b=new Button(host);b.setText(title);b.setTextSize(16);b.setAllCaps(false);b.setMinHeight(dp(64));b.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);b.setPaddingRelative(dp(16),dp(16),dp(16),dp(16));
+        b.setBackground(new RippleDrawable(ColorStateList.valueOf(attr(android.R.attr.colorControlHighlight,0x18000000)),null,new ColorDrawable(0xffffffff)));
+        b.setOnClickListener(v->action.run());LinearLayout.LayoutParams row=new LinearLayout.LayoutParams(-1,-2);row.topMargin=dp(8);row.bottomMargin=dp(8);parent.addView(b,row);controls.add(b);return b;
     }
     private EditText editor(String hint,int minLines,int maxLines){EditText e=new EditText(host);e.setHint(hint);e.setTextSize(16);e.setGravity(Gravity.TOP|Gravity.START);e.setMinLines(minLines);e.setMaxLines(maxLines);e.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);e.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);e.setPaddingRelative(dp(8),dp(12),dp(8),dp(12));controls.add(e);return e;}
     private void build(){
@@ -55,7 +56,8 @@ final class AskAiChat implements AutoCloseable {
         LinearLayout evidence=card(body,"Log evidence");
         coverage=text("No log attached",14,true);evidence.addView(coverage);
         button(evidence,"Paste log",this::pasteLog);button(evidence,"Attach text / log file",this::pickFile);
-        log=editor("Review or edit the selected log section",3,10);evidence.addView(log);
+        log=editor("Review or edit the selected log section",3,5);evidence.addView(log);
+        button(evidence,"Expand / collapse log",()->{boolean expanded=log.getMaxLines()>5;log.setMaxLines(expanded?5:Integer.MAX_VALUE);log.setVerticalScrollBarEnabled(!expanded);});
         includeLog=new CheckBox(host);includeLog.setText("Include this log section in the next message");includeLog.setTextSize(16);includeLog.setMinHeight(dp(48));includeLog.setChecked(history.includeLog);includeLog.setOnCheckedChangeListener((b,checked)->history.includeLog=checked);evidence.addView(includeLog);controls.add(includeLog);
         button(evidence,"Previous section",()->section(-1));button(evidence,"Next section",()->section(1));
         button(evidence,"Remove log",()->{history.attachment="";history.attachmentName="";history.edits.clear();history.section=0;includeLog.setChecked(true);loadSection();});
@@ -79,8 +81,15 @@ final class AskAiChat implements AutoCloseable {
     private void renderHistory(){
         for(int i=surfaces.size()-1;i>=0;i--)if(surfaces.get(i).getParent()==messages)surfaces.remove(i);
         messages.removeAllViews();
-        for(ChatHistory.Turn t:history.turns){LinearLayout turn=card(messages,"You");turn.addView(text(t.user,16,false));TextView name=text("Ask aI",18,false);name.setTypeface(Typeface.create("sans-serif-medium",0));turn.addView(name);turn.addView(text(t.answer,16,false));buttonCopy(turn,t.answer);}
+        for(ChatHistory.Turn t:history.turns){LinearLayout turn=card(messages,"You");collapsible(turn,t.user,16);TextView name=text("Ask aI",18,false);name.setTypeface(Typeface.create("sans-serif-medium",0));turn.addView(name);collapsible(turn,t.answer,16);buttonCopy(turn,t.answer);}
         background();
+    }
+    private void collapsible(LinearLayout parent,String value,int size){
+        TextView view=text(value,size,false);view.setMaxLines(5);parent.addView(view);
+        if(value.length()>180||value.split("\\n",-1).length>5){
+            Button toggle=button(parent,"Show more",()->{});controls.remove(toggle);
+            toggle.setOnClickListener(v->{boolean expand=view.getMaxLines()==5;view.setMaxLines(expand?Integer.MAX_VALUE:5);toggle.setText(expand?"Show less":"Show more");});
+        }
     }
     private void buttonCopy(LinearLayout parent,String answer){Button copy=new Button(host);copy.setAllCaps(false);copy.setText("Copy answer");copy.setMinHeight(dp(48));copy.setOnClickListener(v->{((ClipboardManager)host.getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Ask aI",answer));Toast.makeText(host,"Answer copied",Toast.LENGTH_SHORT).show();});parent.addView(copy);}
     private void show(AlertDialog dialog){dialogs.add(dialog);dialog.setOnDismissListener(d->dialogs.remove(dialog));dialog.show();}
@@ -103,7 +112,7 @@ final class AskAiChat implements AutoCloseable {
         Bundle current=candidate.config();
         if(current.getInt("chat_protocol")!=1)throw new IOException("Install the updated ROM AI backend to enable chat");
         if(!current.getBoolean("ready"))throw new IOException("Prepare the selected model or provider in AI Settings first");
-        ui(ticket,()->{config=current;backend.setText(destination(current)+"\nRequest budget: "+current.getInt("chat_max_chars")+" characters including recent history; up to "+current.getInt("chat_output_tokens")+" output tokens."+(current.getBoolean("online")?" Conservative online budget; provider limits also apply.":" Local context: 1,024 tokens. Exact token checks may require a shorter section."));
+        ui(ticket,()->{config=current;backend.setText(destination(current)+"\nRequest budget: "+current.getInt("chat_max_chars")+" characters including recent history; up to "+current.getInt("chat_output_tokens")+" output tokens."+(current.getBoolean("online")?" Conservative online budget; provider limits also apply.":" Local context: "+current.getInt("chat_context_tokens")+" tokens. Exact token checks may require a shorter section."));
             if(history.sectionChars!=chunk()){history.edits.clear();history.section=0;history.sectionChars=chunk();}loadSection();status.setText("Backend ready. Review your message and log before sending.");});
     });}
     private String destination(Bundle b){return (b.getBoolean("online")?"Online — ":"On device — ")+b.getString("model","")+(b.getBoolean("online")?"\n"+b.getString("endpoint",""):"");}
@@ -138,7 +147,7 @@ final class AskAiChat implements AutoCloseable {
             Bundle selected=new Bundle(config);
             LinearLayout preview=new LinearLayout(host);preview.setOrientation(1);preview.setPadding(dp(24),dp(12),dp(24),dp(16));
             preview.addView(text(destination(selected)+"\n\n"+request.included+" previous exchanges included; "+request.omitted+" older exchanges omitted to fit the budget. Only the payload below is sent. Review for sensitive data.",15,true));
-            TextView payload=text(request.preview,14,false);preview.addView(payload);ScrollView pane=new ScrollView(host);pane.addView(preview);
+            collapsible(preview,request.preview,14);ScrollView pane=new ScrollView(host);pane.addView(preview);
             show(new AlertDialog.Builder(host).setTitle(selected.getBoolean("online")?"Send this conversation online?":"Review local AI request").setView(pane)
                 .setPositiveButton(selected.getBoolean("online")?"Agree and send online":"Ask on device",(d,w)->send(request,selected)).setNegativeButton("Back to edit",null).create());
         }catch(IllegalArgumentException e){status.setText(e.getMessage());}

@@ -1,10 +1,19 @@
 dm3q wide-pair Portrait1..3x source trial
 
-Active source:
+Status 2026-11-07: failed on device and disabled in source. Patch0006 now has
+the .patch.disabled suffix and is not applied. A separate0007 baseline enables
+only1..2x and starts sessions at1x; see PORTRAIT-WIDE-BASELINE.txt. The shared
+feature flag is true for0007, not permission to restore0006. The connected
+device has not been changed by this source implementation.
+The intended behavior and original validation below describe the failed trial,
+not a working feature. Do not re-enable it merely to retry3x. See
+PORTRAIT-PROVIDER-PORT.txt for native policy/crop findings and remaining gates.
+
+Retained trial source:
   target/dm3q/camera/camera-feature.xml
-    SUPPORT_PORTRAIT_SEAMLESS_ZOOM=true
+    SUPPORT_PORTRAIT_SEAMLESS_ZOOM=true (for baseline0007 only)
   unica/mods/rezoss/smali/system/priv-app/SamsungCamera/SamsungCamera.apk/
-    0006-Trial-wide-pair-Portrait-zoom-1-to-3.patch
+    0006-Trial-wide-pair-Portrait-zoom-1-to-3.patch.disabled
 
 Behavior intended for the rebuilt ROM:
   Rear Photo Portrait uses existing logical camera23 and DualBokehPhotoMaker.
@@ -46,7 +55,7 @@ Read-only runtime checks (Windows ADB from WSL):
   Verify rear Portrait stays on camera23 throughout. A camera20/21/24 route,
   camera recovery or differing preview/saved crop is not a successful trial.
 
-Rollback in source:
+Historical trial rollback (use PORTRAIT-WIDE-BASELINE.txt for current0007):
   Set SUPPORT_PORTRAIT_SEAMLESS_ZOOM back tofalse in the dm3q camera XML and
   rebuild. The helper checks that flag, so routing/bounds/maker overrides become
   inactive. Alternatively rename0006 to0006-....patch.disabled and also set the

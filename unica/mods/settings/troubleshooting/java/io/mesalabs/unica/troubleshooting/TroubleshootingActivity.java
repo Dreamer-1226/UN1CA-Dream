@@ -159,8 +159,8 @@ public final class TroubleshootingActivity extends Activity {
         cancelAnalysis=button("Cancel analysis",()->{cancelled=true;if(ai!=null)ai.close();setStatus("Analysis cancellation requested.");});cancelAnalysis.setVisibility(busy&&analyzing?View.VISIBLE:View.GONE);cancelAnalysis.setEnabled(true);
         if(!analysis.isEmpty()){text("AI findings — verify before acting",17).setTypeface(null,Typeface.BOLD);text(analysis,14);
             for(int i=0;i<analysisParts.size();i++){
-                final int index=i;final TextView details=text(analysisParts.get(i),15);details.setVisibility(expandedAnalysis.contains(i)?View.VISIBLE:View.GONE);
-                ActionRow toggle=button((expandedAnalysis.contains(i)?"▾ ":"▸ ")+analysisTitles.get(i),()->{boolean show=details.getVisibility()!=View.VISIBLE;details.setVisibility(show?View.VISIBLE:View.GONE);if(show)expandedAnalysis.add(index);else expandedAnalysis.remove(index);});
+                final int index=i;final TextView details=text(analysisParts.get(i),15);details.setMaxLines(expandedAnalysis.contains(i)?Integer.MAX_VALUE:5);
+                ActionRow toggle=button((expandedAnalysis.contains(i)?"▾ ":"▸ ")+analysisTitles.get(i),()->{boolean show=details.getMaxLines()==5;details.setMaxLines(show?Integer.MAX_VALUE:5);if(show)expandedAnalysis.add(index);else expandedAnalysis.remove(index);});
                 page.removeView(details);page.addView(details);
             }}
         card("History and restoration");button("Action history","Review previous module actions",()->info("Action history",getPreferences(0).getString("history","No actions recorded.")));button("Restoration help","Undo changes made by Troubleshooting",()->info("Restoration help","Restore removes only unchanged disable markers created by this menu. For recovery restoration, remove only the selected module’s disable file whose contents start with ‘UN1CA troubleshooting v1’. Module files and app data are preserved."));
@@ -198,7 +198,7 @@ public final class TroubleshootingActivity extends Activity {
     private void accepted(String id){Set<String> ids=declined();ids.remove(id);getPreferences(0).edit().putStringSet("declined_modules",ids).apply();}
     private void decline(String what){activeSection="scan";Set<String> ids=declined();ids.add(what);getPreferences(0).edit().putStringSet("declined_modules",ids).apply();history("Kept enabled: "+what);setStatus("Suggestion declined; finding remains for review.");draw();}
     private void confirmModule(String op,JSONObject m){boolean disable=op.equals("disable");new AlertDialog.Builder(this).setTitle(disable?"Disable this module?":"Restore this module?")
-        .setMessage(m.optString("id")+" in "+m.optString("stage")+"\n\n"+"Related UN1CA mod: "+relatedMods(m)+"\n"+(disable?(duplicate(m)?"This module serves the same purpose as a built-in UN1CA feature. This does not prove it caused a failure, or that the built-in feature is enabled. Choose which implementation to use. ":"The module changes files related to a built-in feature. This does not prove it caused a failure. ")+"Creates a reversible disable marker. Disabling a boot-critical module can prevent boot or remove a required feature. Attestation-module changes may affect apps that depend on their keys.":"Removes this menu's disable marker. Re-enabling the module can bring back a failure.")+" Restart required. Other modules and app data are preserved.")
+        .setMessage(m.optString("id")+" in "+m.optString("stage")+"\n\nRelated UN1CA mod: "+relatedMods(m)+".\n"+(disable?(duplicate(m)?"This module serves the same purpose as a built-in UN1CA feature.":"This module changes files related to a built-in UN1CA feature."):"Restore this module by removing this menu’s disable marker."))
         .setPositiveButton(disable?"Disable":"Restore",(d,w)->run("scan","Updating module…",()->{
             ModuleTransport.request(op,m);accepted("root:"+m.optString("stage")+"/"+m.optString("id"));getPreferences(0).edit().putBoolean("restart",true).putInt("restart_boot",android.provider.Settings.Global.getInt(getContentResolver(),"boot_count",-1)).apply();
             history(op+": "+m.optString("stage")+"/"+m.optString("id"));JSONObject fresh=ModuleTransport.request("scan",null);
@@ -206,8 +206,8 @@ public final class TroubleshootingActivity extends Activity {
         })).setNegativeButton(disable?"Keep enabled":"Cancel",(d,w)->{if(disable)decline("root:"+m.optString("stage")+"/"+m.optString("id"));}).show();}
     private void restartOffer(){new AlertDialog.Builder(this).setTitle("Restart required").setMessage("Restart to apply the module change. Loaded hooks may still be active.").setPositiveButton("Restart now",(d,w)->restart()).setNegativeButton("Later",null).show();}
     private void restart(){new AlertDialog.Builder(this).setTitle("Restart device?").setMessage("Save your work before restarting.").setPositiveButton("Restart",(d,w)->{try{((PowerManager)getSystemService(POWER_SERVICE)).reboot(null);}catch(Exception e){setStatus(describe(e));draw();}}).setNegativeButton("Cancel",null).show();}
-    private void reviewLsposed(JSONObject app){new AlertDialog.Builder(this).setTitle("Review LSPosed scope")
-        .setMessage((app.optBoolean("duplicate")?"Same purpose as UN1CA’s "+app.optString("unica_mod")+". This does not prove a failure, or that the built-in feature is configured. Choose which implementation to use.\n\n":"Confirmed conflict with UN1CA’s "+app.optString("unica_mod")+".\n\n")+"Disable "+app.optString("package")+" or its relevant target scope"+(app.optString("scope").isEmpty()?"":" ("+app.optString("scope")+")")+" in LSPosed Manager, then return here, scan again and restart. Opening the manager does not verify a change. This menu does not change private LSPosed settings.")
+    private void reviewLsposed(JSONObject app){new AlertDialog.Builder(this).setTitle("Review LSPosed scope.")
+        .setMessage(app.optBoolean("duplicate")?"This module serves the same purpose as a built-in UN1CA feature.":"This module conflicts with a built-in UN1CA feature.")
         .setPositiveButton("Open manager",(d,w)->{
             accepted("lsposed:"+app.optString("package"));history("Accepted LSPosed review: "+app.optString("package")+"; actual scope remains unverified");
             String[] candidates={"org.lsposed.manager"};boolean opened=false;
@@ -225,8 +225,17 @@ public final class TroubleshootingActivity extends Activity {
         if(request==41&&result==RESULT_OK&&data!=null&&data.getData()!=null){Uri uri=data.getData();run("logs","Reading selected log…",()->{String value;try(InputStream in=getContentResolver().openInputStream(uri)){value=LogTools.read(in,LogTools.MAX_IMPORT);}if(value.indexOf('\0')>=0)throw new IOException("Select a plain text log; extract compressed or binary files first");ui(()->{raw=value;source="Imported file (device provenance unverified)";analysis="";analysisParts.clear();analysisTitles.clear();expandedAnalysis.clear();setStatus("File imported. Review crash details before analysis.");});});}}
     private void collect(){run("logs","Collecting recent logcat…",()->{
         File folder=new File(getCacheDir(),"troubleshooting");if(!folder.isDirectory()&&!folder.mkdirs())throw new IOException("Cannot prepare log storage");
-        File file=File.createTempFile("logcat-",".txt",folder);Process process=new ProcessBuilder("/system/bin/logcat","-b","all","-d","-t","4000","-v","threadtime").redirectErrorStream(true).redirectOutput(file).start();
-        try{if(!process.waitFor(8,TimeUnit.SECONDS))throw new IOException("Log collection timed out");if(process.exitValue()!=0)throw new IOException("Logcat access unavailable");String value;try(InputStream in=new FileInputStream(file)){value=LogTools.read(in,LogTools.MAX_IMPORT);}ui(()->{raw=value;source="This device — recent logcat";analysis="";analysisParts.clear();analysisTitles.clear();expandedAnalysis.clear();setStatus("Recent log collected; older or persistent crash evidence may be absent.");});}
+        File file=File.createTempFile("logcat-",".txt",folder);Process process=new ProcessBuilder("/system/bin/logcat","-b","all","-d","-t","20000","-v","threadtime").redirectErrorStream(true).redirectOutput(file).start();
+        try{if(!process.waitFor(8,TimeUnit.SECONDS))throw new IOException("Log collection timed out");if(process.exitValue()!=0)throw new IOException("Logcat access unavailable");String value;try(InputStream in=new FileInputStream(file)){value=LogTools.read(in,LogTools.MAX_IMPORT);}
+            File crash=File.createTempFile("crash-",".txt",folder);
+            Process crashProcess=new ProcessBuilder("/system/bin/logcat","-b","crash","-d","-t","6000","-v","threadtime").redirectErrorStream(true).redirectOutput(crash).start();
+            try{
+                if(!crashProcess.waitFor(8,TimeUnit.SECONDS))throw new IOException("Crash buffer collection timed out");
+                if(crashProcess.exitValue()!=0)throw new IOException("Crash buffer access unavailable");
+                String crashText;try(InputStream in=new FileInputStream(crash)){crashText=LogTools.read(in,LogTools.MAX_IMPORT);}
+                value=value+"\n=== Dedicated crash buffer (may duplicate recent logs) ===\n"+crashText;
+            }finally{crashProcess.destroyForcibly();crash.delete();}
+            final String captured=value;ui(()->{raw=captured;source="This device — recent logcat and dedicated crash buffer";analysis="";analysisParts.clear();analysisTitles.clear();expandedAnalysis.clear();setStatus("Recent log collected; older or persistent crash evidence may be absent.");});}
         finally{process.destroyForcibly();file.delete();}
     });}
     private void checkSetup(){run("setup","Checking PIF settings, TEE profiles and runtime evidence…",()->{
@@ -250,8 +259,8 @@ public final class TroubleshootingActivity extends Activity {
         for(int i=0;i<selection.chunks.size();i++){
             final int index=i;CheckBox check=new CheckBox(this);check.setText("Include log section "+(i+1));check.setChecked(true);list.addView(check);selected.add(check);
             String name=i<selection.titles.size()?selection.titles.get(i):"Crash details";
-            EditText editor=new EditText(this);editor.setText(selection.chunks.get(i));editor.setTextSize(13);editor.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);editor.setVisibility(View.GONE);editors.add(editor);
-            ActionRow expand=new ActionRow(name+" — section "+(index+1),setupReview?"Tap to expand or collapse setup details":"Tap to expand or collapse crash details",()->{boolean show=editor.getVisibility()!=View.VISIBLE;editor.setVisibility(show?View.VISIBLE:View.GONE);});list.addView(expand);list.addView(editor);
+            EditText editor=new EditText(this);editor.setText(selection.chunks.get(i));editor.setTextSize(13);editor.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);editor.setMaxLines(5);editors.add(editor);
+            ActionRow expand=new ActionRow(name+" — section "+(index+1),setupReview?"Tap to expand or collapse setup details":"Tap to expand or collapse crash details",()->{boolean show=editor.getMaxLines()==5;editor.setMaxLines(show?Integer.MAX_VALUE:5);});list.addView(expand);list.addView(editor);
         }
         ScrollView scroll=new ScrollView(this);scroll.addView(list);
         AlertDialog dialog=new AlertDialog.Builder(this).setTitle(online?"Review before sending online":setupReview?"Review setup report":"Review crash details").setView(scroll)

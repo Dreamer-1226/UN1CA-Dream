@@ -1,0 +1,82 @@
+dm3q continuous wide-pair Portrait1..2x baseline - 2026-11-07
+
+Build status and scope
+  This is the first controlled1..2x baseline for the existing camera23 pair.
+  It is not yet a runtime-validated feature. The failed1..3x patch0006 is now
+  .patch.disabled and must remain disabled. Source patch0007 replaces its
+  routing experiment, rather than applying on top of it. Never enable both.
+  The feature flag SUPPORT_PORTRAIT_SEAMLESS_ZOOM=true is for0007 only.
+
+Source patch
+  unica/mods/rezoss/smali/system/priv-app/SamsungCamera/SamsungCamera.apk/
+    0007-Stage-wide-pair-Portrait-baseline-1-to-2.patch
+
+Behavior after a normal ROM rebuild
+  Rear Photo Portrait selects logical camera23 and DualBokehPhotoMaker.
+  Only1x/2x lens positions and continuous intermediate zoom are exposed;3x and
+  second-tele shortcuts are skipped in the rear seamless UI. The optical3x
+  button is intentionally unavailable during this baseline.
+  Camera23 PORTRAIT bounds are restricted to1..2, matching the inspected
+  Samsung per-mode provider metadata. Other capability bounds are unchanged.
+  Rear session setup starts at1x, ignoring saved Portrait zoom and the old3x
+  value. Both session parameters (ud/p.Y0) and initial requests (ud/p.o1) use
+  the same ud/z.l controller value. Reopening/reconfiguring starts at1x again.
+  Live requests in x8/p.n are defensively clamped to1000..2000 only when the
+  baseline is enabled, ZoomType is PORTRAIT, and the capability camera ID is23.
+  The Samsung scaler.zoomRatio value and aligned center crop are both derived
+  from that clamped value. No misleading3x label with a2x HAL crop is added.
+  Front Portrait keeps its supplied initialization zoom; it is not forced1x.
+  All existing method register declarations are preserved. The new single-
+  method helper is placed in classes5 because classes2 is near its DEX limit.
+  Existing Dual Recording patches remain applied. No native provider library,
+  bokeh plugin, calibration, physical handoff,10x path, or crop API is changed.
+
+Runtime acceptance gates -- required before extending to3x
+  1. Build/flash through the normal ROM workflow. Do not clear Camera data.
+     Open rear Photo Portrait. It must initialize at1x even if the prior ROM
+     remembered3x. Confirm1x/2x controls and no3x/10x control in this baseline.
+  2. Use a stationary subject with a detailed background and adequate light.
+     Begin with flash off and ordinary Portrait, without Night processing, to
+     isolate the base path. Capture at1x first. Stop if Camera reports an error.
+  3. Move smoothly1 ->1.25 ->1.5 ->1.75 ->2x, then back to1x. Capture at1x,
+     1.5x and2x. Logical23 and its main56/sub58 pair must remain selected.
+     A pair configuration log alone does not prove both cameras became active;
+     inspect available provider state/result evidence and successful depth.
+  4. Compare preview versus saved framing, subject boundaries and blur strength.
+     Check Gallery Portrait blur adjustment/depth editing where offered. A
+     saved ordinary photo, mismatched framing or broken depth is a failed gate.
+  5. Leave Portrait at2x, reopen it, and confirm a fresh1x session. Repeat after
+     switching rear/front. Regress normal Photo, Video and Dual Recording.
+  6. Any provider abort, CHI recovery, zero active mask, invalid master/history,
+     camera-ID switch, or capture/depth mismatch fails the baseline. Keep3x
+     disabled; reset-only behavior is not evidence that the state bug is fixed.
+
+Read-only evidence collection after testing
+  Create a fresh host directory for each run to preserve existing captures:
+    BASELINE_LOG_DIR="$(mktemp -d /tmp/portrait-baseline-run.XXXXXX)"
+    /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF logcat -d -b all -v threadtime > "$BASELINE_LOG_DIR/logcat.txt"
+    /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF shell dumpsys media.camera > "$BASELINE_LOG_DIR/camera.txt"
+    /mnt/c/platform-tools/adb.exe -s R5CW72R7SDF logcat -d -b crash -v threadtime > "$BASELINE_LOG_DIR/crash.txt"
+    rg 'DualBokehPhotoMaker|initialZoomRatio|scaler.zoomRatio|scaler.cropRegion|Not enough cameras|recommended states|UpdateCameraStateMap|SIGABRT|Serious device error' "$BASELINE_LOG_DIR/logcat.txt"
+  Compare timestamps with this run; old crash-buffer entries are not new failures.
+  Retain representative full-resolution Portrait photos for framing/depth review.
+
+Rollback
+  Set SUPPORT_PORTRAIT_SEAMLESS_ZOOM=false in target/dm3q/camera/camera-feature.xml
+  and rebuild. This disables baseline routing, bounds and live request guards
+  together and restores the supplied static Portrait behavior. Keep0006 disabled.
+  Do not disable0007 alone while leaving the feature flag true: the unadapted
+  newer maker/routing path would become selectable again.
+
+Next stage
+  No automatic3x promotion is implemented. Passing this baseline is necessary,
+  but extending to3x still requires provider state/history and synchronized
+  image/depth crop handling described in PORTRAIT-PROVIDER-PORT.txt. Do not
+  simply restore0006 or widen0007's max to3.
+
+Host validation and backups
+  out/archived/portrait-wide-baseline-20261107/
+  See verification.json and validation.log for the exact source APK, active
+  patch hashes, patch application checks, registers and temporary APK build.
+  The temporary APK is unsigned and is not a direct user-installable update.
+  A successful host build is not phone preview/capture/depth validation.

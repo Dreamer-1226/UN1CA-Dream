@@ -1057,7 +1057,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$0.smali 
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$0.smali
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,50 @@
 +.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$0;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
@@ -1069,57 +1069,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$run$12"
-+    proto = "()V"
-+.end annotation
-+
-+
-+# instance fields
-+.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+
-+# direct methods
-+.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
-+    .registers 2
-+
-+    .line 0
-+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-+
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    return-void
-+.end method
-+
-+
-+# virtual methods
-+.method public final run()V
-+    .registers 2
-+
-+    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$12$io-mesalabs-unica-troubleshooting-AskAiChat()V
-+
-+    return-void
-+.end method
-
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali
-new file mode 100644
---- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali
-@@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$1;
-+.super Ljava/lang/Object;
-+.source "D8$$SyntheticClass"
-+
-+# interfaces
-+.implements Ljava/lang/Runnable;
-+
-+
-+# annotations
-+.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
-+    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$run$11"
++    method = "lambda$file$19"
 +    proto = "(Ljava/lang/String;)V"
 +.end annotation
 +
@@ -1137,9 +1087,9 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;->f$1:Ljava/lang/String;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$1:Ljava/lang/String;
 +
 +    return-void
 +.end method
@@ -1150,13 +1100,57 @@ new file mode 100644
 +    .registers 3
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;->f$1:Ljava/lang/String;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;->f$1:Ljava/lang/String;
 +
-+    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$11$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
++    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$file$19$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
 +
 +    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$1.smali
+@@ -0,0 +1,38 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$1;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Landroid/view/View$OnApplyWindowInsetsListener;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$build$1"
++    proto = "(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;"
++.end annotation
++
++
++# direct methods
++.method public synthetic constructor <init>()V
++    .registers 1
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final onApplyWindowInsets(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;
++    .registers 3
++
++    .line 0
++    invoke-static {p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$1(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;
++
++    move-result-object p1
++
++    return-object p1
 +.end method
 
 diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$10.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$10.smali
@@ -1175,7 +1169,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$4"
++    method = "lambda$build$5"
 +    proto = "()V"
 +.end annotation
 +
@@ -1204,7 +1198,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$10;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$4$io-mesalabs-unica-troubleshooting-AskAiChat()V
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$5$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +
 +    return-void
 +.end method
@@ -1225,7 +1219,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$5"
++    method = "lambda$build$6"
 +    proto = "()V"
 +.end annotation
 +
@@ -1254,7 +1248,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$11;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$5$io-mesalabs-unica-troubleshooting-AskAiChat()V
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$6$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +
 +    return-void
 +.end method
@@ -1313,58 +1307,8 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$13.smali
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$13.smali
-@@ -0,0 +1,44 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$13;
-+.super Ljava/lang/Object;
-+.source "D8$$SyntheticClass"
-+
-+# interfaces
-+.implements Ljava/lang/Runnable;
-+
-+
-+# annotations
-+.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
-+    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "cancel"
-+    proto = "()V"
-+.end annotation
-+
-+
-+# instance fields
-+.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+
-+# direct methods
-+.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
-+    .registers 2
-+
-+    .line 0
-+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-+
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    return-void
-+.end method
-+
-+
-+# virtual methods
-+.method public final run()V
-+    .registers 2
-+
-+    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$zZGhihcfBxlPBlAoVMh0gTJZWUc(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
-+
-+    return-void
-+.end method
-
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali
-new file mode 100644
---- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali
 @@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$14;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$13;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1375,7 +1319,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$show$9"
++    method = "lambda$show$12"
 +    proto = "(Landroid/app/AlertDialog;Landroid/content/DialogInterface;)V"
 +.end annotation
 +
@@ -1393,9 +1337,9 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$1:Landroid/app/AlertDialog;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$1:Landroid/app/AlertDialog;
 +
 +    return-void
 +.end method
@@ -1406,21 +1350,21 @@ new file mode 100644
 +    .registers 4
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$1:Landroid/app/AlertDialog;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;->f$1:Landroid/app/AlertDialog;
 +
-+    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$show$9$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/app/AlertDialog;Landroid/content/DialogInterface;)V
++    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$show$12$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/app/AlertDialog;Landroid/content/DialogInterface;)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$14.smali
 @@ -0,0 +1,56 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$15;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$14;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1431,7 +1375,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$run$13"
++    method = "lambda$run$16"
 +    proto = "(Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V"
 +.end annotation
 +
@@ -1451,11 +1395,11 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$1:Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$1:Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
 +
-+    iput p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$2:I
++    iput p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$2:I
 +
 +    return-void
 +.end method
@@ -1466,23 +1410,23 @@ new file mode 100644
 +    .registers 4
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$1:Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$1:Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
 +
-+    iget v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$2:I
++    iget v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;->f$2:I
 +
-+    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$13$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
++    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$16$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$15.smali
 @@ -0,0 +1,44 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$16;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$15;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1509,7 +1453,7 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$0:Ljava/lang/Runnable;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$0:Ljava/lang/Runnable;
 +
 +    return-void
 +.end method
@@ -1520,19 +1464,19 @@ new file mode 100644
 +    .registers 3
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$0:Ljava/lang/Runnable;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;->f$0:Ljava/lang/Runnable;
 +
 +    invoke-static {v0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$button$0(Ljava/lang/Runnable;Landroid/view/View;)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$16.smali
 @@ -0,0 +1,56 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$17;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$16;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1543,7 +1487,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$review$18"
++    method = "lambda$review$21"
 +    proto = "(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;Landroid/content/DialogInterface;I)V"
 +.end annotation
 +
@@ -1563,11 +1507,11 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$1:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$1:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
 +
-+    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$2:Landroid/os/Bundle;
++    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$2:Landroid/os/Bundle;
 +
 +    return-void
 +.end method
@@ -1578,23 +1522,23 @@ new file mode 100644
 +    .registers 6
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$1:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$1:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
 +
-+    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$2:Landroid/os/Bundle;
++    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;->f$2:Landroid/os/Bundle;
 +
-+    invoke-virtual {v0, v1, v2, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$review$18$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;Landroid/content/DialogInterface;I)V
++    invoke-virtual {v0, v1, v2, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$review$21$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;Landroid/content/DialogInterface;I)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$17.smali
 @@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$17;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1605,7 +1549,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$refresh$15"
++    method = "lambda$refresh$18"
 +    proto = "(Lio/mesalabs/unica/troubleshooting/AiClient;I)V"
 +.end annotation
 +
@@ -1623,9 +1567,9 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
 +    return-void
 +.end method
@@ -1636,11 +1580,61 @@ new file mode 100644
 +    .registers 4
 +
 +    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
++
++    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$refresh$18$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;I)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$18.smali
+@@ -0,0 +1,44 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$run$15"
++    proto = "()V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    .registers 2
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run()V
++    .registers 2
++
++    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
-+
-+    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$refresh$15$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;I)V
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$15$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +
 +    return-void
 +.end method
@@ -1649,8 +1643,114 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$19.smali
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$19.smali
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,50 @@
 +.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$19;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$run$14"
++    proto = "(Ljava/lang/String;)V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++.field public final synthetic f$1:Ljava/lang/String;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
++    .registers 3
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$1:Ljava/lang/String;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run()V
++    .registers 3
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$1:Ljava/lang/String;
++
++    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$run$14$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali
+@@ -0,0 +1,44 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$2;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "cancel"
++    proto = "()V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    .registers 2
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run()V
++    .registers 2
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$zZGhihcfBxlPBlAoVMh0gTJZWUc(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali
+@@ -0,0 +1,62 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$20;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1661,7 +1761,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$send$20"
++    method = "lambda$send$23"
 +    proto = "(Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;I)V"
 +.end annotation
 +
@@ -1683,13 +1783,13 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
-+    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$2:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
++    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$2:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
 +
-+    iput-object p4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$3:Landroid/os/Bundle;
++    iput-object p4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$3:Landroid/os/Bundle;
 +
 +    return-void
 +.end method
@@ -1700,127 +1800,15 @@ new file mode 100644
 +    .registers 6
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
-+
-+    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$2:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
-+
-+    iget-object v3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;->f$3:Landroid/os/Bundle;
-+
-+    invoke-virtual {v0, v1, v2, v3, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$send$20$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;I)V
-+
-+    return-void
-+.end method
-
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali
-new file mode 100644
---- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$2.smali
-@@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$2;
-+.super Ljava/lang/Object;
-+.source "D8$$SyntheticClass"
-+
-+# interfaces
-+.implements Ljava/lang/Runnable;
-+
-+
-+# annotations
-+.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
-+    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$file$16"
-+    proto = "(Ljava/lang/String;)V"
-+.end annotation
-+
-+
-+# instance fields
-+.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+.field public final synthetic f$1:Ljava/lang/String;
-+
-+
-+# direct methods
-+.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
-+    .registers 3
-+
-+    .line 0
-+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-+
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$1:Ljava/lang/String;
-+
-+    return-void
-+.end method
-+
-+
-+# virtual methods
-+.method public final run()V
-+    .registers 3
-+
-+    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;->f$1:Ljava/lang/String;
-+
-+    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$file$16$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
-+
-+    return-void
-+.end method
-
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali
-new file mode 100644
---- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$20.smali
-@@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$20;
-+.super Ljava/lang/Object;
-+.source "D8$$SyntheticClass"
-+
-+# interfaces
-+.implements Ljava/lang/Runnable;
-+
-+
-+# annotations
-+.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
-+    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$refresh$14"
-+    proto = "(Landroid/os/Bundle;)V"
-+.end annotation
-+
-+
-+# instance fields
-+.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+.field public final synthetic f$1:Landroid/os/Bundle;
-+
-+
-+# direct methods
-+.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/os/Bundle;)V
-+    .registers 3
-+
-+    .line 0
-+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-+
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$1:Landroid/os/Bundle;
-+
-+    return-void
-+.end method
-+
-+
-+# virtual methods
-+.method public final run()V
-+    .registers 3
-+
-+    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$1:Landroid/os/Bundle;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$1:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
-+    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$refresh$14$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/os/Bundle;)V
++    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$2:Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;
++
++    iget-object v3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;->f$3:Landroid/os/Bundle;
++
++    invoke-virtual {v0, v1, v2, v3, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$send$23$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;I)V
 +
 +    return-void
 +.end method
@@ -1841,7 +1829,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$6"
++    method = "lambda$build$7"
 +    proto = "(Landroid/content/DialogInterface;I)V"
 +.end annotation
 +
@@ -1870,7 +1858,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$21;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$6$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/content/DialogInterface;I)V
++    invoke-virtual {v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$7$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/content/DialogInterface;I)V
 +
 +    return-void
 +.end method
@@ -1879,7 +1867,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$22.smali
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$22.smali
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,50 @@
 +.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$22;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
@@ -1891,7 +1879,63 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$ui$10"
++    method = "lambda$refresh$17"
++    proto = "(Landroid/os/Bundle;)V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++.field public final synthetic f$1:Landroid/os/Bundle;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/os/Bundle;)V
++    .registers 3
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$1:Landroid/os/Bundle;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run()V
++    .registers 3
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$1:Landroid/os/Bundle;
++
++    invoke-virtual {v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$refresh$17$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/os/Bundle;)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali
+@@ -0,0 +1,56 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$23;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$ui$13"
 +    proto = "(ILjava/lang/Runnable;)V"
 +.end annotation
 +
@@ -1911,11 +1955,11 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$1:I
++    iput p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$1:I
 +
-+    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$2:Ljava/lang/Runnable;
++    iput-object p3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$2:Ljava/lang/Runnable;
 +
 +    return-void
 +.end method
@@ -1926,23 +1970,23 @@ new file mode 100644
 +    .registers 4
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$1:I
++    iget v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$1:I
 +
-+    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;->f$2:Ljava/lang/Runnable;
++    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$2:Ljava/lang/Runnable;
 +
-+    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$ui$10$io-mesalabs-unica-troubleshooting-AskAiChat(ILjava/lang/Runnable;)V
++    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$ui$13$io-mesalabs-unica-troubleshooting-AskAiChat(ILjava/lang/Runnable;)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$23.smali
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali
 @@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$23;
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$24;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
@@ -1953,7 +1997,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$buttonCopy$8"
++    method = "lambda$buttonCopy$11"
 +    proto = "(Ljava/lang/String;Landroid/view/View;)V"
 +.end annotation
 +
@@ -1971,9 +2015,9 @@ new file mode 100644
 +    .line 0
 +    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$1:Ljava/lang/String;
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$1:Ljava/lang/String;
 +
 +    return-void
 +.end method
@@ -1984,67 +2028,11 @@ new file mode 100644
 +    .registers 4
 +
 +    .line 0
-+    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;->f$1:Ljava/lang/String;
-+
-+    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$buttonCopy$8$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;Landroid/view/View;)V
-+
-+    return-void
-+.end method
-
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali
-new file mode 100644
---- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$24.smali
-@@ -0,0 +1,50 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$24;
-+.super Ljava/lang/Object;
-+.source "D8$$SyntheticClass"
-+
-+# interfaces
-+.implements Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
-+
-+
-+# annotations
-+.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
-+    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$file$17"
-+    proto = "(Landroid/net/Uri;I)V"
-+.end annotation
-+
-+
-+# instance fields
-+.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+.field public final synthetic f$1:Landroid/net/Uri;
-+
-+
-+# direct methods
-+.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/net/Uri;)V
-+    .registers 3
-+
-+    .line 0
-+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-+
-+    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
-+
-+    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$1:Landroid/net/Uri;
-+
-+    return-void
-+.end method
-+
-+
-+# virtual methods
-+.method public final run(I)V
-+    .registers 4
-+
-+    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$1:Landroid/net/Uri;
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;->f$1:Ljava/lang/String;
 +
-+    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$file$17$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/net/Uri;I)V
++    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$buttonCopy$11$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;Landroid/view/View;)V
 +
 +    return-void
 +.end method
@@ -2065,7 +2053,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$send$19"
++    method = "lambda$send$22"
 +    proto = "(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V"
 +.end annotation
 +
@@ -2106,29 +2094,85 @@ new file mode 100644
 +
 +    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$25;->f$2:Ljava/lang/String;
 +
-+    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$send$19$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V
++    invoke-virtual {v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$send$22$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V
 +
 +    return-void
 +.end method
 
-diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$26.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$26.smali
 new file mode 100644
 --- /dev/null
-+++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali
-@@ -0,0 +1,38 @@
-+.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$3;
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$26.smali
+@@ -0,0 +1,50 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$26;
 +.super Ljava/lang/Object;
 +.source "D8$$SyntheticClass"
 +
 +# interfaces
-+.implements Landroid/view/View$OnApplyWindowInsetsListener;
++.implements Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;
 +
 +
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$1"
-+    proto = "(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;"
++    method = "lambda$file$20"
++    proto = "(Landroid/net/Uri;I)V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++.field public final synthetic f$1:Landroid/net/Uri;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/net/Uri;)V
++    .registers 3
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;->f$1:Landroid/net/Uri;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run(I)V
++    .registers 4
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;->f$1:Landroid/net/Uri;
++
++    invoke-virtual {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$file$20$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/net/Uri;I)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$27.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$27.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$27.smali
+@@ -0,0 +1,36 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$27;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$collapsible$9"
++    proto = "()V"
 +.end annotation
 +
 +
@@ -2144,15 +2188,119 @@ new file mode 100644
 +
 +
 +# virtual methods
-+.method public final onApplyWindowInsets(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;
++.method public final run()V
++    .registers 1
++
++    .line 0
++    invoke-static {}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$collapsible$9()V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$28.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$28.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$28.smali
+@@ -0,0 +1,50 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$28;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Landroid/view/View$OnClickListener;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$collapsible$10"
++    proto = "(Landroid/widget/TextView;Landroid/widget/Button;Landroid/view/View;)V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Landroid/widget/TextView;
++
++.field public final synthetic f$1:Landroid/widget/Button;
++
++
++# direct methods
++.method public synthetic constructor <init>(Landroid/widget/TextView;Landroid/widget/Button;)V
 +    .registers 3
 +
 +    .line 0
-+    invoke-static {p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$1(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 +
-+    move-result-object p1
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;->f$0:Landroid/widget/TextView;
 +
-+    return-object p1
++    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;->f$1:Landroid/widget/Button;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final onClick(Landroid/view/View;)V
++    .registers 4
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;->f$0:Landroid/widget/TextView;
++
++    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;->f$1:Landroid/widget/Button;
++
++    invoke-static {v0, v1, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$collapsible$10(Landroid/widget/TextView;Landroid/widget/Button;Landroid/view/View;)V
++
++    return-void
++.end method
+
+diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$3.smali
+@@ -0,0 +1,44 @@
++.class public final synthetic Lio/mesalabs/unica/troubleshooting/AskAiChat$3;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
++    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
++    method = "lambda$build$8"
++    proto = "()V"
++.end annotation
++
++
++# instance fields
++.field public final synthetic f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++
++# direct methods
++.method public synthetic constructor <init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    .registers 2
++
++    .line 0
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final run()V
++    .registers 2
++
++    .line 0
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
++
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$8$io-mesalabs-unica-troubleshooting-AskAiChat()V
++
++    return-void
 +.end method
 
 diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$4.smali b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat$4.smali
@@ -2171,7 +2319,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$7"
++    method = "refresh"
 +    proto = "()V"
 +.end annotation
 +
@@ -2200,7 +2348,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$4;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$7$io-mesalabs-unica-troubleshooting-AskAiChat()V
++    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$L1qoviBWu3c_WrtZ4R3mN5aTU1s(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    return-void
 +.end method
@@ -2221,7 +2369,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "refresh"
++    method = "pasteLog"
 +    proto = "()V"
 +.end annotation
 +
@@ -2250,7 +2398,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$5;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$L1qoviBWu3c_WrtZ4R3mN5aTU1s(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$TyDAlRNXUcHt-5kvsy6bmlcpvf4(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    return-void
 +.end method
@@ -2271,7 +2419,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "pasteLog"
++    method = "pickFile"
 +    proto = "()V"
 +.end annotation
 +
@@ -2300,7 +2448,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$6;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$TyDAlRNXUcHt-5kvsy6bmlcpvf4(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$IgQVzP3nTd-xqu7orRPZmPzfqoc(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    return-void
 +.end method
@@ -2321,7 +2469,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "pickFile"
++    method = "lambda$build$2"
 +    proto = "()V"
 +.end annotation
 +
@@ -2350,7 +2498,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$7;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->$r8$lambda$IgQVzP3nTd-xqu7orRPZmPzfqoc(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$2$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +
 +    return-void
 +.end method
@@ -2371,7 +2519,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$2"
++    method = "lambda$build$3"
 +    proto = "(Landroid/widget/CompoundButton;Z)V"
 +.end annotation
 +
@@ -2400,7 +2548,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$8;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$2$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/widget/CompoundButton;Z)V
++    invoke-virtual {v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$3$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/widget/CompoundButton;Z)V
 +
 +    return-void
 +.end method
@@ -2421,7 +2569,7 @@ new file mode 100644
 +# annotations
 +.annotation runtime Lcom/android/tools/r8/annotations/LambdaMethod;
 +    holder = "Lio/mesalabs/unica/troubleshooting/AskAiChat;"
-+    method = "lambda$build$3"
++    method = "lambda$build$4"
 +    proto = "()V"
 +.end annotation
 +
@@ -2450,7 +2598,7 @@ new file mode 100644
 +    .line 0
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat$9;->f$0:Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +
-+    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$3$io-mesalabs-unica-troubleshooting-AskAiChat()V
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->lambda$build$4$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +
 +    return-void
 +.end method
@@ -2489,7 +2637,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat.smali b/
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/AskAiChat.smali
-@@ -0,0 +1,3610 @@
+@@ -0,0 +1,3855 @@
 +.class final Lio/mesalabs/unica/troubleshooting/AskAiChat;
 +.super Ljava/lang/Object;
 +.source "AskAiChat.java"
@@ -2671,7 +2819,7 @@ new file mode 100644
 +.method private attach(Ljava/lang/String;Ljava/lang/String;)V
 +    .registers 4
 +
-+    .line 118
++    .line 127
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    invoke-static {p1}, Lio/mesalabs/unica/troubleshooting/LogTools;->redact(Ljava/lang/String;)Ljava/lang/String;
@@ -2762,7 +2910,7 @@ new file mode 100644
 +.method private build()V
 +    .registers 9
 +
-+    .line 47
++    .line 48
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    const-string v1, "Ask aI"
@@ -2779,7 +2927,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v2}, Landroid/view/Window;->setSoftInputMode(I)V
 +
-+    .line 48
++    .line 49
 +    new-instance v0, Landroid/widget/LinearLayout;
 +
 +    iget-object v3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -2794,16 +2942,16 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v3}, Landroid/widget/LinearLayout;->setOrientation(I)V
 +
-+    .line 49
++    .line 50
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->layout:Landroid/widget/LinearLayout;
 +
-+    new-instance v4, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;
++    new-instance v4, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;
 +
-+    invoke-direct {v4}, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;-><init>()V
++    invoke-direct {v4}, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;-><init>()V
 +
 +    invoke-virtual {v0, v4}, Landroid/widget/LinearLayout;->setOnApplyWindowInsetsListener(Landroid/view/View$OnApplyWindowInsetsListener;)V
 +
-+    .line 50
++    .line 51
 +    new-instance v0, Landroid/widget/ScrollView;
 +
 +    iget-object v4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -2868,7 +3016,7 @@ new file mode 100644
 +
 +    invoke-virtual {v2, v4}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
 +
-+    .line 51
++    .line 52
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->card(Landroid/widget/LinearLayout;Ljava/lang/String;)Landroid/widget/LinearLayout;
 +
 +    move-result-object v1
@@ -2887,7 +3035,7 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 52
++    .line 53
 +    const-string v2, "Ask about a problem, paste a log, or attach a text file. Up to 12 recent exchanges stay in memory until Troubleshooting closes. AI suggestions require verification."
 +
 +    invoke-direct {p0, v2, v4, v3}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
@@ -2896,16 +3044,16 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 53
-+    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$5;
++    .line 54
++    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$4;
 +
-+    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$5;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$4;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    const-string v4, "Refresh AI backend"
 +
 +    invoke-direct {p0, v1, v4, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 54
++    .line 55
 +    new-instance v1, Landroid/widget/LinearLayout;
 +
 +    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -2924,14 +3072,14 @@ new file mode 100644
 +
 +    invoke-direct {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->renderHistory()V
 +
-+    .line 55
++    .line 56
 +    const-string v1, "Log evidence"
 +
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->card(Landroid/widget/LinearLayout;Ljava/lang/String;)Landroid/widget/LinearLayout;
 +
 +    move-result-object v1
 +
-+    .line 56
++    .line 57
 +    const-string v2, "No log attached"
 +
 +    const/16 v4, 0xe
@@ -2946,25 +3094,25 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 57
-+    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$6;
++    .line 58
++    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$5;
 +
-+    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$6;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$5;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    const-string v5, "Paste log"
 +
 +    invoke-direct {p0, v1, v5, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$7;
++    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$6;
 +
-+    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$7;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$6;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    const-string v5, "Attach text / log file"
 +
 +    invoke-direct {p0, v1, v5, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 58
-+    const/16 v2, 0xa
++    .line 59
++    const/4 v2, 0x5
 +
 +    const-string v5, "Review or edit the selected log section"
 +
@@ -2980,7 +3128,16 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 59
++    .line 60
++    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$7;
++
++    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$7;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++
++    const-string v5, "Expand / collapse log"
++
++    invoke-direct {p0, v1, v5, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
++
++    .line 61
 +    new-instance v2, Landroid/widget/CheckBox;
 +
 +    iget-object v5, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -3037,7 +3194,7 @@ new file mode 100644
 +
 +    invoke-virtual {v2, v5}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
-+    .line 60
++    .line 62
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$9;
 +
 +    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$9;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
@@ -3054,7 +3211,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v5, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 61
++    .line 63
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/AskAiChat$11;
 +
 +    invoke-direct {v2, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$11;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
@@ -3063,7 +3220,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v5, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 62
++    .line 64
 +    const-string v1, "Your message"
 +
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->card(Landroid/widget/LinearLayout;Ljava/lang/String;)Landroid/widget/LinearLayout;
@@ -3092,7 +3249,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 63
++    .line 65
 +    new-instance v1, Landroid/widget/ProgressBar;
 +
 +    iget-object v5, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -3123,7 +3280,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v1, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 +
-+    .line 64
++    .line 66
 +    const-string v1, "Review each request before sending. No device changes are made by the chat."
 +
 +    invoke-direct {p0, v1, v4, v3}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
@@ -3136,7 +3293,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 65
++    .line 67
 +    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$12;
 +
 +    invoke-direct {v1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$12;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
@@ -3145,10 +3302,10 @@ new file mode 100644
 +
 +    invoke-direct {p0, v0, v3, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 66
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;
++    .line 68
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;
 +
-+    invoke-direct {v1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    const-string v3, "Cancel request"
 +
@@ -3168,33 +3325,33 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/Button;->setVisibility(I)V
 +
-+    .line 67
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$4;
++    .line 69
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;
 +
-+    invoke-direct {v1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$4;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$3;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    const-string v2, "Clear conversation"
 +
 +    invoke-direct {p0, v0, v2, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 68
++    .line 70
 +    const-string v1, "Back to Troubleshooting"
 +
 +    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->leave:Ljava/lang/Runnable;
 +
 +    invoke-direct {p0, v0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
 +
-+    .line 69
++    .line 71
 +    invoke-direct {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->loadSection()V
 +
 +    invoke-virtual {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->background()V
 +
-+    .line 70
++    .line 72
 +    return-void
 +.end method
 +
 +.method private button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
-+    .registers 6
++    .registers 9
 +
 +    .line 42
 +    new-instance v0, Landroid/widget/Button;
@@ -3213,7 +3370,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, p2}, Landroid/widget/Button;->setAllCaps(Z)V
 +
-+    const/16 p2, 0x34
++    const/16 p2, 0x40
 +
 +    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
 +
@@ -3221,20 +3378,83 @@ new file mode 100644
 +
 +    invoke-virtual {v0, p2}, Landroid/widget/Button;->setMinHeight(I)V
 +
-+    .line 43
-+    new-instance p2, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;
++    const p2, 0x800013
 +
-+    invoke-direct {p2, p3}, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;-><init>(Ljava/lang/Runnable;)V
++    invoke-virtual {v0, p2}, Landroid/widget/Button;->setGravity(I)V
++
++    const/16 p2, 0x10
++
++    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result v1
++
++    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result v2
++
++    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result v3
++
++    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result p2
++
++    invoke-virtual {v0, v1, v2, v3, p2}, Landroid/widget/Button;->setPaddingRelative(IIII)V
++
++    .line 43
++    new-instance p2, Landroid/graphics/drawable/RippleDrawable;
++
++    const v1, 0x101042c
++
++    const/high16 v2, 0x18000000
++
++    invoke-direct {p0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->attr(II)I
++
++    move-result v1
++
++    invoke-static {v1}, Landroid/content/res/ColorStateList;->valueOf(I)Landroid/content/res/ColorStateList;
++
++    move-result-object v1
++
++    new-instance v2, Landroid/graphics/drawable/ColorDrawable;
++
++    const/4 v3, -0x1
++
++    invoke-direct {v2, v3}, Landroid/graphics/drawable/ColorDrawable;-><init>(I)V
++
++    const/4 v4, 0x0
++
++    invoke-direct {p2, v1, v4, v2}, Landroid/graphics/drawable/RippleDrawable;-><init>(Landroid/content/res/ColorStateList;Landroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;)V
++
++    invoke-virtual {v0, p2}, Landroid/widget/Button;->setBackground(Landroid/graphics/drawable/Drawable;)V
++
++    .line 44
++    new-instance p2, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;
++
++    invoke-direct {p2, p3}, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;-><init>(Ljava/lang/Runnable;)V
 +
 +    invoke-virtual {v0, p2}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 +
 +    new-instance p2, Landroid/widget/LinearLayout$LayoutParams;
 +
-+    const/4 p3, -0x1
++    const/4 p3, -0x2
 +
-+    const/4 v1, -0x2
++    invoke-direct {p2, v3, p3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
 +
-+    invoke-direct {p2, p3, v1}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
++    const/16 p3, 0x8
++
++    invoke-direct {p0, p3}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result v1
++
++    iput v1, p2, Landroid/widget/LinearLayout$LayoutParams;->topMargin:I
++
++    invoke-direct {p0, p3}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dp(I)I
++
++    move-result p3
++
++    iput p3, p2, Landroid/widget/LinearLayout$LayoutParams;->bottomMargin:I
 +
 +    invoke-virtual {p1, v0, p2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 +
@@ -3248,7 +3468,7 @@ new file mode 100644
 +.method private buttonCopy(Landroid/widget/LinearLayout;Ljava/lang/String;)V
 +    .registers 5
 +
-+    .line 85
++    .line 94
 +    new-instance v0, Landroid/widget/Button;
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -3271,9 +3491,9 @@ new file mode 100644
 +
 +    invoke-virtual {v0, v1}, Landroid/widget/Button;->setMinHeight(I)V
 +
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;
 +
-+    invoke-direct {v1, p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
++    invoke-direct {v1, p0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
 +
 +    invoke-virtual {v0, v1}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 +
@@ -3285,7 +3505,7 @@ new file mode 100644
 +.method private cancel()V
 +    .registers 3
 +
-+    .line 153
++    .line 162
 +    iget v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->generation:I
 +
 +    add-int/lit8 v0, v0, 0x1
@@ -3415,7 +3635,7 @@ new file mode 100644
 +.method private chunk()I
 +    .registers 4
 +
-+    .line 110
++    .line 119
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->config:Landroid/os/Bundle;
 +
 +    if-nez v0, :cond_9
@@ -3439,6 +3659,71 @@ new file mode 100644
 +
 +    :goto_13
 +    return v0
++.end method
++
++.method private collapsible(Landroid/widget/LinearLayout;Ljava/lang/String;I)V
++    .registers 7
++
++    .line 88
++    const/4 v0, 0x0
++
++    invoke-direct {p0, p2, p3, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
++
++    move-result-object p3
++
++    const/4 v0, 0x5
++
++    invoke-virtual {p3, v0}, Landroid/widget/TextView;->setMaxLines(I)V
++
++    invoke-virtual {p1, p3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
++
++    .line 89
++    invoke-virtual {p2}, Ljava/lang/String;->length()I
++
++    move-result v1
++
++    const/16 v2, 0xb4
++
++    if-gt v1, v2, :cond_1e
++
++    const-string v1, "\\n"
++
++    const/4 v2, -0x1
++
++    invoke-virtual {p2, v1, v2}, Ljava/lang/String;->split(Ljava/lang/String;I)[Ljava/lang/String;
++
++    move-result-object p2
++
++    array-length p2, p2
++
++    if-le p2, v0, :cond_36
++
++    .line 90
++    :cond_1e
++    new-instance p2, Lio/mesalabs/unica/troubleshooting/AskAiChat$27;
++
++    invoke-direct {p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$27;-><init>()V
++
++    const-string v0, "Show more"
++
++    invoke-direct {p0, p1, v0, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->button(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/Runnable;)Landroid/widget/Button;
++
++    move-result-object p1
++
++    iget-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->controls:Ljava/util/ArrayList;
++
++    invoke-virtual {p2, p1}, Ljava/util/ArrayList;->remove(Ljava/lang/Object;)Z
++
++    .line 91
++    new-instance p2, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;
++
++    invoke-direct {p2, p3, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$28;-><init>(Landroid/widget/TextView;Landroid/widget/Button;)V
++
++    invoke-virtual {p1, p2}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
++
++    .line 93
++    :cond_36
++    return-void
 +.end method
 +
 +.method private color(Ljava/lang/String;I)I
@@ -3514,7 +3799,7 @@ new file mode 100644
 +.method private destination(Landroid/os/Bundle;)Ljava/lang/String;
 +    .registers 6
 +
-+    .line 109
++    .line 118
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -3623,7 +3908,7 @@ new file mode 100644
 +.method private editor(Ljava/lang/String;II)Landroid/widget/EditText;
 +    .registers 6
 +
-+    .line 45
++    .line 46
 +    new-instance v0, Landroid/widget/EditText;
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -3682,7 +3967,7 @@ new file mode 100644
 +.method private static error(Ljava/lang/String;)Ljava/lang/String;
 +    .registers 3
 +
-+    .line 95
++    .line 104
 +    if-eqz p0, :cond_15
 +
 +    const-string v0, "context_limit"
@@ -3706,7 +3991,7 @@ new file mode 100644
 +
 +    return-object p0
 +
-+    .line 96
++    .line 105
 +    :cond_15
 +    const-string v0, "backend_changed"
 +
@@ -3720,7 +4005,7 @@ new file mode 100644
 +
 +    return-object p0
 +
-+    .line 97
++    .line 106
 +    :cond_20
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
@@ -3757,7 +4042,7 @@ new file mode 100644
 +.method static synthetic lambda$build$1(Landroid/view/View;Landroid/view/WindowInsets;)Landroid/view/WindowInsets;
 +    .registers 6
 +
-+    .line 49
++    .line 50
 +    invoke-static {}, Landroid/view/WindowInsets$Type;->systemBars()I
 +
 +    move-result v0
@@ -3788,16 +4073,65 @@ new file mode 100644
 +.method static synthetic lambda$button$0(Ljava/lang/Runnable;Landroid/view/View;)V
 +    .registers 2
 +
-+    .line 43
++    .line 44
 +    invoke-interface {p0}, Ljava/lang/Runnable;->run()V
 +
++    return-void
++.end method
++
++.method static synthetic lambda$collapsible$10(Landroid/widget/TextView;Landroid/widget/Button;Landroid/view/View;)V
++    .registers 4
++
++    .line 91
++    invoke-virtual {p0}, Landroid/widget/TextView;->getMaxLines()I
++
++    move-result p2
++
++    const/4 v0, 0x5
++
++    if-ne p2, v0, :cond_9
++
++    const/4 p2, 0x1
++
++    goto :goto_a
++
++    :cond_9
++    const/4 p2, 0x0
++
++    :goto_a
++    if-eqz p2, :cond_f
++
++    const v0, 0x7fffffff
++
++    :cond_f
++    invoke-virtual {p0, v0}, Landroid/widget/TextView;->setMaxLines(I)V
++
++    if-eqz p2, :cond_17
++
++    const-string p0, "Show less"
++
++    goto :goto_19
++
++    :cond_17
++    const-string p0, "Show more"
++
++    :goto_19
++    invoke-virtual {p1, p0}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
++
++    return-void
++.end method
++
++.method static synthetic lambda$collapsible$9()V
++    .registers 0
++
++    .line 90
 +    return-void
 +.end method
 +
 +.method private loadSection()V
 +    .registers 6
 +
-+    .line 112
++    .line 121
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget-object v0, v0, Lio/mesalabs/unica/troubleshooting/ChatHistory;->attachment:Ljava/lang/String;
@@ -3830,7 +4164,7 @@ new file mode 100644
 +
 +    iput v2, v1, Lio/mesalabs/unica/troubleshooting/ChatHistory;->section:I
 +
-+    .line 113
++    .line 122
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->log:Landroid/widget/EditText;
 +
 +    if-eqz v1, :cond_5b
@@ -3893,7 +4227,7 @@ new file mode 100644
 +    :goto_58
 +    invoke-virtual {v1, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
 +
-+    .line 114
++    .line 123
 +    :cond_5b
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->coverage:Landroid/widget/TextView;
 +
@@ -3985,7 +4319,7 @@ new file mode 100644
 +    :goto_b1
 +    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 +
-+    .line 115
++    .line 124
 +    :cond_b4
 +    return-void
 +.end method
@@ -3993,7 +4327,7 @@ new file mode 100644
 +.method private pasteLog()V
 +    .registers 4
 +
-+    .line 120
++    .line 129
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    const-string v1, "clipboard"
@@ -4008,7 +4342,7 @@ new file mode 100644
 +
 +    move-result-object v0
 +
-+    .line 121
++    .line 130
 +    if-eqz v0, :cond_44
 +
 +    invoke-virtual {v0}, Landroid/content/ClipData;->getItemCount()I
@@ -4019,7 +4353,7 @@ new file mode 100644
 +
 +    goto :goto_44
 +
-+    .line 123
++    .line 132
 +    :cond_17
 +    const/4 v1, 0x0
 +
@@ -4041,7 +4375,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 124
++    .line 133
 +    :cond_2a
 +    invoke-interface {v0}, Ljava/lang/CharSequence;->length()I
 +
@@ -4059,7 +4393,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 125
++    .line 134
 +    :cond_3a
 +    invoke-interface {v0}, Ljava/lang/CharSequence;->toString()Ljava/lang/String;
 +
@@ -4069,10 +4403,10 @@ new file mode 100644
 +
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->attach(Ljava/lang/String;Ljava/lang/String;)V
 +
-+    .line 126
++    .line 135
 +    return-void
 +
-+    .line 121
++    .line 130
 +    :cond_44
 +    :goto_44
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->status:Landroid/widget/TextView;
@@ -4087,7 +4421,7 @@ new file mode 100644
 +.method private pickFile()V
 +    .registers 4
 +
-+    .line 127
++    .line 136
 +    new-instance v0, Landroid/content/Intent;
 +
 +    const-string v1, "android.intent.action.OPEN_DOCUMENT"
@@ -4133,7 +4467,7 @@ new file mode 100644
 +.method private refresh()V
 +    .registers 4
 +
-+    .line 100
++    .line 109
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->busy:Z
 +
 +    if-nez v0, :cond_33
@@ -4144,7 +4478,7 @@ new file mode 100644
 +
 +    goto :goto_33
 +
-+    .line 101
++    .line 110
 +    :cond_9
 +    invoke-direct {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->saveSection()V
 +
@@ -4175,19 +4509,19 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 +
-+    .line 102
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
++    .line 111
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;
 +
-+    invoke-direct {v1, p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AiClient;)V
++    invoke-direct {v1, p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AiClient;)V
 +
 +    const-string v0, "Checking active backend\u2026"
 +
 +    invoke-direct {p0, v0, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->run(Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;)V
 +
-+    .line 108
++    .line 117
 +    return-void
 +
-+    .line 100
++    .line 109
 +    :cond_33
 +    :goto_33
 +    return-void
@@ -4196,7 +4530,7 @@ new file mode 100644
 +.method private renderHistory()V
 +    .registers 8
 +
-+    .line 80
++    .line 82
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->surfaces:Ljava/util/ArrayList;
 +
 +    invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
@@ -4233,13 +4567,13 @@ new file mode 100644
 +
 +    goto :goto_8
 +
-+    .line 81
++    .line 83
 +    :cond_22
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->messages:Landroid/widget/LinearLayout;
 +
 +    invoke-virtual {v0}, Landroid/widget/LinearLayout;->removeAllViews()V
 +
-+    .line 82
++    .line 84
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget-object v0, v0, Lio/mesalabs/unica/troubleshooting/ChatHistory;->turns:Ljava/util/ArrayList;
@@ -4253,7 +4587,7 @@ new file mode 100644
 +
 +    move-result v1
 +
-+    if-eqz v1, :cond_72
++    if-eqz v1, :cond_6a
 +
 +    invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
 +
@@ -4273,39 +4607,31 @@ new file mode 100644
 +
 +    const/16 v4, 0x10
 +
-+    const/4 v5, 0x0
-+
-+    invoke-direct {p0, v3, v4, v5}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
++    invoke-direct {p0, v2, v3, v4}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->collapsible(Landroid/widget/LinearLayout;Ljava/lang/String;I)V
 +
 +    const-string v3, "Ask aI"
 +
-+    const/16 v6, 0x12
++    const/16 v5, 0x12
 +
-+    invoke-direct {p0, v3, v6, v5}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
++    const/4 v6, 0x0
++
++    invoke-direct {p0, v3, v5, v6}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
 +
 +    move-result-object v3
 +
-+    const-string v6, "sans-serif-medium"
++    const-string v5, "sans-serif-medium"
 +
-+    invoke-static {v6, v5}, Landroid/graphics/Typeface;->create(Ljava/lang/String;I)Landroid/graphics/Typeface;
++    invoke-static {v5, v6}, Landroid/graphics/Typeface;->create(Ljava/lang/String;I)Landroid/graphics/Typeface;
 +
-+    move-result-object v6
++    move-result-object v5
 +
-+    invoke-virtual {v3, v6}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
++    invoke-virtual {v3, v5}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
 +
 +    invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
 +    iget-object v3, v1, Lio/mesalabs/unica/troubleshooting/ChatHistory$Turn;->answer:Ljava/lang/String;
 +
-+    invoke-direct {p0, v3, v4, v5}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
++    invoke-direct {p0, v2, v3, v4}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->collapsible(Landroid/widget/LinearLayout;Ljava/lang/String;I)V
 +
 +    iget-object v1, v1, Lio/mesalabs/unica/troubleshooting/ChatHistory$Turn;->answer:Ljava/lang/String;
 +
@@ -4313,18 +4639,18 @@ new file mode 100644
 +
 +    goto :goto_2f
 +
-+    .line 83
-+    :cond_72
++    .line 85
++    :cond_6a
 +    invoke-virtual {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->background()V
 +
-+    .line 84
++    .line 86
 +    return-void
 +.end method
 +
 +.method private review()V
 +    .registers 10
 +
-+    .line 134
++    .line 143
 +    const-string v0, "online"
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->config:Landroid/os/Bundle;
@@ -4339,7 +4665,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 136
++    .line 145
 +    :cond_e
 +    :try_start_e
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
@@ -4356,7 +4682,7 @@ new file mode 100644
 +
 +    iput-object v2, v1, Lio/mesalabs/unica/troubleshooting/ChatHistory;->draft:Ljava/lang/String;
 +
-+    .line 137
++    .line 146
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
@@ -4407,14 +4733,14 @@ new file mode 100644
 +
 +    move-result-object v1
 +
-+    .line 138
++    .line 147
 +    new-instance v2, Landroid/os/Bundle;
 +
 +    iget-object v3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->config:Landroid/os/Bundle;
 +
 +    invoke-direct {v2, v3}, Landroid/os/Bundle;-><init>(Landroid/os/Bundle;)V
 +
-+    .line 139
++    .line 148
 +    new-instance v3, Landroid/widget/LinearLayout;
 +
 +    iget-object v4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -4449,7 +4775,7 @@ new file mode 100644
 +
 +    invoke-virtual {v3, v6, v7, v5, v8}, Landroid/widget/LinearLayout;->setPadding(IIII)V
 +
-+    .line 140
++    .line 149
 +    new-instance v5, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
@@ -4504,18 +4830,12 @@ new file mode 100644
 +
 +    invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 141
++    .line 150
 +    iget-object v4, v1, Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;->preview:Ljava/lang/String;
 +
 +    const/16 v5, 0xe
 +
-+    const/4 v6, 0x0
-+
-+    invoke-direct {p0, v4, v5, v6}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->text(Ljava/lang/String;IZ)Landroid/widget/TextView;
-+
-+    move-result-object v4
-+
-+    invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
++    invoke-direct {p0, v3, v4, v5}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->collapsible(Landroid/widget/LinearLayout;Ljava/lang/String;I)V
 +
 +    new-instance v4, Landroid/widget/ScrollView;
 +
@@ -4525,7 +4845,7 @@ new file mode 100644
 +
 +    invoke-virtual {v4, v3}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V
 +
-+    .line 142
++    .line 151
 +    new-instance v3, Landroid/app/AlertDialog$Builder;
 +
 +    iget-object v5, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -4536,16 +4856,16 @@ new file mode 100644
 +
 +    move-result v5
 +
-+    if-eqz v5, :cond_d4
++    if-eqz v5, :cond_cf
 +
 +    const-string v5, "Send this conversation online?"
 +
-+    goto :goto_d6
++    goto :goto_d1
 +
-+    :cond_d4
++    :cond_cf
 +    const-string v5, "Review local AI request"
 +
-+    :goto_d6
++    :goto_d1
 +    invoke-virtual {v3, v5}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v3
@@ -4554,24 +4874,24 @@ new file mode 100644
 +
 +    move-result-object v3
 +
-+    .line 143
++    .line 152
 +    invoke-virtual {v2, v0}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;)Z
 +
 +    move-result v0
 +
-+    if-eqz v0, :cond_e7
++    if-eqz v0, :cond_e2
 +
 +    const-string v0, "Agree and send online"
 +
-+    goto :goto_e9
++    goto :goto_e4
 +
-+    :cond_e7
++    :cond_e2
 +    const-string v0, "Ask on device"
 +
-+    :goto_e9
-+    new-instance v4, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;
++    :goto_e4
++    new-instance v4, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;
 +
-+    invoke-direct {v4, p0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$17;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
++    invoke-direct {v4, p0, v1, v2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$16;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
 +
 +    invoke-virtual {v3, v0, v4}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
 +
@@ -4589,15 +4909,15 @@ new file mode 100644
 +
 +    move-result-object v0
 +
-+    .line 142
++    .line 151
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->show(Landroid/app/AlertDialog;)V
-+    :try_end_100
-+    .catch Ljava/lang/IllegalArgumentException; {:try_start_e .. :try_end_100} :catch_101
++    :try_end_fb
++    .catch Ljava/lang/IllegalArgumentException; {:try_start_e .. :try_end_fb} :catch_fc
 +
-+    .line 144
-+    goto :goto_10b
++    .line 153
++    goto :goto_106
 +
-+    :catch_101
++    :catch_fc
 +    move-exception v0
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->status:Landroid/widget/TextView;
@@ -4608,15 +4928,15 @@ new file mode 100644
 +
 +    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 +
-+    .line 145
-+    :goto_10b
++    .line 154
++    :goto_106
 +    return-void
 +.end method
 +
 +.method private run(Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;)V
 +    .registers 5
 +
-+    .line 91
++    .line 100
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->busy:Z
 +
 +    if-nez v0, :cond_22
@@ -4642,19 +4962,19 @@ new file mode 100644
 +
 +    iput p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->generation:I
 +
-+    .line 92
++    .line 101
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->worker:Ljava/util/concurrent/ExecutorService;
 +
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;
 +
-+    invoke-direct {v1, p0, p2, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$15;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
++    invoke-direct {v1, p0, p2, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
 +
 +    invoke-interface {v0, v1}, Ljava/util/concurrent/ExecutorService;->execute(Ljava/lang/Runnable;)V
 +
-+    .line 93
++    .line 102
 +    return-void
 +
-+    .line 91
++    .line 100
 +    :cond_22
 +    :goto_22
 +    return-void
@@ -4663,7 +4983,7 @@ new file mode 100644
 +.method private saveSection()V
 +    .registers 4
 +
-+    .line 116
++    .line 125
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->log:Landroid/widget/EditText;
 +
 +    if-eqz v0, :cond_1d
@@ -4699,7 +5019,7 @@ new file mode 100644
 +.method private section(I)V
 +    .registers 4
 +
-+    .line 117
++    .line 126
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget-object v0, v0, Lio/mesalabs/unica/troubleshooting/ChatHistory;->attachment:Ljava/lang/String;
@@ -4737,25 +5057,25 @@ new file mode 100644
 +.method private send(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
 +    .registers 5
 +
-+    .line 146
++    .line 155
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->client:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;
 +
-+    invoke-direct {v1, p0, v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
++    invoke-direct {v1, p0, v0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
 +
 +    const-string p1, "Asking your selected AI backend\u2026"
 +
 +    invoke-direct {p0, p1, v1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->run(Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;)V
 +
-+    .line 152
++    .line 161
 +    return-void
 +.end method
 +
 +.method private setBusy(Z)V
 +    .registers 6
 +
-+    .line 87
++    .line 96
 +    iput-boolean p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->busy:Z
 +
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->controls:Ljava/util/ArrayList;
@@ -4820,14 +5140,14 @@ new file mode 100644
 +.method private show(Landroid/app/AlertDialog;)V
 +    .registers 3
 +
-+    .line 86
++    .line 95
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dialogs:Ljava/util/ArrayList;
 +
 +    invoke-virtual {v0, p1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;
 +
-+    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$14;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/app/AlertDialog;)V
++    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$13;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/app/AlertDialog;)V
 +
 +    invoke-virtual {p1, v0}, Landroid/app/AlertDialog;->setOnDismissListener(Landroid/content/DialogInterface$OnDismissListener;)V
 +
@@ -4920,12 +5240,12 @@ new file mode 100644
 +.method private ui(ILjava/lang/Runnable;)V
 +    .registers 5
 +
-+    .line 88
++    .line 97
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
-+    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;
 +
-+    invoke-direct {v1, p0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;ILjava/lang/Runnable;)V
++    invoke-direct {v1, p0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$23;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;ILjava/lang/Runnable;)V
 +
 +    invoke-virtual {v0, v1}, Landroid/app/Activity;->runOnUiThread(Ljava/lang/Runnable;)V
 +
@@ -4937,7 +5257,7 @@ new file mode 100644
 +.method background()V
 +    .registers 12
 +
-+    .line 72
++    .line 74
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    invoke-virtual {v0}, Landroid/app/Activity;->getContentResolver()Landroid/content/ContentResolver;
@@ -4961,7 +5281,7 @@ new file mode 100644
 +    :cond_11
 +    move v0, v2
 +
-+    .line 73
++    .line 75
 +    :goto_12
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
@@ -4987,7 +5307,7 @@ new file mode 100644
 +
 +    move-result v1
 +
-+    .line 74
++    .line 76
 +    iget-object v4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    const/high16 v5, 0x100000
@@ -5005,7 +5325,7 @@ new file mode 100644
 +    :cond_38
 +    invoke-virtual {v4, v5}, Landroid/view/Window;->clearFlags(I)V
 +
-+    .line 75
++    .line 77
 +    :goto_3b
 +    iget-object v4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
@@ -5027,7 +5347,7 @@ new file mode 100644
 +    :goto_47
 +    invoke-virtual {v4, v6}, Landroid/view/Window;->setFormat(I)V
 +
-+    .line 76
++    .line 78
 +    iget-object v4, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    invoke-virtual {v4}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
@@ -5100,7 +5420,7 @@ new file mode 100644
 +
 +    invoke-virtual {v4, v6}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
 +
-+    .line 77
++    .line 79
 +    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->surfaces:Ljava/util/ArrayList;
 +
 +    invoke-virtual {v2}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
@@ -5207,7 +5527,7 @@ new file mode 100644
 +
 +    goto :goto_91
 +
-+    .line 78
++    .line 80
 +    :cond_ec
 +    return-void
 +.end method
@@ -5215,7 +5535,7 @@ new file mode 100644
 +.method public close()V
 +    .registers 3
 +
-+    .line 154
++    .line 163
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->closed:Z
 +
 +    if-eqz v0, :cond_5
@@ -5296,7 +5616,7 @@ new file mode 100644
 +.method file(Landroid/net/Uri;)V
 +    .registers 3
 +
-+    .line 128
++    .line 137
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->busy:Z
 +
 +    if-eqz v0, :cond_7
@@ -5306,22 +5626,67 @@ new file mode 100644
 +    return-void
 +
 +    :cond_7
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;
 +
-+    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$24;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/net/Uri;)V
++    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$26;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/net/Uri;)V
 +
 +    const-string p1, "Reading text file\u2026"
 +
 +    invoke-direct {p0, p1, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->run(Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;)V
 +
-+    .line 132
++    .line 141
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$2$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/widget/CompoundButton;Z)V
++.method synthetic lambda$build$2$io-mesalabs-unica-troubleshooting-AskAiChat()V
++    .registers 5
++
++    .line 60
++    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->log:Landroid/widget/EditText;
++
++    invoke-virtual {v0}, Landroid/widget/EditText;->getMaxLines()I
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    const/4 v2, 0x5
++
++    if-le v0, v2, :cond_c
++
++    move v0, v1
++
++    goto :goto_d
++
++    :cond_c
++    const/4 v0, 0x0
++
++    :goto_d
++    iget-object v3, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->log:Landroid/widget/EditText;
++
++    if-eqz v0, :cond_12
++
++    goto :goto_15
++
++    :cond_12
++    const v2, 0x7fffffff
++
++    :goto_15
++    invoke-virtual {v3, v2}, Landroid/widget/EditText;->setMaxLines(I)V
++
++    iget-object v2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->log:Landroid/widget/EditText;
++
++    xor-int/2addr v0, v1
++
++    invoke-virtual {v2, v0}, Landroid/widget/EditText;->setVerticalScrollBarEnabled(Z)V
++
++    return-void
++.end method
++
++.method synthetic lambda$build$3$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/widget/CompoundButton;Z)V
 +    .registers 3
 +
-+    .line 59
++    .line 61
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iput-boolean p2, p1, Lio/mesalabs/unica/troubleshooting/ChatHistory;->includeLog:Z
@@ -5329,10 +5694,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$3$io-mesalabs-unica-troubleshooting-AskAiChat()V
++.method synthetic lambda$build$4$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +    .registers 2
 +
-+    .line 60
++    .line 62
 +    const/4 v0, -0x1
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->section(I)V
@@ -5340,10 +5705,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$4$io-mesalabs-unica-troubleshooting-AskAiChat()V
++.method synthetic lambda$build$5$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +    .registers 2
 +
-+    .line 60
++    .line 62
 +    const/4 v0, 0x1
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->section(I)V
@@ -5351,10 +5716,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$5$io-mesalabs-unica-troubleshooting-AskAiChat()V
++.method synthetic lambda$build$6$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +    .registers 3
 +
-+    .line 61
++    .line 63
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    const-string v1, ""
@@ -5388,10 +5753,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$6$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/content/DialogInterface;I)V
++.method synthetic lambda$build$7$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/content/DialogInterface;I)V
 +    .registers 3
 +
-+    .line 67
++    .line 69
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    invoke-virtual {p1}, Lio/mesalabs/unica/troubleshooting/ChatHistory;->clear()V
@@ -5421,10 +5786,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$build$7$io-mesalabs-unica-troubleshooting-AskAiChat()V
++.method synthetic lambda$build$8$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +    .registers 4
 +
-+    .line 67
++    .line 69
 +    new-instance v0, Landroid/app/AlertDialog$Builder;
 +
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
@@ -5470,10 +5835,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$buttonCopy$8$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;Landroid/view/View;)V
++.method synthetic lambda$buttonCopy$11$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;Landroid/view/View;)V
 +    .registers 4
 +
-+    .line 85
++    .line 94
 +    iget-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    const-string v0, "clipboard"
@@ -5507,10 +5872,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$file$16$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
++.method synthetic lambda$file$19$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
 +    .registers 3
 +
-+    .line 131
++    .line 140
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iput-object p1, v0, Lio/mesalabs/unica/troubleshooting/ChatHistory;->attachment:Ljava/lang/String;
@@ -5550,7 +5915,7 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$file$17$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/net/Uri;I)V
++.method synthetic lambda$file$20$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/net/Uri;I)V
 +    .registers 4
 +    .annotation system Ldalvik/annotation/Throws;
 +        value = {
@@ -5558,7 +5923,7 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 129
++    .line 138
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->host:Landroid/app/Activity;
 +
 +    invoke-virtual {v0}, Landroid/app/Activity;->getContentResolver()Landroid/content/ContentResolver;
@@ -5582,7 +5947,7 @@ new file mode 100644
 +
 +    invoke-virtual {p1}, Ljava/io/InputStream;->close()V
 +
-+    .line 130
++    .line 139
 +    :cond_15
 +    const/4 p1, 0x0
 +
@@ -5600,21 +5965,21 @@ new file mode 100644
 +
 +    if-gez p1, :cond_32
 +
-+    .line 131
++    .line 140
 +    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/LogTools;->redact(Ljava/lang/String;)Ljava/lang/String;
 +
 +    move-result-object p1
 +
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;
 +
-+    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$2;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
++    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
 +
 +    invoke-direct {p0, p2, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
 +
-+    .line 132
++    .line 141
 +    return-void
 +
-+    .line 130
++    .line 139
 +    :cond_32
 +    new-instance p1, Ljava/io/IOException;
 +
@@ -5624,7 +5989,7 @@ new file mode 100644
 +
 +    throw p1
 +
-+    .line 129
++    .line 138
 +    :catchall_3a
 +    move-exception p2
 +
@@ -5647,10 +6012,10 @@ new file mode 100644
 +    throw p2
 +.end method
 +
-+.method synthetic lambda$refresh$14$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/os/Bundle;)V
-+    .registers 5
++.method synthetic lambda$refresh$17$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/os/Bundle;)V
++    .registers 6
 +
-+    .line 106
++    .line 115
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->config:Landroid/os/Bundle;
 +
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->backend:Landroid/widget/TextView;
@@ -5709,18 +6074,46 @@ new file mode 100644
 +
 +    invoke-virtual {p1, v2}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;)Z
 +
-+    move-result p1
++    move-result v2
 +
-+    if-eqz p1, :cond_42
++    if-eqz v2, :cond_42
 +
 +    const-string p1, " Conservative online budget; provider limits also apply."
 +
-+    goto :goto_44
++    goto :goto_61
 +
 +    :cond_42
-+    const-string p1, " Local context: 1,024 tokens. Exact token checks may require a shorter section."
++    new-instance v2, Ljava/lang/StringBuilder;
 +
-+    :goto_44
++    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
++
++    const-string v3, " Local context: "
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v2
++
++    const-string v3, "chat_context_tokens"
++
++    invoke-virtual {p1, v3}, Landroid/os/Bundle;->getInt(Ljava/lang/String;)I
++
++    move-result p1
++
++    invoke-virtual {v2, p1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    move-result-object p1
++
++    const-string v2, " tokens. Exact token checks may require a shorter section."
++
++    invoke-virtual {p1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object p1
++
++    :goto_61
 +    invoke-virtual {v1, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object p1
@@ -5731,7 +6124,7 @@ new file mode 100644
 +
 +    invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 +
-+    .line 107
++    .line 116
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget p1, p1, Lio/mesalabs/unica/troubleshooting/ChatHistory;->sectionChars:I
@@ -5740,7 +6133,7 @@ new file mode 100644
 +
 +    move-result v0
 +
-+    if-eq p1, v0, :cond_6d
++    if-eq p1, v0, :cond_8a
 +
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
@@ -5762,7 +6155,7 @@ new file mode 100644
 +
 +    iput v0, p1, Lio/mesalabs/unica/troubleshooting/ChatHistory;->sectionChars:I
 +
-+    :cond_6d
++    :cond_8a
 +    invoke-direct {p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->loadSection()V
 +
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->status:Landroid/widget/TextView;
@@ -5774,7 +6167,7 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$refresh$15$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;I)V
++.method synthetic lambda$refresh$18$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;I)V
 +    .registers 5
 +    .annotation system Ldalvik/annotation/Throws;
 +        value = {
@@ -5782,12 +6175,12 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 103
++    .line 112
 +    invoke-virtual {p1}, Lio/mesalabs/unica/troubleshooting/AiClient;->config()Landroid/os/Bundle;
 +
 +    move-result-object p1
 +
-+    .line 104
++    .line 113
 +    const-string v0, "chat_protocol"
 +
 +    invoke-virtual {p1, v0}, Landroid/os/Bundle;->getInt(Ljava/lang/String;)I
@@ -5798,7 +6191,7 @@ new file mode 100644
 +
 +    if-ne v0, v1, :cond_26
 +
-+    .line 105
++    .line 114
 +    const-string v0, "ready"
 +
 +    invoke-virtual {p1, v0}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;)Z
@@ -5807,17 +6200,17 @@ new file mode 100644
 +
 +    if-eqz v0, :cond_1e
 +
-+    .line 106
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;
++    .line 115
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;
 +
-+    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$20;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/os/Bundle;)V
++    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$22;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Landroid/os/Bundle;)V
 +
 +    invoke-direct {p0, p2, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
 +
-+    .line 108
++    .line 117
 +    return-void
 +
-+    .line 105
++    .line 114
 +    :cond_1e
 +    new-instance p1, Ljava/io/IOException;
 +
@@ -5827,7 +6220,7 @@ new file mode 100644
 +
 +    throw p1
 +
-+    .line 104
++    .line 113
 +    :cond_26
 +    new-instance p1, Ljava/io/IOException;
 +
@@ -5838,19 +6231,19 @@ new file mode 100644
 +    throw p1
 +.end method
 +
-+.method synthetic lambda$review$18$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;Landroid/content/DialogInterface;I)V
++.method synthetic lambda$review$21$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;Landroid/content/DialogInterface;I)V
 +    .registers 5
 +
-+    .line 143
++    .line 152
 +    invoke-direct {p0, p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->send(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;)V
 +
 +    return-void
 +.end method
 +
-+.method synthetic lambda$run$11$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
++.method synthetic lambda$run$14$io-mesalabs-unica-troubleshooting-AskAiChat(Ljava/lang/String;)V
 +    .registers 3
 +
-+    .line 92
++    .line 101
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->status:Landroid/widget/TextView;
 +
 +    invoke-virtual {v0, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
@@ -5858,10 +6251,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$run$12$io-mesalabs-unica-troubleshooting-AskAiChat()V
++.method synthetic lambda$run$15$io-mesalabs-unica-troubleshooting-AskAiChat()V
 +    .registers 3
 +
-+    .line 92
++    .line 101
 +    const/4 v0, 0x0
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->setBusy(Z)V
@@ -5882,19 +6275,19 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$run$13$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
++.method synthetic lambda$run$16$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;I)V
 +    .registers 4
 +
-+    .line 92
++    .line 101
 +    :try_start_0
 +    invoke-interface {p1, p2}, Lio/mesalabs/unica/troubleshooting/AskAiChat$Task;->run(I)V
 +    :try_end_3
 +    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_3} :catch_e
 +    .catchall {:try_start_0 .. :try_end_3} :catchall_c
 +
-+    new-instance p1, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;
++    new-instance p1, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
 +
-+    invoke-direct {p1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {p1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    :goto_8
 +    invoke-direct {p0, p2, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
@@ -5932,17 +6325,17 @@ new file mode 100644
 +
 +    move-result-object p1
 +
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;
 +
-+    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$1;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
++    invoke-direct {v0, p0, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$19;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Ljava/lang/String;)V
 +
 +    invoke-direct {p0, p2, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
 +    :try_end_2a
 +    .catchall {:try_start_f .. :try_end_2a} :catchall_c
 +
-+    new-instance p1, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;
++    new-instance p1, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
 +
-+    invoke-direct {p1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {p1, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    goto :goto_8
 +
@@ -5950,19 +6343,19 @@ new file mode 100644
 +    return-void
 +
 +    :goto_31
-+    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;
++    new-instance v0, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;
 +
-+    invoke-direct {v0, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$0;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
++    invoke-direct {v0, p0}, Lio/mesalabs/unica/troubleshooting/AskAiChat$18;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;)V
 +
 +    invoke-direct {p0, p2, v0}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
 +
 +    throw p1
 +.end method
 +
-+.method synthetic lambda$send$19$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V
++.method synthetic lambda$send$22$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V
 +    .registers 5
 +
-+    .line 151
++    .line 160
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->history:Lio/mesalabs/unica/troubleshooting/ChatHistory;
 +
 +    iget-object v1, p1, Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;->question:Ljava/lang/String;
@@ -5998,7 +6391,7 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$send$20$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;I)V
++.method synthetic lambda$send$23$io-mesalabs-unica-troubleshooting-AskAiChat(Lio/mesalabs/unica/troubleshooting/AiClient;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Landroid/os/Bundle;I)V
 +    .registers 6
 +    .annotation system Ldalvik/annotation/Throws;
 +        value = {
@@ -6006,17 +6399,17 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 148
++    .line 157
 +    if-eqz p1, :cond_21
 +
-+    .line 149
++    .line 158
 +    iget-object v0, p2, Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;->wire:Ljava/lang/String;
 +
 +    invoke-virtual {p1, v0, p3}, Lio/mesalabs/unica/troubleshooting/AiClient;->chat(Ljava/lang/String;Landroid/os/Bundle;)Ljava/lang/String;
 +
 +    move-result-object p1
 +
-+    .line 150
++    .line 159
 +    invoke-virtual {p1}, Ljava/lang/String;->length()I
 +
 +    move-result p3
@@ -6025,17 +6418,17 @@ new file mode 100644
 +
 +    if-gt p3, v0, :cond_19
 +
-+    .line 151
++    .line 160
 +    new-instance p3, Lio/mesalabs/unica/troubleshooting/AskAiChat$25;
 +
 +    invoke-direct {p3, p0, p2, p1}, Lio/mesalabs/unica/troubleshooting/AskAiChat$25;-><init>(Lio/mesalabs/unica/troubleshooting/AskAiChat;Lio/mesalabs/unica/troubleshooting/ChatHistory$Request;Ljava/lang/String;)V
 +
 +    invoke-direct {p0, p4, p3}, Lio/mesalabs/unica/troubleshooting/AskAiChat;->ui(ILjava/lang/Runnable;)V
 +
-+    .line 152
++    .line 161
 +    return-void
 +
-+    .line 150
++    .line 159
 +    :cond_19
 +    new-instance p1, Ljava/io/IOException;
 +
@@ -6045,7 +6438,7 @@ new file mode 100644
 +
 +    throw p1
 +
-+    .line 148
++    .line 157
 +    :cond_21
 +    new-instance p1, Ljava/io/IOException;
 +
@@ -6056,10 +6449,10 @@ new file mode 100644
 +    throw p1
 +.end method
 +
-+.method synthetic lambda$show$9$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/app/AlertDialog;Landroid/content/DialogInterface;)V
++.method synthetic lambda$show$12$io-mesalabs-unica-troubleshooting-AskAiChat(Landroid/app/AlertDialog;Landroid/content/DialogInterface;)V
 +    .registers 3
 +
-+    .line 86
++    .line 95
 +    iget-object p2, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->dialogs:Ljava/util/ArrayList;
 +
 +    invoke-virtual {p2, p1}, Ljava/util/ArrayList;->remove(Ljava/lang/Object;)Z
@@ -6067,10 +6460,10 @@ new file mode 100644
 +    return-void
 +.end method
 +
-+.method synthetic lambda$ui$10$io-mesalabs-unica-troubleshooting-AskAiChat(ILjava/lang/Runnable;)V
++.method synthetic lambda$ui$13$io-mesalabs-unica-troubleshooting-AskAiChat(ILjava/lang/Runnable;)V
 +    .registers 4
 +
-+    .line 88
++    .line 97
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/AskAiChat;->closed:Z
 +
 +    if-nez v0, :cond_1b
@@ -15526,7 +15919,7 @@ diff --git a/smali_classes4/io/mesalabs/unica/troubleshooting/TroubleshootingAct
 new file mode 100644
 --- /dev/null
 +++ b/smali_classes4/io/mesalabs/unica/troubleshooting/TroubleshootingActivity.smali
-@@ -0,0 +1,7991 @@
+@@ -0,0 +1,7993 @@
 +.class public final Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;
 +.super Landroid/app/Activity;
 +.source "TroubleshootingActivity.java"
@@ -15954,7 +16347,7 @@ new file mode 100644
 +.method private analyze(Lio/mesalabs/unica/troubleshooting/LogTools$Selection;Landroid/os/Bundle;)V
 +    .registers 4
 +
-+    .line 270
++    .line 279
 +    const/4 v0, 0x0
 +
 +    iput-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->cancelled:Z
@@ -15985,7 +16378,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, p1, p2, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->run(Ljava/lang/String;Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$Work;)V
 +
-+    .line 281
++    .line 290
 +    return-void
 +.end method
 +
@@ -16574,7 +16967,7 @@ new file mode 100644
 +.method private checkSetup()V
 +    .registers 4
 +
-+    .line 232
++    .line 241
 +    new-instance v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$58;
 +
 +    invoke-direct {v0, p0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$58;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;)V
@@ -16585,7 +16978,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->run(Ljava/lang/String;Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$Work;)V
 +
-+    .line 234
++    .line 243
 +    return-void
 +.end method
 +
@@ -16635,7 +17028,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->run(Ljava/lang/String;Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$Work;)V
 +
-+    .line 231
++    .line 240
 +    return-void
 +.end method
 +
@@ -16671,7 +17064,7 @@ new file mode 100644
 +.end method
 +
 +.method private confirmModule(Ljava/lang/String;Lorg/json/JSONObject;)V
-+    .registers 8
++    .registers 7
 +
 +    .line 200
 +    const-string v0, "disable"
@@ -16743,58 +17136,33 @@ new file mode 100644
 +
 +    move-result-object v2
 +
-+    const-string v3, "\n"
++    const-string v3, ".\n"
 +
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v2
 +
-+    if-eqz v0, :cond_6a
-+
-+    new-instance v3, Ljava/lang/StringBuilder;
-+
-+    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
++    if-eqz v0, :cond_57
 +
 +    invoke-direct {p0, p2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->duplicate(Lorg/json/JSONObject;)Z
 +
-+    move-result v4
++    move-result v3
 +
-+    if-eqz v4, :cond_59
++    if-eqz v3, :cond_54
 +
-+    const-string v4, "This module serves the same purpose as a built-in UN1CA feature. This does not prove it caused a failure, or that the built-in feature is enabled. Choose which implementation to use. "
++    const-string v3, "This module serves the same purpose as a built-in UN1CA feature."
 +
-+    goto :goto_5b
++    goto :goto_59
 +
-+    :cond_59
-+    const-string v4, "The module changes files related to a built-in feature. This does not prove it caused a failure. "
++    :cond_54
++    const-string v3, "This module changes files related to a built-in UN1CA feature."
 +
-+    :goto_5b
-+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++    goto :goto_59
 +
-+    move-result-object v3
++    :cond_57
++    const-string v3, "Restore this module by removing this menu\u2019s disable marker."
 +
-+    const-string v4, "Creates a reversible disable marker. Disabling a boot-critical module can prevent boot or remove a required feature. Attestation-module changes may affect apps that depend on their keys."
-+
-+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-+
-+    move-result-object v3
-+
-+    goto :goto_6c
-+
-+    :cond_6a
-+    const-string v3, "Removes this menu\'s disable marker. Re-enabling the module can bring back a failure."
-+
-+    :goto_6c
-+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    const-string v3, " Restart required. Other modules and app data are preserved."
-+
++    :goto_59
 +    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
 +    move-result-object v2
@@ -16808,16 +17176,16 @@ new file mode 100644
 +    move-result-object v1
 +
 +    .line 202
-+    if-eqz v0, :cond_83
++    if-eqz v0, :cond_6a
 +
 +    const-string v2, "Disable"
 +
-+    goto :goto_85
++    goto :goto_6c
 +
-+    :cond_83
++    :cond_6a
 +    const-string v2, "Restore"
 +
-+    :goto_85
++    :goto_6c
 +    new-instance v3, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$56;
 +
 +    invoke-direct {v3, p0, p1, p2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$56;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Ljava/lang/String;Lorg/json/JSONObject;)V
@@ -16827,16 +17195,16 @@ new file mode 100644
 +    move-result-object p1
 +
 +    .line 206
-+    if-eqz v0, :cond_93
++    if-eqz v0, :cond_7a
 +
 +    const-string v1, "Keep enabled"
 +
-+    goto :goto_95
++    goto :goto_7c
 +
-+    :cond_93
++    :cond_7a
 +    const-string v1, "Cancel"
 +
-+    :goto_95
++    :goto_7c
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$57;
 +
 +    invoke-direct {v2, p0, v0, p2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$57;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;ZLorg/json/JSONObject;)V
@@ -18668,22 +19036,20 @@ new file mode 100644
 +
 +    iget-boolean v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->busy:Z
 +
-+    const/16 v5, 0x8
-+
-+    if-eqz v4, :cond_559
++    if-eqz v4, :cond_557
 +
 +    iget-boolean v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analyzing:Z
 +
-+    if-eqz v4, :cond_559
++    if-eqz v4, :cond_557
 +
 +    move v4, v1
 +
-+    goto :goto_55a
++    goto :goto_559
 +
-+    :cond_559
-+    move v4, v5
++    :cond_557
++    const/16 v4, 0x8
 +
-+    :goto_55a
++    :goto_559
 +    invoke-virtual {v3, v4}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$ActionRow;->setVisibility(I)V
 +
 +    iget-object v3, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->cancelAnalysis:Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$ActionRow;
@@ -18699,7 +19065,7 @@ new file mode 100644
 +
 +    move-result v3
 +
-+    if-nez v3, :cond_5e0
++    if-nez v3, :cond_5e1
 +
 +    const-string v3, "AI findings \u2014 verify before acting"
 +
@@ -18716,119 +19082,119 @@ new file mode 100644
 +    invoke-direct {v0, v3, v6}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->text(Ljava/lang/String;I)Landroid/widget/TextView;
 +
 +    .line 161
-+    move v3, v1
++    nop
 +
-+    :goto_57b
-+    iget-object v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisParts:Ljava/util/ArrayList;
++    :goto_57a
++    iget-object v3, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisParts:Ljava/util/ArrayList;
 +
-+    invoke-virtual {v4}, Ljava/util/ArrayList;->size()I
++    invoke-virtual {v3}, Ljava/util/ArrayList;->size()I
++
++    move-result v3
++
++    if-ge v1, v3, :cond_5e1
++
++    .line 162
++    iget-object v3, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisParts:Ljava/util/ArrayList;
++
++    invoke-virtual {v3, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++
++    move-result-object v3
++
++    check-cast v3, Ljava/lang/String;
++
++    invoke-direct {v0, v3, v13}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->text(Ljava/lang/String;I)Landroid/widget/TextView;
++
++    move-result-object v3
++
++    iget-object v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->expandedAnalysis:Ljava/util/Set;
++
++    invoke-static {v1}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
++
++    move-result-object v5
++
++    invoke-interface {v4, v5}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
 +
 +    move-result v4
 +
-+    if-ge v3, v4, :cond_5e0
++    if-eqz v4, :cond_59e
 +
-+    .line 162
-+    iget-object v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisParts:Ljava/util/ArrayList;
++    const v4, 0x7fffffff
 +
-+    invoke-virtual {v4, v3}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++    goto :goto_59f
 +
-+    move-result-object v4
++    :cond_59e
++    const/4 v4, 0x5
 +
-+    check-cast v4, Ljava/lang/String;
-+
-+    invoke-direct {v0, v4, v13}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->text(Ljava/lang/String;I)Landroid/widget/TextView;
-+
-+    move-result-object v4
-+
-+    iget-object v6, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->expandedAnalysis:Ljava/util/Set;
-+
-+    invoke-static {v3}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
-+
-+    move-result-object v7
-+
-+    invoke-interface {v6, v7}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
-+
-+    move-result v6
-+
-+    if-eqz v6, :cond_59d
-+
-+    move v6, v1
-+
-+    goto :goto_59e
-+
-+    :cond_59d
-+    move v6, v5
-+
-+    :goto_59e
-+    invoke-virtual {v4, v6}, Landroid/widget/TextView;->setVisibility(I)V
++    :goto_59f
++    invoke-virtual {v3, v4}, Landroid/widget/TextView;->setMaxLines(I)V
 +
 +    .line 163
-+    new-instance v6, Ljava/lang/StringBuilder;
++    new-instance v4, Ljava/lang/StringBuilder;
 +
-+    invoke-direct {v6}, Ljava/lang/StringBuilder;-><init>()V
++    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
 +
-+    iget-object v7, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->expandedAnalysis:Ljava/util/Set;
++    iget-object v5, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->expandedAnalysis:Ljava/util/Set;
 +
-+    invoke-static {v3}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
-+
-+    move-result-object v8
-+
-+    invoke-interface {v7, v8}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
-+
-+    move-result v7
-+
-+    if-eqz v7, :cond_5b5
-+
-+    const-string v7, "\u25be "
-+
-+    goto :goto_5b7
-+
-+    :cond_5b5
-+    const-string v7, "\u25b8 "
-+
-+    :goto_5b7
-+    invoke-virtual {v6, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++    invoke-static {v1}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 +
 +    move-result-object v6
 +
-+    iget-object v7, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisTitles:Ljava/util/ArrayList;
++    invoke-interface {v5, v6}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
 +
-+    invoke-virtual {v7, v3}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++    move-result v5
 +
-+    move-result-object v7
++    if-eqz v5, :cond_5b6
 +
-+    check-cast v7, Ljava/lang/String;
++    const-string v5, "\u25be "
 +
-+    invoke-virtual {v6, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++    goto :goto_5b8
 +
-+    move-result-object v6
++    :cond_5b6
++    const-string v5, "\u25b8 "
 +
-+    invoke-virtual {v6}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++    :goto_5b8
++    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
-+    move-result-object v6
++    move-result-object v4
 +
-+    new-instance v7, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$39;
++    iget-object v5, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisTitles:Ljava/util/ArrayList;
 +
-+    invoke-direct {v7, v0, v4, v3}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$39;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Landroid/widget/TextView;I)V
++    invoke-virtual {v5, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
 +
-+    invoke-direct {v0, v6, v7}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->button(Ljava/lang/String;Ljava/lang/Runnable;)Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$ActionRow;
++    move-result-object v5
++
++    check-cast v5, Ljava/lang/String;
++
++    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v4
++
++    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v4
++
++    new-instance v5, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$39;
++
++    invoke-direct {v5, v0, v3, v1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$39;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Landroid/widget/TextView;I)V
++
++    invoke-direct {v0, v4, v5}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->button(Ljava/lang/String;Ljava/lang/Runnable;)Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$ActionRow;
 +
 +    .line 164
-+    iget-object v6, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->page:Landroid/widget/LinearLayout;
++    iget-object v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->page:Landroid/widget/LinearLayout;
 +
-+    invoke-virtual {v6, v4}, Landroid/widget/LinearLayout;->removeView(Landroid/view/View;)V
++    invoke-virtual {v4, v3}, Landroid/widget/LinearLayout;->removeView(Landroid/view/View;)V
 +
-+    iget-object v6, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->page:Landroid/widget/LinearLayout;
++    iget-object v4, v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->page:Landroid/widget/LinearLayout;
 +
-+    invoke-virtual {v6, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
++    invoke-virtual {v4, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
 +    .line 161
-+    add-int/lit8 v3, v3, 0x1
++    add-int/lit8 v1, v1, 0x1
 +
-+    goto :goto_57b
++    goto :goto_57a
 +
 +    .line 166
-+    :cond_5e0
++    :cond_5e1
 +    const-string v1, "History and restoration"
 +
 +    invoke-direct {v0, v1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->card(Ljava/lang/String;)V
@@ -18904,7 +19270,7 @@ new file mode 100644
 +.method private explainSetup()V
 +    .registers 4
 +
-+    .line 235
++    .line 244
 +    new-instance v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$19;
 +
 +    invoke-direct {v0, p0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$19;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;)V
@@ -18915,7 +19281,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->run(Ljava/lang/String;Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$Work;)V
 +
-+    .line 239
++    .line 248
 +    return-void
 +.end method
 +
@@ -19320,32 +19686,29 @@ new file mode 100644
 +.method static synthetic lambda$preview$43(Landroid/widget/EditText;)V
 +    .registers 3
 +
-+    .line 254
-+    invoke-virtual {p0}, Landroid/widget/EditText;->getVisibility()I
++    .line 263
++    invoke-virtual {p0}, Landroid/widget/EditText;->getMaxLines()I
 +
 +    move-result v0
 +
-+    const/4 v1, 0x0
++    const/4 v1, 0x5
 +
-+    if-eqz v0, :cond_9
++    if-ne v0, v1, :cond_9
 +
 +    const/4 v0, 0x1
 +
 +    goto :goto_a
 +
 +    :cond_9
-+    move v0, v1
++    const/4 v0, 0x0
 +
 +    :goto_a
-+    if-eqz v0, :cond_d
++    if-eqz v0, :cond_f
 +
-+    goto :goto_f
++    const v1, 0x7fffffff
 +
-+    :cond_d
-+    const/16 v1, 0x8
-+
-+    :goto_f
-+    invoke-virtual {p0, v1}, Landroid/widget/EditText;->setVisibility(I)V
++    :cond_f
++    invoke-virtual {p0, v1}, Landroid/widget/EditText;->setMaxLines(I)V
 +
 +    return-void
 +.end method
@@ -19408,7 +19771,7 @@ new file mode 100644
 +.method private prepareAnalysis()V
 +    .registers 4
 +
-+    .line 240
++    .line 249
 +    new-instance v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$54;
 +
 +    invoke-direct {v0, p0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$54;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;)V
@@ -19419,14 +19782,14 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1, v2, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->run(Ljava/lang/String;Ljava/lang/String;Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$Work;)V
 +
-+    .line 245
++    .line 254
 +    return-void
 +.end method
 +
 +.method private preview()V
 +    .registers 13
 +
-+    .line 247
++    .line 256
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->config:Landroid/os/Bundle;
 +
 +    const-string v1, "online"
@@ -19531,7 +19894,7 @@ new file mode 100644
 +
 +    move-result-object v1
 +
-+    .line 248
++    .line 257
 +    new-instance v2, Landroid/widget/LinearLayout;
 +
 +    invoke-direct {v2, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
@@ -19554,7 +19917,7 @@ new file mode 100644
 +
 +    invoke-virtual {v2, v5, v6, v4, v6}, Landroid/widget/LinearLayout;->setPadding(IIII)V
 +
-+    .line 249
++    .line 258
 +    new-instance v4, Ljava/util/ArrayList;
 +
 +    invoke-direct {v4}, Ljava/util/ArrayList;-><init>()V
@@ -19563,7 +19926,7 @@ new file mode 100644
 +
 +    invoke-direct {v5}, Ljava/util/ArrayList;-><init>()V
 +
-+    .line 250
++    .line 259
 +    nop
 +
 +    :goto_86
@@ -19575,9 +19938,9 @@ new file mode 100644
 +
 +    move-result v7
 +
-+    if-ge v6, v7, :cond_125
++    if-ge v6, v7, :cond_124
 +
-+    .line 251
++    .line 260
 +    new-instance v7, Landroid/widget/CheckBox;
 +
 +    invoke-direct {v7, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
@@ -19610,7 +19973,7 @@ new file mode 100644
 +
 +    invoke-virtual {v4, v7}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
-+    .line 252
++    .line 261
 +    iget-object v7, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->selection:Lio/mesalabs/unica/troubleshooting/LogTools$Selection;
 +
 +    iget-object v7, v7, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;->titles:Ljava/util/ArrayList;
@@ -19636,7 +19999,7 @@ new file mode 100644
 +    :cond_cb
 +    const-string v7, "Crash details"
 +
-+    .line 253
++    .line 262
 +    :goto_cd
 +    new-instance v8, Landroid/widget/EditText;
 +
@@ -19662,13 +20025,13 @@ new file mode 100644
 +
 +    invoke-virtual {v8, v6}, Landroid/widget/EditText;->setInputType(I)V
 +
-+    const/16 v6, 0x8
++    const/4 v6, 0x5
 +
-+    invoke-virtual {v8, v6}, Landroid/widget/EditText;->setVisibility(I)V
++    invoke-virtual {v8, v6}, Landroid/widget/EditText;->setMaxLines(I)V
 +
 +    invoke-virtual {v5, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 +
-+    .line 254
++    .line 263
 +    new-instance v6, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$ActionRow;
 +
 +    new-instance v10, Ljava/lang/StringBuilder;
@@ -19695,16 +20058,16 @@ new file mode 100644
 +
 +    iget-boolean v10, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setupReview:Z
 +
-+    if-eqz v10, :cond_112
++    if-eqz v10, :cond_111
 +
 +    const-string v10, "Tap to expand or collapse setup details"
 +
-+    goto :goto_114
++    goto :goto_113
 +
-+    :cond_112
++    :cond_111
 +    const-string v10, "Tap to expand or collapse crash details"
 +
-+    :goto_114
++    :goto_113
 +    new-instance v11, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$13;
 +
 +    invoke-direct {v11, v8}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$13;-><init>(Landroid/widget/EditText;)V
@@ -19715,43 +20078,43 @@ new file mode 100644
 +
 +    invoke-virtual {v2, v8}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 +
-+    .line 250
++    .line 259
 +    move v6, v9
 +
 +    goto/16 :goto_86
 +
-+    .line 256
-+    :cond_125
++    .line 265
++    :cond_124
 +    new-instance v3, Landroid/widget/ScrollView;
 +
 +    invoke-direct {v3, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V
 +
 +    invoke-virtual {v3, v2}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V
 +
-+    .line 257
++    .line 266
 +    new-instance v2, Landroid/app/AlertDialog$Builder;
 +
 +    invoke-direct {v2, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
 +
-+    if-eqz v0, :cond_137
++    if-eqz v0, :cond_136
 +
 +    const-string v6, "Review before sending online"
 +
-+    goto :goto_140
++    goto :goto_13f
 +
-+    :cond_137
++    :cond_136
 +    iget-boolean v6, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setupReview:Z
 +
-+    if-eqz v6, :cond_13e
++    if-eqz v6, :cond_13d
 +
 +    const-string v6, "Review setup report"
 +
-+    goto :goto_140
++    goto :goto_13f
 +
-+    :cond_13e
++    :cond_13d
 +    const-string v6, "Review crash details"
 +
-+    :goto_140
++    :goto_13f
 +    invoke-virtual {v2, v6}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v2
@@ -19778,22 +20141,22 @@ new file mode 100644
 +
 +    move-result-object v1
 +
-+    .line 258
++    .line 267
 +    invoke-virtual {v2, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v1
 +
-+    .line 259
-+    if-eqz v0, :cond_164
++    .line 268
++    if-eqz v0, :cond_163
 +
 +    const-string v0, "Send selected sections"
 +
-+    goto :goto_166
++    goto :goto_165
 +
-+    :cond_164
++    :cond_163
 +    const-string v0, "Analyze selected sections"
 +
-+    :goto_166
++    :goto_165
 +    const/4 v2, 0x0
 +
 +    invoke-virtual {v1, v0, v2}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
@@ -19810,17 +20173,17 @@ new file mode 100644
 +
 +    move-result-object v0
 +
-+    .line 260
++    .line 269
 +    new-instance v1, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$14;
 +
 +    invoke-direct {v1, p0, v0, v4, v5}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$14;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Landroid/app/AlertDialog;Ljava/util/ArrayList;Ljava/util/ArrayList;)V
 +
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog;->setOnShowListener(Landroid/content/DialogInterface$OnShowListener;)V
 +
-+    .line 268
++    .line 277
 +    invoke-virtual {v0}, Landroid/app/AlertDialog;->show()V
 +
-+    .line 269
++    .line 278
 +    return-void
 +.end method
 +
@@ -20107,172 +20470,36 @@ new file mode 100644
 +.end method
 +
 +.method private reviewLsposed(Lorg/json/JSONObject;)V
-+    .registers 7
++    .registers 5
 +
 +    .line 209
 +    new-instance v0, Landroid/app/AlertDialog$Builder;
 +
 +    invoke-direct {v0, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
 +
-+    const-string v1, "Review LSPosed scope"
++    const-string v1, "Review LSPosed scope."
 +
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
 +
-+    new-instance v1, Ljava/lang/StringBuilder;
-+
-+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
-+
 +    .line 210
-+    const-string v2, "duplicate"
++    const-string v1, "duplicate"
 +
-+    invoke-virtual {p1, v2}, Lorg/json/JSONObject;->optBoolean(Ljava/lang/String;)Z
++    invoke-virtual {p1, v1}, Lorg/json/JSONObject;->optBoolean(Ljava/lang/String;)Z
 +
-+    move-result v2
++    move-result v1
 +
-+    const-string v3, "unica_mod"
++    if-eqz v1, :cond_16
 +
-+    if-eqz v2, :cond_30
++    const-string v1, "This module serves the same purpose as a built-in UN1CA feature."
 +
-+    new-instance v2, Ljava/lang/StringBuilder;
++    goto :goto_18
 +
-+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
++    :cond_16
++    const-string v1, "This module conflicts with a built-in UN1CA feature."
 +
-+    const-string v4, "Same purpose as UN1CA\u2019s "
-+
-+    invoke-virtual {v2, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {p1, v3}, Lorg/json/JSONObject;->optString(Ljava/lang/String;)Ljava/lang/String;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    const-string v3, ". This does not prove a failure, or that the built-in feature is configured. Choose which implementation to use.\n\n"
-+
-+    goto :goto_45
-+
-+    :cond_30
-+    new-instance v2, Ljava/lang/StringBuilder;
-+
-+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
-+
-+    const-string v4, "Confirmed conflict with UN1CA\u2019s "
-+
-+    invoke-virtual {v2, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {p1, v3}, Lorg/json/JSONObject;->optString(Ljava/lang/String;)Ljava/lang/String;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    const-string v3, ".\n\n"
-+
-+    :goto_45
-+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    const-string v2, "Disable "
-+
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    const-string v2, "package"
-+
-+    invoke-virtual {p1, v2}, Lorg/json/JSONObject;->optString(Ljava/lang/String;)Ljava/lang/String;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    const-string v2, " or its relevant target scope"
-+
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    const-string v2, "scope"
-+
-+    invoke-virtual {p1, v2}, Lorg/json/JSONObject;->optString(Ljava/lang/String;)Ljava/lang/String;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {v3}, Ljava/lang/String;->isEmpty()Z
-+
-+    move-result v3
-+
-+    if-eqz v3, :cond_76
-+
-+    const-string v2, ""
-+
-+    goto :goto_93
-+
-+    :cond_76
-+    new-instance v3, Ljava/lang/StringBuilder;
-+
-+    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-+
-+    const-string v4, " ("
-+
-+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v3
-+
-+    invoke-virtual {p1, v2}, Lorg/json/JSONObject;->optString(Ljava/lang/String;)Ljava/lang/String;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {v3, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    const-string v3, ")"
-+
-+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v2
-+
-+    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-+
-+    move-result-object v2
-+
-+    :goto_93
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    const-string v2, " in LSPosed Manager, then return here, scan again and restart. Opening the manager does not verify a change. This menu does not change private LSPosed settings."
-+
-+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-+
-+    move-result-object v1
-+
-+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-+
-+    move-result-object v1
-+
++    :goto_18
 +    invoke-virtual {v0, v1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
 +
 +    move-result-object v0
@@ -20595,7 +20822,7 @@ new file mode 100644
 +.method synthetic lambda$analyze$46$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(ILio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +    .registers 5
 +
-+    .line 274
++    .line 283
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -20646,7 +20873,7 @@ new file mode 100644
 +.method synthetic lambda$analyze$47$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Ljava/lang/String;Ljava/lang/String;ILio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +    .registers 6
 +
-+    .line 277
++    .line 286
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysis:Ljava/lang/String;
 +
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analysisParts:Ljava/util/ArrayList;
@@ -20709,7 +20936,7 @@ new file mode 100644
 +.method synthetic lambda$analyze$48$io-mesalabs-unica-troubleshooting-TroubleshootingActivity()V
 +    .registers 2
 +
-+    .line 278
++    .line 287
 +    const-string v0, "Analysis stopped. Some selected log sections were not analyzed."
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setStatus(Ljava/lang/String;)V
@@ -20720,7 +20947,7 @@ new file mode 100644
 +.method synthetic lambda$analyze$49$io-mesalabs-unica-troubleshooting-TroubleshootingActivity()V
 +    .registers 2
 +
-+    .line 280
++    .line 289
 +    const-string v0, "Analysis finished. Expand a result below to read it. Suggested causes require verification."
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setStatus(Ljava/lang/String;)V
@@ -20736,7 +20963,7 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 271
++    .line 280
 +    new-instance v0, Ljava/lang/StringBuilder;
 +
 +    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
@@ -20789,7 +21016,7 @@ new file mode 100644
 +
 +    move-result-object v3
 +
-+    .line 272
++    .line 281
 +    const/4 v7, 0x0
 +
 +    move v5, v7
@@ -20803,7 +21030,7 @@ new file mode 100644
 +
 +    if-ge v5, v0, :cond_a0
 +
-+    .line 273
++    .line 282
 +    iget-boolean v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->cancelled:Z
 +
 +    if-nez v0, :cond_98
@@ -20818,17 +21045,17 @@ new file mode 100644
 +
 +    if-nez v0, :cond_98
 +
-+    .line 274
++    .line 283
 +    new-instance v0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$20;
 +
 +    invoke-direct {v0, p0, v5, p2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$20;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;ILio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 275
++    .line 284
 +    nop
 +
-+    .line 276
++    .line 285
 +    :try_start_53
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ai:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
@@ -20883,7 +21110,7 @@ new file mode 100644
 +
 +    move v0, v1
 +
-+    .line 277
++    .line 286
 +    :goto_7f
 +    new-instance v1, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$21;
 +
@@ -20895,7 +21122,7 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 278
++    .line 287
 +    if-eqz v0, :cond_94
 +
 +    new-instance p1, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$22;
@@ -20906,7 +21133,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 272
++    .line 281
 +    :cond_94
 +    add-int/lit8 v5, v5, 0x1
 +
@@ -20914,7 +21141,7 @@ new file mode 100644
 +
 +    goto :goto_34
 +
-+    .line 273
++    .line 282
 +    :cond_98
 +    new-instance p1, Ljava/io/InterruptedIOException;
 +
@@ -20924,7 +21151,7 @@ new file mode 100644
 +
 +    throw p1
 +
-+    .line 280
++    .line 289
 +    :cond_a0
 +    new-instance p1, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$23;
 +
@@ -20932,14 +21159,14 @@ new file mode 100644
 +
 +    invoke-direct {p0, p1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 281
++    .line 290
 +    return-void
 +.end method
 +
 +.method synthetic lambda$checkSetup$36$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Ljava/lang/String;)V
 +    .registers 2
 +
-+    .line 233
++    .line 242
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setupReport:Ljava/lang/String;
 +
 +    const-string p1, "Check completed. Review configuration and runtime results below."
@@ -20957,7 +21184,7 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 233
++    .line 242
 +    invoke-static {p0}, Lio/mesalabs/unica/troubleshooting/SetupChecks;->collect(Landroid/content/Context;)Ljava/lang/String;
 +
 +    move-result-object v0
@@ -20968,17 +21195,17 @@ new file mode 100644
 +
 +    invoke-direct {p0, v1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 234
++    .line 243
 +    return-void
 +.end method
 +
 +.method synthetic lambda$collect$34$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Ljava/lang/String;)V
 +    .registers 2
 +
-+    .line 229
++    .line 238
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->raw:Ljava/lang/String;
 +
-+    const-string p1, "This device \u2014 recent logcat"
++    const-string p1, "This device \u2014 recent logcat and dedicated crash buffer"
 +
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->source:Ljava/lang/String;
 +
@@ -21006,7 +21233,7 @@ new file mode 100644
 +.end method
 +
 +.method synthetic lambda$collect$35$io-mesalabs-unica-troubleshooting-TroubleshootingActivity()V
-+    .registers 11
++    .registers 20
 +    .annotation system Ldalvik/annotation/Throws;
 +        value = {
 +            Ljava/lang/Exception;
@@ -21014,31 +21241,33 @@ new file mode 100644
 +    .end annotation
 +
 +    .line 227
-+    new-instance v0, Ljava/io/File;
++    move-object/from16 v0, p0
 +
-+    invoke-virtual {p0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->getCacheDir()Ljava/io/File;
++    new-instance v1, Ljava/io/File;
 +
-+    move-result-object v1
++    invoke-virtual {v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->getCacheDir()Ljava/io/File;
 +
-+    const-string v2, "troubleshooting"
++    move-result-object v2
 +
-+    invoke-direct {v0, v1, v2}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
++    const-string v3, "troubleshooting"
 +
-+    invoke-virtual {v0}, Ljava/io/File;->isDirectory()Z
++    invoke-direct {v1, v2, v3}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
 +
-+    move-result v1
++    invoke-virtual {v1}, Ljava/io/File;->isDirectory()Z
 +
-+    if-nez v1, :cond_20
++    move-result v2
 +
-+    invoke-virtual {v0}, Ljava/io/File;->mkdirs()Z
++    if-nez v2, :cond_22
 +
-+    move-result v1
++    invoke-virtual {v1}, Ljava/io/File;->mkdirs()Z
 +
-+    if-eqz v1, :cond_18
++    move-result v2
 +
-+    goto :goto_20
++    if-eqz v2, :cond_1a
 +
-+    :cond_18
++    goto :goto_22
++
++    :cond_1a
 +    new-instance v0, Ljava/io/IOException;
 +
 +    const-string v1, "Cannot prepare log storage"
@@ -21048,156 +21277,325 @@ new file mode 100644
 +    throw v0
 +
 +    .line 228
-+    :cond_20
-+    :goto_20
-+    const-string v1, "logcat-"
++    :cond_22
++    :goto_22
++    const-string v2, "logcat-"
 +
-+    const-string v2, ".txt"
++    const-string v3, ".txt"
 +
-+    invoke-static {v1, v2, v0}, Ljava/io/File;->createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;
++    invoke-static {v2, v3, v1}, Ljava/io/File;->createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;
++
++    move-result-object v2
++
++    new-instance v4, Ljava/lang/ProcessBuilder;
++
++    const-string v11, "-v"
++
++    const-string v12, "threadtime"
++
++    const-string v5, "/system/bin/logcat"
++
++    const-string v6, "-b"
++
++    const-string v7, "all"
++
++    const-string v8, "-d"
++
++    const-string v9, "-t"
++
++    const-string v10, "20000"
++
++    filled-new-array/range {v5 .. v12}, [Ljava/lang/String;
++
++    move-result-object v5
++
++    invoke-direct {v4, v5}, Ljava/lang/ProcessBuilder;-><init>([Ljava/lang/String;)V
++
++    const/4 v5, 0x1
++
++    invoke-virtual {v4, v5}, Ljava/lang/ProcessBuilder;->redirectErrorStream(Z)Ljava/lang/ProcessBuilder;
++
++    move-result-object v4
++
++    invoke-virtual {v4, v2}, Ljava/lang/ProcessBuilder;->redirectOutput(Ljava/io/File;)Ljava/lang/ProcessBuilder;
++
++    move-result-object v4
++
++    invoke-virtual {v4}, Ljava/lang/ProcessBuilder;->start()Ljava/lang/Process;
++
++    move-result-object v4
++
++    .line 229
++    :try_start_50
++    sget-object v6, Ljava/util/concurrent/TimeUnit;->SECONDS:Ljava/util/concurrent/TimeUnit;
++
++    const-wide/16 v7, 0x8
++
++    invoke-virtual {v4, v7, v8, v6}, Ljava/lang/Process;->waitFor(JLjava/util/concurrent/TimeUnit;)Z
++
++    move-result v6
++
++    if-eqz v6, :cond_115
++
++    invoke-virtual {v4}, Ljava/lang/Process;->exitValue()I
++
++    move-result v6
++
++    if-nez v6, :cond_10d
++
++    new-instance v6, Ljava/io/FileInputStream;
++
++    invoke-direct {v6, v2}, Ljava/io/FileInputStream;-><init>(Ljava/io/File;)V
++    :try_end_65
++    .catchall {:try_start_50 .. :try_end_65} :catchall_11d
++
++    const/high16 v9, 0x800000
++
++    :try_start_67
++    invoke-static {v6, v9}, Lio/mesalabs/unica/troubleshooting/LogTools;->read(Ljava/io/InputStream;I)Ljava/lang/String;
++
++    move-result-object v10
++    :try_end_6b
++    .catchall {:try_start_67 .. :try_end_6b} :catchall_102
++
++    :try_start_6b
++    invoke-virtual {v6}, Ljava/io/InputStream;->close()V
++
++    .line 230
++    const-string v6, "crash-"
++
++    invoke-static {v6, v3, v1}, Ljava/io/File;->createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;
 +
 +    move-result-object v1
 +
-+    new-instance v0, Ljava/lang/ProcessBuilder;
++    .line 231
++    new-instance v3, Ljava/lang/ProcessBuilder;
 +
-+    const-string v8, "-v"
++    const-string v11, "/system/bin/logcat"
 +
-+    const-string v9, "threadtime"
++    const-string v12, "-b"
 +
-+    const-string v2, "/system/bin/logcat"
++    const-string v13, "crash"
 +
-+    const-string v3, "-b"
++    const-string v14, "-d"
 +
-+    const-string v4, "all"
++    const-string v15, "-t"
 +
-+    const-string v5, "-d"
++    const-string v16, "6000"
 +
-+    const-string v6, "-t"
++    const-string v17, "-v"
 +
-+    const-string v7, "4000"
++    const-string v18, "threadtime"
 +
-+    filled-new-array/range {v2 .. v9}, [Ljava/lang/String;
++    filled-new-array/range {v11 .. v18}, [Ljava/lang/String;
 +
-+    move-result-object v2
++    move-result-object v6
 +
-+    invoke-direct {v0, v2}, Ljava/lang/ProcessBuilder;-><init>([Ljava/lang/String;)V
++    invoke-direct {v3, v6}, Ljava/lang/ProcessBuilder;-><init>([Ljava/lang/String;)V
 +
-+    const/4 v2, 0x1
++    invoke-virtual {v3, v5}, Ljava/lang/ProcessBuilder;->redirectErrorStream(Z)Ljava/lang/ProcessBuilder;
 +
-+    invoke-virtual {v0, v2}, Ljava/lang/ProcessBuilder;->redirectErrorStream(Z)Ljava/lang/ProcessBuilder;
++    move-result-object v3
 +
-+    move-result-object v0
++    invoke-virtual {v3, v1}, Ljava/lang/ProcessBuilder;->redirectOutput(Ljava/io/File;)Ljava/lang/ProcessBuilder;
 +
-+    invoke-virtual {v0, v1}, Ljava/lang/ProcessBuilder;->redirectOutput(Ljava/io/File;)Ljava/lang/ProcessBuilder;
++    move-result-object v3
 +
-+    move-result-object v0
++    invoke-virtual {v3}, Ljava/lang/ProcessBuilder;->start()Ljava/lang/Process;
 +
-+    invoke-virtual {v0}, Ljava/lang/ProcessBuilder;->start()Ljava/lang/Process;
++    move-result-object v3
++    :try_end_99
++    .catchall {:try_start_6b .. :try_end_99} :catchall_11d
 +
-+    move-result-object v2
++    .line 233
++    :try_start_99
++    sget-object v5, Ljava/util/concurrent/TimeUnit;->SECONDS:Ljava/util/concurrent/TimeUnit;
 +
-+    .line 229
-+    :try_start_4e
-+    sget-object v0, Ljava/util/concurrent/TimeUnit;->SECONDS:Ljava/util/concurrent/TimeUnit;
++    invoke-virtual {v3, v7, v8, v5}, Ljava/lang/Process;->waitFor(JLjava/util/concurrent/TimeUnit;)Z
 +
-+    const-wide/16 v3, 0x8
++    move-result v5
 +
-+    invoke-virtual {v2, v3, v4, v0}, Ljava/lang/Process;->waitFor(JLjava/util/concurrent/TimeUnit;)Z
++    if-eqz v5, :cond_f2
 +
-+    move-result v0
++    .line 234
++    invoke-virtual {v3}, Ljava/lang/Process;->exitValue()I
 +
-+    if-eqz v0, :cond_8e
++    move-result v5
 +
-+    invoke-virtual {v2}, Ljava/lang/Process;->exitValue()I
++    if-nez v5, :cond_ea
 +
-+    move-result v0
++    .line 235
++    new-instance v5, Ljava/io/FileInputStream;
 +
-+    if-nez v0, :cond_86
++    invoke-direct {v5, v1}, Ljava/io/FileInputStream;-><init>(Ljava/io/File;)V
++    :try_end_ac
++    .catchall {:try_start_99 .. :try_end_ac} :catchall_fa
 +
-+    new-instance v3, Ljava/io/FileInputStream;
++    :try_start_ac
++    invoke-static {v5, v9}, Lio/mesalabs/unica/troubleshooting/LogTools;->read(Ljava/io/InputStream;I)Ljava/lang/String;
 +
-+    invoke-direct {v3, v1}, Ljava/io/FileInputStream;-><init>(Ljava/io/File;)V
-+    :try_end_63
-+    .catchall {:try_start_4e .. :try_end_63} :catchall_96
++    move-result-object v6
++    :try_end_b0
++    .catchall {:try_start_ac .. :try_end_b0} :catchall_df
 +
-+    const/high16 v0, 0x800000
++    :try_start_b0
++    invoke-virtual {v5}, Ljava/io/InputStream;->close()V
 +
-+    :try_start_65
-+    invoke-static {v3, v0}, Lio/mesalabs/unica/troubleshooting/LogTools;->read(Ljava/io/InputStream;I)Ljava/lang/String;
++    .line 236
++    new-instance v5, Ljava/lang/StringBuilder;
 +
-+    move-result-object v0
-+    :try_end_69
-+    .catchall {:try_start_65 .. :try_end_69} :catchall_7b
++    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
 +
-+    :try_start_69
-+    invoke-virtual {v3}, Ljava/io/InputStream;->close()V
++    invoke-virtual {v5, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
-+    new-instance v3, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$55;
++    move-result-object v5
 +
-+    invoke-direct {v3, p0, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$55;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Ljava/lang/String;)V
++    const-string v7, "\n=== Dedicated crash buffer (may duplicate recent logs) ===\n"
 +
-+    invoke-direct {p0, v3}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
-+    :try_end_74
-+    .catchall {:try_start_69 .. :try_end_74} :catchall_96
++    invoke-virtual {v5, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 +
-+    .line 230
-+    invoke-virtual {v2}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
++    move-result-object v5
++
++    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v5
++
++    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v5
++    :try_end_ca
++    .catchall {:try_start_b0 .. :try_end_ca} :catchall_fa
++
++    .line 237
++    :try_start_ca
++    invoke-virtual {v3}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
 +
 +    invoke-virtual {v1}, Ljava/io/File;->delete()Z
 +
-+    .line 231
++    .line 238
++    new-instance v1, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$55;
++
++    invoke-direct {v1, v0, v5}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$55;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Ljava/lang/String;)V
++
++    invoke-direct {v0, v1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
++    :try_end_d8
++    .catchall {:try_start_ca .. :try_end_d8} :catchall_11d
++
++    .line 239
++    invoke-virtual {v4}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
++
++    invoke-virtual {v2}, Ljava/io/File;->delete()Z
++
++    .line 240
 +    return-void
 +
-+    .line 229
-+    :catchall_7b
++    .line 235
++    :catchall_df
 +    move-exception v0
 +
-+    move-object v4, v0
++    move-object v6, v0
 +
-+    :try_start_7d
-+    invoke-virtual {v3}, Ljava/io/InputStream;->close()V
-+    :try_end_80
-+    .catchall {:try_start_7d .. :try_end_80} :catchall_81
++    :try_start_e1
++    invoke-virtual {v5}, Ljava/io/InputStream;->close()V
++    :try_end_e4
++    .catchall {:try_start_e1 .. :try_end_e4} :catchall_e5
 +
-+    goto :goto_85
++    goto :goto_e9
 +
-+    :catchall_81
++    :catchall_e5
 +    move-exception v0
 +
-+    :try_start_82
-+    invoke-virtual {v4, v0}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
++    :try_start_e6
++    invoke-virtual {v6, v0}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
 +
-+    :goto_85
-+    throw v4
++    :goto_e9
++    throw v6
 +
-+    :cond_86
++    .line 234
++    :cond_ea
 +    new-instance v0, Ljava/io/IOException;
 +
-+    const-string v3, "Logcat access unavailable"
++    const-string v5, "Crash buffer access unavailable"
 +
-+    invoke-direct {v0, v3}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
++    invoke-direct {v0, v5}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
 +
-+    goto :goto_95
-+
-+    :cond_8e
-+    new-instance v0, Ljava/io/IOException;
-+
-+    const-string v3, "Log collection timed out"
-+
-+    invoke-direct {v0, v3}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
-+
-+    :goto_95
 +    throw v0
-+    :try_end_96
-+    .catchall {:try_start_82 .. :try_end_96} :catchall_96
 +
-+    .line 230
-+    :catchall_96
++    .line 233
++    :cond_f2
++    new-instance v0, Ljava/io/IOException;
++
++    const-string v5, "Crash buffer collection timed out"
++
++    invoke-direct {v0, v5}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
++
++    throw v0
++    :try_end_fa
++    .catchall {:try_start_e6 .. :try_end_fa} :catchall_fa
++
++    .line 237
++    :catchall_fa
 +    move-exception v0
 +
-+    invoke-virtual {v2}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
++    :try_start_fb
++    invoke-virtual {v3}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
 +
 +    invoke-virtual {v1}, Ljava/io/File;->delete()Z
++
++    throw v0
++    :try_end_102
++    .catchall {:try_start_fb .. :try_end_102} :catchall_11d
++
++    .line 229
++    :catchall_102
++    move-exception v0
++
++    move-object v1, v0
++
++    :try_start_104
++    invoke-virtual {v6}, Ljava/io/InputStream;->close()V
++    :try_end_107
++    .catchall {:try_start_104 .. :try_end_107} :catchall_108
++
++    goto :goto_10c
++
++    :catchall_108
++    move-exception v0
++
++    :try_start_109
++    invoke-virtual {v1, v0}, Ljava/lang/Throwable;->addSuppressed(Ljava/lang/Throwable;)V
++
++    :goto_10c
++    throw v1
++
++    :cond_10d
++    new-instance v0, Ljava/io/IOException;
++
++    const-string v1, "Logcat access unavailable"
++
++    invoke-direct {v0, v1}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
++
++    goto :goto_11c
++
++    :cond_115
++    new-instance v0, Ljava/io/IOException;
++
++    const-string v1, "Log collection timed out"
++
++    invoke-direct {v0, v1}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
++
++    :goto_11c
++    throw v0
++    :try_end_11d
++    .catchall {:try_start_109 .. :try_end_11d} :catchall_11d
++
++    .line 239
++    :catchall_11d
++    move-exception v0
++
++    invoke-virtual {v4}, Ljava/lang/Process;->destroyForcibly()Ljava/lang/Process;
++
++    invoke-virtual {v2}, Ljava/io/File;->delete()Z
 +
 +    throw v0
 +.end method
@@ -21532,31 +21930,28 @@ new file mode 100644
 +    .registers 5
 +
 +    .line 163
-+    invoke-virtual {p1}, Landroid/widget/TextView;->getVisibility()I
++    invoke-virtual {p1}, Landroid/widget/TextView;->getMaxLines()I
 +
 +    move-result v0
 +
-+    const/4 v1, 0x0
++    const/4 v1, 0x5
 +
-+    if-eqz v0, :cond_9
++    if-ne v0, v1, :cond_9
 +
 +    const/4 v0, 0x1
 +
 +    goto :goto_a
 +
 +    :cond_9
-+    move v0, v1
++    const/4 v0, 0x0
 +
 +    :goto_a
-+    if-eqz v0, :cond_d
++    if-eqz v0, :cond_f
 +
-+    goto :goto_f
++    const v1, 0x7fffffff
 +
-+    :cond_d
-+    const/16 v1, 0x8
-+
-+    :goto_f
-+    invoke-virtual {p1, v1}, Landroid/widget/TextView;->setVisibility(I)V
++    :cond_f
++    invoke-virtual {p1, v1}, Landroid/widget/TextView;->setMaxLines(I)V
 +
 +    iget-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->expandedAnalysis:Ljava/util/Set;
 +
@@ -21715,7 +22110,7 @@ new file mode 100644
 +.method synthetic lambda$explainSetup$38$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Landroid/os/Bundle;Lio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +    .registers 3
 +
-+    .line 238
++    .line 247
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->config:Landroid/os/Bundle;
 +
 +    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->selection:Lio/mesalabs/unica/troubleshooting/LogTools$Selection;
@@ -21745,7 +22140,7 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 236
++    .line 245
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ai:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
 +    if-eqz v0, :cond_9
@@ -21775,7 +22170,7 @@ new file mode 100644
 +
 +    if-eqz v1, :cond_54
 +
-+    .line 237
++    .line 246
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setupReport:Ljava/lang/String;
 +
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;
@@ -21823,7 +22218,7 @@ new file mode 100644
 +
 +    goto :goto_39
 +
-+    .line 238
++    .line 247
 +    :cond_4b
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$24;
 +
@@ -21831,10 +22226,10 @@ new file mode 100644
 +
 +    invoke-direct {p0, v2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 239
++    .line 248
 +    return-void
 +
-+    .line 236
++    .line 245
 +    :cond_54
 +    new-instance v0, Ljava/io/IOException;
 +
@@ -22089,7 +22484,7 @@ new file mode 100644
 +.method synthetic lambda$prepareAnalysis$40$io-mesalabs-unica-troubleshooting-TroubleshootingActivity()V
 +    .registers 2
 +
-+    .line 242
++    .line 251
 +    const-string v0, "No system crash, app crash, app-start failure or app-not-responding report found. Nothing was sent for analysis."
 +
 +    invoke-direct {p0, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->setStatus(Ljava/lang/String;)V
@@ -22100,7 +22495,7 @@ new file mode 100644
 +.method synthetic lambda$prepareAnalysis$41$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Landroid/os/Bundle;Lio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +    .registers 4
 +
-+    .line 244
++    .line 253
 +    iput-object p1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->config:Landroid/os/Bundle;
 +
 +    iput-object p2, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->selection:Lio/mesalabs/unica/troubleshooting/LogTools$Selection;
@@ -22158,7 +22553,7 @@ new file mode 100644
 +        }
 +    .end annotation
 +
-+    .line 241
++    .line 250
 +    iget-object v0, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->raw:Ljava/lang/String;
 +
 +    invoke-static {v0}, Lio/mesalabs/unica/troubleshooting/LogTools;->redact(Ljava/lang/String;)Ljava/lang/String;
@@ -22169,7 +22564,7 @@ new file mode 100644
 +
 +    move-result-object v0
 +
-+    .line 242
++    .line 251
 +    iget-object v1, v0, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;->chunks:Ljava/util/ArrayList;
 +
 +    invoke-virtual {v1}, Ljava/util/ArrayList;->isEmpty()Z
@@ -22186,7 +22581,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 243
++    .line 252
 +    :cond_1b
 +    iget-object v1, p0, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ai:Lio/mesalabs/unica/troubleshooting/AiClient;
 +
@@ -22217,17 +22612,17 @@ new file mode 100644
 +
 +    if-eqz v2, :cond_42
 +
-+    .line 244
++    .line 253
 +    new-instance v2, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$50;
 +
 +    invoke-direct {v2, p0, v1, v0}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity$50;-><init>(Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;Landroid/os/Bundle;Lio/mesalabs/unica/troubleshooting/LogTools$Selection;)V
 +
 +    invoke-direct {p0, v2}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->ui(Ljava/lang/Runnable;)V
 +
-+    .line 245
++    .line 254
 +    return-void
 +
-+    .line 243
++    .line 252
 +    :cond_42
 +    new-instance v0, Ljava/io/IOException;
 +
@@ -22241,7 +22636,7 @@ new file mode 100644
 +.method synthetic lambda$preview$44$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Ljava/util/ArrayList;Ljava/util/ArrayList;Landroid/app/AlertDialog;Landroid/view/View;)V
 +    .registers 11
 +
-+    .line 261
++    .line 270
 +    new-instance p4, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;
 +
 +    invoke-direct {p4}, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;-><init>()V
@@ -22262,7 +22657,7 @@ new file mode 100644
 +
 +    iput-boolean v1, p4, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;->truncated:Z
 +
-+    .line 262
++    .line 271
 +    move v1, v0
 +
 +    :goto_15
@@ -22284,7 +22679,7 @@ new file mode 100644
 +
 +    if-eqz v2, :cond_89
 +
-+    .line 263
++    .line 272
 +    invoke-virtual {p2, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
 +
 +    move-result-object v2
@@ -22305,7 +22700,7 @@ new file mode 100644
 +
 +    move-result-object v2
 +
-+    .line 264
++    .line 273
 +    iget-object v2, v2, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;->chunks:Ljava/util/ArrayList;
 +
 +    invoke-virtual {v2}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
@@ -22392,14 +22787,14 @@ new file mode 100644
 +
 +    goto :goto_41
 +
-+    .line 262
++    .line 271
 +    :cond_89
 +    :goto_89
 +    add-int/lit8 v1, v1, 0x1
 +
 +    goto :goto_15
 +
-+    .line 266
++    .line 275
 +    :cond_8c
 +    iget-object p1, p4, Lio/mesalabs/unica/troubleshooting/LogTools$Selection;->chunks:Ljava/util/ArrayList;
 +
@@ -22419,7 +22814,7 @@ new file mode 100644
 +
 +    return-void
 +
-+    .line 267
++    .line 276
 +    :cond_9e
 +    invoke-virtual {p3}, Landroid/app/AlertDialog;->dismiss()V
 +
@@ -22427,14 +22822,14 @@ new file mode 100644
 +
 +    invoke-direct {p0, p4, p1}, Lio/mesalabs/unica/troubleshooting/TroubleshootingActivity;->analyze(Lio/mesalabs/unica/troubleshooting/LogTools$Selection;Landroid/os/Bundle;)V
 +
-+    .line 268
++    .line 277
 +    return-void
 +.end method
 +
 +.method synthetic lambda$preview$45$io-mesalabs-unica-troubleshooting-TroubleshootingActivity(Landroid/app/AlertDialog;Ljava/util/ArrayList;Ljava/util/ArrayList;Landroid/content/DialogInterface;)V
 +    .registers 6
 +
-+    .line 260
++    .line 269
 +    const/4 p4, -0x1
 +
 +    invoke-virtual {p1, p4}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
