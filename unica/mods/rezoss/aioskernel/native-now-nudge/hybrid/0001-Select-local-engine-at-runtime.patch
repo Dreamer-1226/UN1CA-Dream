@@ -25,7 +25,7 @@ API routes, Samsung IPC, output validation and deadlines are unchanged.
      private final ThreadPoolExecutor nativeWorker=new ThreadPoolExecutor(1,1,0,TimeUnit.SECONDS,new ArrayBlockingQueue<Runnable>(2));
      private final ScheduledExecutorService idle=Executors.newSingleThreadScheduledExecutor(r->{Thread t=new Thread(r,"gemma-idle");t.setDaemon(true);return t;});
      private volatile long lastUse=SystemClock.elapsedRealtime();
-@@ -31,7 +40,6 @@
+@@ -32,7 +41,6 @@
      private GemmaRuntime(Context c){
          context=c;File dir=new File(c.getFilesDir(),"gemma4-e2b");
          model=new File(dir,"gemma-4-E2B-it.litertlm");marker=new File(dir,"verified.json");
@@ -33,33 +33,34 @@ API routes, Samsung IPC, output validation and deadlines are unchanged.
          idle.scheduleAtFixedRate(()->{
              if(loaded&&SystemClock.elapsedRealtime()-lastUse>60000&&nativeWorker.getActiveCount()==0){
                  try{nativeWorker.execute(()->{if(SystemClock.elapsedRealtime()-lastUse>60000)unload();});}catch(RejectedExecutionException ignored){}
-@@ -45,16 +53,18 @@
+@@ -46,18 +54,19 @@
              return HASH.equals(m.getString("sha256"))&&m.getLong("size")==SIZE&&m.getLong("modified")==model.lastModified();
          }catch(Exception e){return false;}
      }
 -    String status(){return "Gemma 4 E2B · "+GemmaBuild.BACKEND.toUpperCase()+"\n"+(filesPresent()?(loaded?"Model verified · engine ready":"Model verified · engine not loaded"):"Import the model to enable local inference");}
 +    String status(){return "Gemma 4 E2B · "+backend.toUpperCase()+"\n"+(filesPresent()?(loaded?"Model verified · engine ready":"Model verified · engine not loaded"):"Import the model to enable local inference");}
-     private void load()throws Exception{
--        if(engine!=0)return;
-+        if(engine!=0&&backend.equals(loadedBackend))return;
-+        unload();
+     private void load()throws Exception{load(1024);}
+     private void load(int contextTokens)throws Exception{
+-        if(engine!=0&&engineContext==contextTokens)return;
++        if(engine!=0&&backend.equals(loadedBackend)&&engineContext==contextTokens)return;
+         if(engine!=0)unload();
 +        String selected=backend;File cache=new File(context.getCacheDir(),"gemma4-"+selected);
          if(!filesPresent())throw new IOException("gemma_model_missing");
          if(!cache.isDirectory()&&!cache.mkdirs())throw new IOException("gemma_cache_unavailable");
          jni=LiteRtLmJni.INSTANCE;jni.nativeSetMinLogSeverity(2);
          long started=SystemClock.elapsedRealtime();
--        engine=jni.nativeCreateEngine(model.toString(),GemmaBuild.BACKEND,"","",1024,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
-+        engine=jni.nativeCreateEngine(model.toString(),selected,"","",1024,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
+-        engine=jni.nativeCreateEngine(model.toString(),GemmaBuild.BACKEND,"","",contextTokens,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
++        engine=jni.nativeCreateEngine(model.toString(),selected,"","",contextTokens,0,cache.toString(),true,Boolean.FALSE,"","","",4,0,0,-1,null,null);
          if(engine==0)throw new IOException("gemma_load_failed");
--        loaded=true;Log.i("RezossGemma","engine_ready backend="+GemmaBuild.BACKEND+" loadMs="+(SystemClock.elapsedRealtime()-started));
-+        loaded=true;loadedBackend=selected;Log.i("RezossGemma","engine_ready backend="+selected+" loadMs="+(SystemClock.elapsedRealtime()-started));
+-        engineContext=contextTokens;loaded=true;Log.i("RezossGemma","engine_ready backend="+GemmaBuild.BACKEND+" contextTokens="+engineContext+" loadMs="+(SystemClock.elapsedRealtime()-started));
++        engineContext=contextTokens;loaded=true;loadedBackend=selected;Log.i("RezossGemma","engine_ready backend="+selected+" contextTokens="+engineContext+" loadMs="+(SystemClock.elapsedRealtime()-started));
      }
      private void unload(){if(engine!=0){jni.nativeDeleteEngine(engine);engine=0;loaded=false;Log.i("RezossGemma","engine_unloaded");}}
      private abstract class Job<T> implements Callable<T> {
-@@ -114,7 +124,7 @@
+@@ -120,7 +129,7 @@
          if(prompt==null||prompt.isEmpty()||prompt.length()>20000)throw new IOException("gemma_prompt_size");
          long started=SystemClock.elapsedRealtime();
-         String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens);}});
+         String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens,prompt.startsWith("You help diagnose Samsung UN1CA")||prompt.startsWith("Analyze this untrusted Android log excerpt."));}});
 -        Log.i("RezossGemma","generation backend="+GemmaBuild.BACKEND+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
 +        Log.i("RezossGemma","generation backend="+loadedBackend+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
          return out;
