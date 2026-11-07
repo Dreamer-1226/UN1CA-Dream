@@ -181,7 +181,7 @@ new file mode 100644
 index 00000000..09de0fcb
 --- /dev/null
 +++ b/smali_classes5/io/mesalabs/unica/LegacyResolution.smali
-@@ -0,0 +1,373 @@
+@@ -0,0 +1,501 @@
 +.class public final Lio/mesalabs/unica/LegacyResolution;
 +.super Ljava/lang/Object;
 +.source "LegacyResolution.java"
@@ -379,6 +379,8 @@ index 00000000..09de0fcb
 +
 +    if-nez v0, :cond_0
 +
++    invoke-static {p0}, Lio/mesalabs/unica/LegacyResolution;->scaleDensity(Ljava/lang/String;)V
++
 +    return v10
 +
 +    :cond_0
@@ -554,4 +556,130 @@ index 00000000..09de0fcb
 +    const/4 v0, 0x1
 +
 +    return v0
++.end method
++
++# Display modes switch the resolution on this device, but the forced density
++# stays where it was, so FHD+/HD came out huge. Scale the density with the
++# width before the mode changes, which also keeps the screen zoom level.
++.method private static scaleDensity(Ljava/lang/String;)V
++    .locals 8
++
++    :try_start_0
++    invoke-static {p0}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
++
++    move-result v0
++
++    if-nez v0, :cond_0
++
++    sget v1, Lcom/samsung/android/settings/display/SecDisplayUtils;->mHDWidth:I
++
++    goto :goto_0
++
++    :cond_0
++    const/4 v1, 0x1
++
++    if-ne v0, v1, :cond_1
++
++    sget v1, Lcom/samsung/android/settings/display/SecDisplayUtils;->mFHDWidth:I
++
++    goto :goto_0
++
++    :cond_1
++    sget v1, Lcom/samsung/android/settings/display/SecDisplayUtils;->mWQHDWidth:I
++
++    :goto_0
++    if-lez v1, :cond_done
++
++    invoke-static {}, Landroid/view/WindowManagerGlobal;->getWindowManagerService()Landroid/view/IWindowManager;
++
++    move-result-object v2
++
++    const/4 v3, 0x0
++
++    new-instance v6, Landroid/graphics/Point;
++
++    invoke-direct {v6}, Landroid/graphics/Point;-><init>()V
++
++    invoke-interface {v2, v3, v6}, Landroid/view/IWindowManager;->getInitialDisplaySize(ILandroid/graphics/Point;)V
++
++    iget v7, v6, Landroid/graphics/Point;->y:I
++
++    iget v6, v6, Landroid/graphics/Point;->x:I
++
++    if-le v6, v7, :cond_2
++
++    move v6, v7
++
++    :cond_2
++    if-lez v6, :cond_done
++
++    if-eq v6, v1, :cond_done
++
++    invoke-interface {v2, v3}, Landroid/view/IWindowManager;->getBaseDisplayDensity(I)I
++
++    move-result v4
++
++    invoke-interface {v2, v3}, Landroid/view/IWindowManager;->getInitialDisplayDensity(I)I
++
++    move-result v5
++
++    mul-int/2addr v4, v1
++
++    div-int/2addr v4, v6
++
++    const/4 v7, -0x2
++
++    if-ne v4, v5, :cond_3
++
++    invoke-interface {v2, v3, v7}, Landroid/view/IWindowManager;->clearForcedDisplayDensityForUser(II)V
++
++    goto :goto_1
++
++    :cond_3
++    invoke-interface {v2, v3, v4, v7}, Landroid/view/IWindowManager;->setForcedDisplayDensityForUser(III)V
++
++    :goto_1
++    const-string v0, "UN1CA-LegacyResolution"
++
++    new-instance v2, Ljava/lang/StringBuilder;
++
++    const-string v3, "scaleDensity: width "
++
++    invoke-direct {v2, v3}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
++
++    invoke-virtual {v2, v6}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    const-string v3, " -> "
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    invoke-virtual {v2, v1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    const-string v3, ", density "
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    invoke-virtual {v2, v4}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-static {v0, v2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
++    :try_end_0
++    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
++
++    :cond_done
++    return-void
++
++    :catch_0
++    move-exception v0
++
++    const-string v1, "UN1CA-LegacyResolution"
++
++    const-string v2, "scaleDensity failed"
++
++    invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    return-void
 +.end method
