@@ -564,6 +564,26 @@ ADD_TO_WORK_DIR "m3qxxx" "system" "system/lib64/vendor.samsung.hardware.media.mp
 # ADD_TO_WORK_DIR "m3qxxx" "vendor" "lib64/camera/t2_t1_dual_calibration.bin" 0 0 644 "u:object_r:vendor_file:s0"
 
 # =============================================================================
+# S-series SamsungCamera smali tweaks (dual-recording / portrait pair)
+# =============================================================================
+# These target the S23U-style SamsungCamera class layout and apply on the bar
+# phones (confirmed on dm1q and z3q). The foldables b5q/q5q ship a different
+# SamsungCamera, so skip them. Moved out of the auto-apply smali/ tree (kept
+# as .patch.disabled) so this gate is the single place they run.
+if [[ "$TARGET_CODENAME" != "b5q" && "$TARGET_CODENAME" != "q5q" ]]; then
+    LOG "- Applying S-series SamsungCamera dual-recording/portrait patches"
+    for _REZOSS_CAM_PATCH in \
+        "0003-Use-legacy-multiview-modes-for-dual-recording" \
+        "0004-Add-opt-in-in-app-portrait-pair-diagnostic" \
+        "0005-Trial-expanded-dual-recording-resolutions" \
+        "0007-Stage-wide-pair-Portrait-baseline-1-to-2"; do
+        APPLY_PATCH "system" "system/priv-app/SamsungCamera/SamsungCamera.apk" \
+            "$MODPATH/smali/system/priv-app/SamsungCamera/SamsungCamera.apk/${_REZOSS_CAM_PATCH}.patch.disabled" || return 1
+    done
+    unset _REZOSS_CAM_PATCH
+fi
+
+# =============================================================================
 # S26U Prebuilts - Camera Core / Photo Processing Libraries
 # =============================================================================
 LOG "- Adding S26U camera node libraries for partial vendor-lib feature set"
