@@ -32,15 +32,6 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 #        || ABORT "Failed to install Relax SDHMS policy control"
 #fi
 
-# Relax SDHMS uses the inspected dm3q persistent process, with no root shell,
-# kernel changes or cross-app data writes. Reject an unreviewed SDHMS ABI.
-python3 "$MODPATH/thermal/verify-input.py" \
-    "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-    || ABORT "Relax SDHMS firmware compatibility check failed"
-APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-    "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
-    || ABORT "Failed to install Relax SDHMS policy control"
-
 # SoftwareUpdateUtils no longer exposes isOTAUpgradeAllowed(Context) on One UI 9.
 
 # The camera feature override hooks an obfuscated SamsungCamera class that only
