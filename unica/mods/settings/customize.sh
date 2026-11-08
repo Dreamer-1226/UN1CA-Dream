@@ -23,28 +23,15 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
 # Relax SDHMS uses the inspected dm3q persistent process, with no root shell,
 # kernel changes or cross-app data writes. Reject an unreviewed SDHMS ABI.
-#if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q)$ ]]; then
-#    python3 "$MODPATH/thermal/verify-input.py" \
-#        "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-#        || ABORT "Relax SDHMS firmware compatibility check failed"
-#    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-#        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
-#        || ABORT "Failed to install Relax SDHMS policy control"
-#fi
+if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q|c1q|c2q|r8q)$ ]]; then
+    python3 "$MODPATH/thermal/verify-input.py" \
+        "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        || ABORT "Relax SDHMS firmware compatibility check failed"
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
+        || ABORT "Failed to install Relax SDHMS policy control"
+fi
 
-# --- [OTA 옵션 제거 및 차단 패치 시작] ---
-# One UI 9 및 최신 빌드 기준 소프트웨어 업데이트(OTA) 메뉴 진입점 및 권한 강제 차단
-LOG "- Removing and disabling OTA update options in /system/system/priv-app/SecSettings.apk"
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/update/SoftwareUpdateSettings.smali" "return" \
-    'isAvailable()Z' 'false' \
-    > /dev/null || true
-
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/update/SoftwareUpdatePreferenceController.smali" "return" \
-    'isAvailable()Z' 'false' \
-    > /dev/null || true
-# --- [OTA 옵션 제거 및 차단 패치 끝] ---
 
 # The camera feature override hooks an obfuscated SamsungCamera class that only
 # matches the S23 (S911N) build, so apply it only where it still fits.
