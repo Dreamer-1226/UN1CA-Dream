@@ -32,7 +32,19 @@ DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 #        || ABORT "Failed to install Relax SDHMS policy control"
 #fi
 
-# SoftwareUpdateUtils no longer exposes isOTAUpgradeAllowed(Context) on One UI 9.
+# --- [OTA 옵션 제거 및 차단 패치 시작] ---
+# One UI 9 및 최신 빌드 기준 소프트웨어 업데이트(OTA) 메뉴 진입점 및 권한 강제 차단
+LOG "- Removing and disabling OTA update options in /system/system/priv-app/SecSettings.apk"
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali_classes3/com/samsung/android/settings/update/SoftwareUpdateSettings.smali" "return" \
+    'isAvailable()Z' 'false' \
+    > /dev/null || true
+
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali_classes3/com/samsung/android/settings/update/SoftwareUpdatePreferenceController.smali" "return" \
+    'isAvailable()Z' 'false' \
+    > /dev/null || true
+# --- [OTA 옵션 제거 및 차단 패치 끝] ---
 
 # The camera feature override hooks an obfuscated SamsungCamera class that only
 # matches the S23 (S911N) build, so apply it only where it still fits.
