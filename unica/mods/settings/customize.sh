@@ -21,17 +21,6 @@ SMALI_PATCH "system" "system/framework/framework.jar" \
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
-# Relax SDHMS uses the inspected dm3q persistent process, with no root shell,
-# kernel changes or cross-app data writes. Reject an unreviewed SDHMS ABI.
-if [[ "$TARGET_CODENAME" =~ ^(dm1q|dm2q|dm3q|b5q|q5q|x1q|y2q|z3q|c1q|c2q|r8q)$ ]]; then
-    python3 "$MODPATH/thermal/verify-input.py" \
-        "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        || ABORT "Relax SDHMS firmware compatibility check failed"
-    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
-        || ABORT "Failed to install Relax SDHMS policy control"
-fi
-
 
 # The camera feature override hooks an obfuscated SamsungCamera class that only
 # matches the S23 (S911N) build, so apply it only where it still fits.
