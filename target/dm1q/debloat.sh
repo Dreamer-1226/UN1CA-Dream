@@ -20,24 +20,6 @@
 # - DO NOT add the partition name at the start of any entry (eg. "/system/dpolicy_system")
 # - DO NOT add a slash at the start of any entry (eg. "/dpolicy_system")
 
-# SKT,KT,LG
-SYSTEM_DEBLOAT+="
-system/app/KTAuth_Stub
-system/app/KTCustomerService
-system/app/LGUMiniCustomerCenter
-system/app/LGUplusTsmProxy
-system/app/SKTMemberShip_new
-system/app/TWorld
-system/priv-app/KTOneStore
-system/priv-app/KTServiceAgent
-system/priv-app/KTServiceMenu
-system/priv-app/LGUOZStore
-system/priv-app/OneStoreService
-system/priv-app/SKTOneStore
-system/priv-app/TPhoneOnePackage
-system/priv-app/TService
-"
-
 #I don't need
 SYSTEM_DEBLOAT+="
 system/app/BookmarkProvider
