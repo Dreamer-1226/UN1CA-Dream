@@ -31,6 +31,43 @@ system/lib64/libssu_keystore2.so
 system/priv-app/SsuService
 "
 
+# Korean carrier apps and stores. Keep telephony, IMS, CSC and USIM services.
+# SetupWizard skips carrier location consent when its app is not installed.
+SYSTEM_DEBLOAT+="
+system/app/HpsAgreement_new
+system/app/KTAuth_Stub
+system/app/KTCustomerService
+system/app/LGUMiniCustomerCenter
+system/app/SKTMemberShip_new
+system/app/TWorld
+system/etc/permissions/privapp-permissions-com.kt.serviceagent.xml
+system/etc/permissions/privapp-permissions-com.lguplus.appstore.xml
+system/etc/permissions/privapp-permissions-com.lguplus.lgugpsnwps.xml
+system/etc/permissions/privapp-permissions-com.samsung.hidden.LGU.xml
+system/etc/permissions/privapp-permissions-com.samsung.hidden.SKT.xml
+system/etc/permissions/privapp-permissions-com.skt.hps20client.xml
+system/etc/permissions/privapp-permissions-com.skt.prod.dialer.xml
+system/etc/permissions/privapp-permissions-com.skt.skaf.A000Z00040.xml
+system/etc/permissions/privapp-permissions-com.skt.skaf.OA00018282.xml
+system/etc/permissions/privapp-permissions-com.skt.skaf.OA00199800.xml
+system/etc/permissions/privapp-permissions-com.skt.t_smart_charge.xml
+system/priv-app/HPSClient
+system/priv-app/KT114Provider2
+system/priv-app/KTHiddenMenu
+system/priv-app/KTOneStore
+system/priv-app/KTServiceAgent
+system/priv-app/KTServiceMenu
+system/priv-app/LGUGPSnWPS
+system/priv-app/LGUHiddenMenu
+system/priv-app/LGUOZStore
+system/priv-app/OneStoreService
+system/priv-app/SKTHiddenMenu
+system/priv-app/SKTOneStore
+system/priv-app/SmartPush_64
+system/priv-app/TPhoneOnePackage
+system/priv-app/TService
+"
+
 # Recovery restoration script
 VENDOR_DEBLOAT+="
 recovery-from-boot.p
