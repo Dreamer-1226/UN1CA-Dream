@@ -1,8 +1,19 @@
-# The target vendor runs boringssl self tests that are declared with
-# "reboot_on_failure reboot,boringssl-self-check-failed". With a 64-bit-only
-# Android 16 source one of them can't run on the legacy SM8250 vendor and init
-# reboots before anything is logged. Keep the self tests but drop the forced
-# reboot, and log every self test service and whether its binary exists.
+# [PATCH] init: refine boringssl self-test handling
+#
+# Vendor init scripts currently declare boringssl self-tests with
+# "reboot_on_failure reboot,boringssl-self-check-failed". On 64‑bit‑only
+# Android 16 builds, one of these tests cannot execute on legacy SM8250
+# vendors, resulting in an immediate reboot before any diagnostic output.
+#
+# This change removes the forced reboot directive while retaining the
+# self-tests. Each service is logged with its associated binary, including
+# type information when present, and warnings are issued if binaries are
+# missing. This ensures observability without premature system restart.
+#
+# Summary of changes:
+# - Strip "reboot_on_failure reboot,boringssl-self-check-failed" from init rc files
+# - Log service names and binary details for all boringssl self-tests
+# - Emit warnings for missing binaries
 SYSTEM_EXT_ROOT="$WORK_DIR/system/system/system_ext"
 [ -d "$WORK_DIR/system_ext" ] && SYSTEM_EXT_ROOT="$WORK_DIR/system_ext"
 

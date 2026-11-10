@@ -7,20 +7,20 @@ ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libTracking.polarr.so" 0 0 644 
 ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libYuv.polarr.so" 0 0 644 "u:object_r:system_lib_file:s0"
 
 # Add camera libs
+ADD_TO_WORK_DIR "r9qxxx" "system" "system/lib64/libSceneDetector_v1.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+EVAL "echo \"libSceneDetector_v1.camera.samsung.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt\""
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libSwIsp_core.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhigh_dynamic_range.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhigh_res.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
 EVAL "echo \"libhigh_res.arcsoft.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt\""
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhumantracking.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhumantracking_util.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/liblow_light_hdr.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libsecimaging_pdk.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libsuperresolution.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
 EVAL "echo \"libsuperresolution.arcsoft.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt\""
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libsuperresolution_wrapper_v2.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 EVAL "echo \"libsuperresolution_wrapper_v2.camera.samsung.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt\""
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libveengine.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-# shellcheck disable=SC2046
-wait $(jobs -p) || exit 1
 
 BLOBS_LIST="
 system/lib64/libhigh_dynamic_range.arcsoft.so
@@ -37,9 +37,33 @@ system/lib64/libMultiFrameProcessing30Tuning.camera.samsung.so
 "
 for blob in $BLOBS_LIST
 do
-    ADD_TO_WORK_DIR "p3qxxx" "system" "$blob" 0 0 644 "u:object_r:system_lib_file:s0"
+    ADD_TO_WORK_DIR "p3qxxx" "system" "$blob" 0 0 644 "u:object_r:system_lib_file:s0" &
 done
 
+LOG_STEP_IN "- Fixing MIDAS, AI and camera"
+ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libSlowShutter_jni.media.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/lib_nativeJni.dk.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libsamsung_videoengine_9_0.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libtensorflowLite.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libtensorflowlite_inference_api.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+LOG_STEP_OUT
+
+
+LOG_STEP_IN "- Adding dm3qxxx NightMode libs"
+ADD_TO_WORK_DIR "dm3qxxx" "system" "system/lib64/libSwIsp_core.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "dm3qxxx" "system" "system/lib64/libSwIsp_wrapper_v1.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+LOG_STEP_OUT
+
+ADD_TO_WORK_DIR "a73xqxx" "vendor" "lib64/libsnaplite_native.so" 0 0 644 "u:object_r:same_process_hal_file:s0"
+
+# Force disable Snaplite in Shot suggestions
+# Before: [blt #0x1f890]
+# After: [b #0x1f890]
+HEX_PATCH "$WORK_DIR/vendor/lib/libshotsuggestion_engines.so" "0ddb" "0de0"
+
+# Before: [b.lt 0x40dedc]
+# After: [b 0x40dedc]
+HEX_PATCH "$WORK_DIR/vendor/lib64/libshotsuggestion_engines.so" "eb010054" "0f000014"
 
 # Pro mode EV Fix
 LOG_STEP_IN "- Adding camera PRO mode EV-fix"
@@ -47,13 +71,11 @@ ADD_TO_WORK_DIR "r9qxxx" "vendor" \
     "lib64/X12QS_libTsAe.so" 0 0 644 "u:object_r:vendor_file:s0"
 LOG_STEP_OUT
 
-# HDR10+ encoder bypass, HEVC temporal SVC and vendor bufferqueue timestamp fixes.
-# From AstroByteX-Code/UN1CA-SM8250 (Mian Hamza): fb943f3, 73f432a, cd5faed.
 LOG_STEP_IN "- Removing HDR10+ check"
 
 if [ -f "$WORK_DIR/system/system/lib/libstagefright.so" ]; then
     if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "dbf8002043f2685004990844824240f0a583"; then
-        # ARM32 S918B base: skip the conditional branch into ACodec's HDR10+ abort path.
+        # ARM32 S911B base: skip the conditional branch into ACodec's HDR10+ abort path.
         HEX_PATCH "$WORK_DIR/system/system/lib/libstagefright.so" \
             "dbf8002043f2685004990844824240f0a583" \
             "dbf8002043f2685004990844824200bf00bf"
@@ -111,7 +133,6 @@ if [ -f "$WORK_DIR/system/system/lib64/libstagefright.so" ]; then
             "e10740b9e22340b9e00313aa44aa059411000014fa03002a"
     fi
 fi
-LOG_STEP_OUT
 
 # Vendor bufferqueue helper: patch backward-in-time timestamp check
 if [ -f "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" ] && \
@@ -120,5 +141,6 @@ if [ -f "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" ] && 
     HEX_PATCH "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" \
         "d7e94601401b71eb060006da" \
         "d7e94601401b71eb060000bf"
-    LOG_STEP_OUT
 fi
+
+LOG_STEP_OUT
