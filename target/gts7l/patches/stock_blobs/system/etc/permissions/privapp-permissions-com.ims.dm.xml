@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MinsOS (I-43): SM-T875N KOO stock grant list for com.ims.dm (T875NKOS8HXH1, same file name,
+  2 entries) plus SCHEDULE_EXACT_ALARM. The app requests it; on Android 13 it was "appop", on the
+  A16 donor's framework-res it is "signature|privileged|appop", so under
+  ro.control_privapp_permissions=enforce leaving it out stops the boot. The donor's own
+  uid.system clients com.wssyncmldm and com.sec.imsservice list it for the same reason.
+  10-04: the APK is now SM-S918N KOO S918NKSS8FZI1's 3.3.05 (the Android 13 2.9.04 crashed on A16);
+  S918N's own privapp-permissions-com.ims.dm.xml lists exactly these three.
+-->
+<permissions>
+    <privapp-permissions package="com.ims.dm">
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.POST_NOTIFICATIONS"/>
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    </privapp-permissions>
+</permissions>

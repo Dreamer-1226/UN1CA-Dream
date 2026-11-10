@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MinsOS: let the stock SM8250 GPU driver packages load (v1.2.0).
+  The stock vendor build.prop names them (ro.gfx.driver.0/1, graphics.gpu.profiler.vulkan_layer_apk),
+  but the X810 donor's allowed-system-preload-apps.xml only lists sm8450 and newer, so on 1.1.3
+  package manager logged "Package is not in allowed list" for exactly these three at boot and none
+  of them got a uid (T970 baseline, ops/v114_baseline/20260926_1531).
+-->
+<config>
+    <allowed-system-preload package="com.samsung.gamedriver.sm8250"/>
+    <allowed-system-preload package="com.qualcomm.qti.gpudrivers.kona.api30"/>
+    <allowed-system-preload package="com.samsung.vklayer.sm8250"/>
+</config>

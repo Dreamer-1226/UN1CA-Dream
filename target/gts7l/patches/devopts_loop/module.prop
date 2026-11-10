@@ -1,0 +1,4 @@
+id=devopts_loop
+name=Developer options refresh loop
+author=claude
+description=Stops Settings re-running the whole developer-options screen ~9 times a second forever. Opening the screen once starts a feedback loop - a preference writes a system property while refreshing, the fragment's SystemProperties change callback reposts the refresh, and it never settles - which leaves the process spinning until it is killed and makes the screen drop 42 percent of its frames.

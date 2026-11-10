@@ -1,0 +1,6 @@
+system/etc/vintf/compatibility_matrix.device.xml 0 0 644 capabilities=0x0
+system/etc/sysconfig/minsos-gpu-preload.xml 0 0 644 capabilities=0x0
+system/priv-app/OpenImsDm 0 0 755 capabilities=0x0
+system/priv-app/OpenImsDm/OpenImsDm.apk 0 0 644 capabilities=0x0
+system/etc/permissions/privapp-permissions-com.ims.dm.xml 0 0 644 capabilities=0x0
+system/etc/init/minsos-radio-defnet.rc 0 0 644 capabilities=0x0

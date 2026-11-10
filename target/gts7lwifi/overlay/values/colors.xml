@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T870 stock default; the 12.4" #ff121212 belongs to the AMOLED pair only -->
+    <color name="tw_screen_background_color_dark">#ff171717</color>
+</resources>

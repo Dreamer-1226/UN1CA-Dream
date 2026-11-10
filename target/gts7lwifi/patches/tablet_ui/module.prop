@@ -1,0 +1,4 @@
+id=tablet_ui
+name=Tablet UI
+author=claude
+description=Set build characteristics to tablet and stock density for proper One UI tablet UX (taskbar, multi-pane) on gts7xlwifi.

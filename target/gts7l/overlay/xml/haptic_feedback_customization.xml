@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Overrides com.android.internal.R.xml.haptic_feedback_customization (matched by name), which is an
+  empty <haptic-feedback-constants/> in stock and donor framework-res.
+
+  WHY THIS FILE EXISTS
+  On a coin DC motor One UI short-circuits AOSP haptic feedback. services.jar,
+  HapticFeedbackVibrationProvider.getVibrationForHapticFeedback(int):
+
+      if (VibRune.SUPPORT_HAPTIC_FEEDBACK_ON_DC_MOTOR && VibratorHelper.sMotorType == 1) {
+          if (effectId != 0 && effectId != 0xc3d4) index = -1;   // -> returns null
+          ...
+      }
+
+  i.e. every constant except LONG_PRESS (0) and GRAB (0xc3d4) returns null, and
+  VibratorManagerService logs "vibration absent for constant N" and ends IGNORED_UNSUPPORTED.
+  (UN1CA's services.jar patch 9001 adds the power key long press to that list.)
+
+  VibratorManagerService.performHapticFeedbackForInputDeviceInternal consults
+  HapticFeedbackCustomization BEFORE that method, and falls back to it only when the SparseArray
+  has no entry for the constant. So an entry here pre-empts the DC short-circuit entirely: the
+  effect below is a plain AOSP Composed(StepSegment), SingleVibrationSession's
+  `instanceof SemHapticSegment` test fails, and it goes down the stock VibrationThread ->
+  SetAmplitudeVibratorStep -> VibratorController.on(durationMs) -> our IVibrator::on().
+  An entry here does NOT follow the touch intensity slider; it is a fixed length.
+
+  WHY waveform-effect AND NOT predefined-effect
+  predefined-effect would call IVibrator::perform(), whose duration table lives inside the compiled
+  HAL binary. waveform-effect puts the millisecond value here, in text. amplitude="default" is
+  mandatory and is what makes this resolve on a HAL with capabilities == 0:
+  StepSegment.areVibrationFeaturesSupported() only demands hasAmplitudeControl() when the amplitude
+  is not DEFAULT_AMPLITUDE.
+
+  WHAT IS LISTED, AND WHY SO LITTLE (1.2.2, owner's choice "stock base + fixes", 10-10)
+  Stock T970 (One UI 5.1.1, its last firmware) left almost every UI haptic silent on this motor: only the DC click
+  (touch slider, stock 45/55/70 ms), the PIN pad (50 ms) and long patterns were felt
+  (ops/release122/haptic_audit/VIBRATION_AUDIT.md). 1.0-1.2.1 listed 15 constants at 90 ms here,
+  so switches (50051), Google app taps (1), confirm/reject (16/17), context click (6), the status
+  bar capsule (50104) and the AOSP gesture/toggle ids buzzed where stock was silent. Those are
+  removed: they return to stock silence, and gestures, the taskbar, the navigation buttons and
+  long presses are unaffected because they are DC clicks (SEP 50124), not these constants.
+  Kept, all at or near the stock DC click length and above the ~40 ms perception floor
+  (handoff/04 SS1.1):
+    50025 EFFECT_CLICK   lock screen PIN pad and pattern dots. 50 ms = stock PIN pad length.
+                         Pattern dots fire ~100 ms apart and this brakeless motor needs
+                         110-150 ms to stop, so longer steps would smear.
+    3     KEYBOARD_TAP   keyboards that use AOSP haptics (Gboard). Without an entry it is silent.
+                         45 ms = stock default DC click (Samsung Keyboard uses the DC click).
+    50057 EFFECT_HEAVY_CLICK_LONG_PRESS  long press on the quick panel brightness or volume bar.
+                         Measured on the T970 (1.2.1, 10-10 19:09): 4 presses, 4
+                         "external | ignored_unsupported", while every other long press is a DC
+                         click. 45 ms like the default DC click (ops/release122/haptic_50057/).
+  Left out on purpose: 50065 (slider ends, and text selection handles fire it per character,
+  which this motor would smear into one buzz), 50050 and the scroll/tick ids (repeat within
+  one gesture), 7/8 (key release would double every keypress).
+-->
+<haptic-feedback-constants>
+
+    <constant id="50025">
+        <vibration-effect>
+            <waveform-effect><waveform-entry durationMs="50" amplitude="default"/></waveform-effect>
+        </vibration-effect>
+    </constant>
+
+    <constant id="3">   <!-- KEYBOARD_TAP / KEYBOARD_PRESS -->
+        <vibration-effect>
+            <waveform-effect><waveform-entry durationMs="45" amplitude="default"/></waveform-effect>
+        </vibration-effect>
+    </constant>
+
+    <constant id="50057">
+        <vibration-effect>
+            <waveform-effect><waveform-entry durationMs="45" amplitude="default"/></waveform-effect>
+        </vibration-effect>
+    </constant>
+
+</haptic-feedback-constants>

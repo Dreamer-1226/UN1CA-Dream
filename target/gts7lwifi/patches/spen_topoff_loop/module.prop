@@ -1,0 +1,4 @@
+id=spen_topoff_loop
+name=S Pen 100% top-off loop
+author=claude
+description=Stops AirCommand re-charging an attached, already full S Pen about once a minute while the tablet is on battery. The pen reports 100 again after every 1-minute charge, the charge controller re-arms on every report whether the level changed or not, and at 100 percent with no charger it starts another minute - a 60 s wakelock 100 times an hour. An unchanged 100 percent report no longer re-arms; every other path (level change, attach, reconnect, charger, temperature) is untouched.

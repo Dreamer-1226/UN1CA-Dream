@@ -1,0 +1,10 @@
+# Netflix platform hint. Q8250 = SM8250/kona, which is what every Tab S7 model is; read out of each
+# device's own stock system/build.prop (T870, T970 and T976B all ship exactly this). What used to be
+# here was Q875-32408-1 - lahaina/SM8350, a Snapdragon 888 - inherited verbatim from UN1CA's Galaxy
+# S21 FE tree. The donor X810 carries Q8550-36432-1 in its vendor, two generations off again, so
+# deleting this line rather than correcting it would leave the prop absent or wrong.
+ro.netflix.bsp_rev=Q8250-19134-1
+
+# ro.factory.model is NOT set here on purpose - it is per-device and is derived from the target's
+# own vendor in customize.sh. A hardcoded model in a file that gets copied when a target is
+# scaffolded is how SM-G990B reached three Tab S7 device trees in the first place.

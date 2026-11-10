@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_adaptive_display_solution_enabled">true</bool>
+    <bool name="config_dynamic_automatic_brightness_available">true</bool>
+    <bool name="config_mdnie_scenario_control_enabled">true</bool>
+    <bool name="config_showNavigationBar">true</bool>
+    <bool name="config_supportAudioSourceUnprocessed">false</bool>
+    <!-- Wi-Fi-only device: the X810 donor ships this true, which makes getPhoneType()
+         report GSM and Samsung Account demand an IMEI the hardware does not have. -->
+    <bool name="config_voice_capable">false</bool>
+</resources>

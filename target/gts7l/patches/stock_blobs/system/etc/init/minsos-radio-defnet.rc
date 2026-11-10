@@ -1,0 +1,6 @@
+# I-52: One UI 8.5 TelephonyUI takes the device's default network type from persist.radio.def_network
+# (unset = 22, and only a value above 22 offers the 5G modes). The newer libsec-ril writes it; our A13
+# vendor RIL publishes the same CSC value as ro.telephony.default_network, which the A13 TelephonyUI
+# read. Copy it across so the network mode list is the one stock A13 showed for this model.
+on property:ro.telephony.default_network=*
+    setprop persist.radio.def_network ${ro.telephony.default_network}
