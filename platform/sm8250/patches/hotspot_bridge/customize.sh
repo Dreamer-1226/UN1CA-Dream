@@ -1,3 +1,4 @@
+# shellcheck disable=SC2034
 SKIPUNZIP=1
 
 # Samsung's explicit dual-band channel lists require a bridged AP in Android 17.
