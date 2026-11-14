@@ -55,6 +55,14 @@ final class ApiProviderClient {
         }catch(Exception e){throw new IOException("backend_unavailable",e);}
     }
 
+    String memoryRoute() throws IOException {
+        if(!available())return "default";
+        try { Bundle config=context.getContentResolver().call(URI,"backend_config",null,null);
+            if(config==null)throw new IOException("backend_unavailable");
+            return config.getString("memory_backend","default");
+        } catch(Exception e){throw new IOException("backend_unavailable",e);}
+    }
+
     Bundle diagnosticConfig() throws Exception {
         String route=route(false); Bundle result=new Bundle();
         result.putString("backend",route);result.putBoolean("online",!"default".equals(route));
@@ -79,9 +87,16 @@ final class ApiProviderClient {
         return generate(prompt,maxTokens,deadline,requestId,backend,null);
     }
     String generate(String prompt,int maxTokens,long deadline,String requestId,String backend,String destination)throws Exception {
+        return generate(prompt,maxTokens,deadline,requestId,backend,destination,false);
+    }
+    String generateMemory(String prompt,int maxTokens,long deadline,String requestId,String backend)throws Exception {
+        return generate(prompt,maxTokens,deadline,requestId,backend,null,true);
+    }
+    private String generate(String prompt,int maxTokens,long deadline,String requestId,String backend,String destination,boolean memory)throws Exception {
         if (SystemClock.elapsedRealtime() >= deadline) throw new IOException("deadline");
         Bundle extras = new Bundle();
         extras.putString("backend",backend);
+        if(memory)extras.putString("task","memory");
         if(destination!=null)extras.putString("destination",destination);
         extras.putString("prompt", prompt);
         extras.putString("request_id", requestId);

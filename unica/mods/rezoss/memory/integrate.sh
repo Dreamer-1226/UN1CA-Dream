@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Sourced by mods/rezoss; Memory retains its original Samsung platform signature.
+# Sourced by mods/rezoss; patch the exact Memory .48 baseline for this ROM.
 # shellcheck disable=SC2154
 if [[ -f "$MODPATH/memory/disable" ]]; then
     LOG "- Samsung Memory integration is disabled"
@@ -33,8 +33,8 @@ if [[ ! -f "$REZOSS_MEMORY_PRELOAD_CONFIG" ]] ||
     return 1
 fi
 
-# Check all chunks before changing the working tree. Never rebuild or resign this APK.
-MEMORY_SHA256="28c74ddee923b8de0cf3abe816aa44a8135f6b5259d54d275d9c30f04f0bb5e8"
+# Check the untouched .48 baseline before applying the isolated AI adapter.
+MEMORY_SHA256="ea088fe8329289b9b1494d805ac0555eea9f888757cba394c99b429985f3939a"
 if [[ "$(cat "$REZOSS_MEMORY_ROOT/system/system/priv-app/Memory/Memory.apk.00" \
         "$REZOSS_MEMORY_ROOT/system/system/priv-app/Memory/Memory.apk.01" | sha256sum | cut -d ' ' -f 1)" != "$MEMORY_SHA256" ]]; then
     LOGE "Samsung Memory APK chunks are missing or do not match the investigated APK"
@@ -59,11 +59,18 @@ APPLY_PATCH "system" "system/framework/services.jar" \
     "$REZOSS_MEMORY_ROOT/sidekey/0001-Add-Memory-volume-up-side-key.patch" || return 1
 REZOSS_MEMORY_STAGE=$(mktemp -d /tmp/rezoss-memory-stage.XXXXXX) || return 1
 mkdir -p "$REZOSS_MEMORY_STAGE/system/system/priv-app/TouchWizHome_2017" || return 1
+mkdir -p "$REZOSS_MEMORY_STAGE/system/system/priv-app/Memory" || return 1
+cat "$REZOSS_MEMORY_ROOT/system/system/priv-app/Memory/Memory.apk.00" \
+    "$REZOSS_MEMORY_ROOT/system/system/priv-app/Memory/Memory.apk.01" \
+    > "$REZOSS_MEMORY_STAGE/Memory-v48-original.apk" || return 1
+LOG "- Adding Memory .48 UN1CA AI backend and isolated failure fallback"
+bash "$REZOSS_MEMORY_ROOT/prepare-memory.sh" "$REZOSS_MEMORY_STAGE/Memory-v48-original.apk" \
+    "$REZOSS_MEMORY_STAGE/system/system/priv-app/Memory/Memory.apk" || return 1
 bash "$REZOSS_MEMORY_ROOT/prepare-launcher.sh" "$WORK_DIR/system/$REZOSS_MEMORY_LAUNCHER" \
     "$REZOSS_MEMORY_STAGE/system/$REZOSS_MEMORY_LAUNCHER" || return 1
 
 SET_METADATA "system" "system/priv-app/Memory" 0 0 755 "u:object_r:system_file:s0" || return 1
-ADD_TO_WORK_DIR "$REZOSS_MEMORY_ROOT" "system" "system/priv-app/Memory/Memory.apk" 0 0 644 "u:object_r:system_file:s0" || return 1
+ADD_TO_WORK_DIR "$REZOSS_MEMORY_STAGE" "system" "system/priv-app/Memory/Memory.apk" 0 0 644 "u:object_r:system_file:s0" || return 1
 ADD_TO_WORK_DIR "$REZOSS_MEMORY_ROOT" "system" "system/etc/permissions/privapp-permissions-com.samsung.android.app.memory.xml" 0 0 644 "u:object_r:system_file:s0" || return 1
 ADD_TO_WORK_DIR "$REZOSS_MEMORY_ROOT" "system" "system/etc/permissions/signature-permissions-com.samsung.android.app.memory.xml" 0 0 644 "u:object_r:system_file:s0" || return 1
 if ! grep -q 'package="com.samsung.android.app.memory"' "$REZOSS_MEMORY_PRELOAD_CONFIG"; then

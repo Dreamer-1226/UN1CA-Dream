@@ -17,9 +17,9 @@ public final class LocalInferenceService extends Service {
     private TextBackend backend;
     private Messenger endpoint;
     private final class Job implements Runnable,TextBackend.Control,IBinder.DeathRecipient {
-        final Messenger callback;final int uid;final String input;final boolean summary,recall,diagnostic,chat,consent;final String destination;final long deadline,submitted=SystemClock.elapsedRealtime();
+        final Messenger callback;final int uid;final String input;final boolean summary,recall,diagnostic,chat,memory,consent;final String destination;final long deadline,submitted=SystemClock.elapsedRealtime();
         volatile Process process;volatile String cancellation;volatile String requestId;volatile Thread thread;
-        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));diagnostic="diagnostic".equals(b.getString("task"));chat="diagnostic_chat".equals(b.getString("task"));consent=b.getBoolean("online_consent");destination=b.getString("destination","");deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(recall?8000:45000));}
+        Job(Message m){callback=m.replyTo;uid=m.sendingUid;Bundle b=m.getData();input=b.getString("input","");summary=b.getBoolean("summary");recall="recall".equals(b.getString("task"));diagnostic="diagnostic".equals(b.getString("task"));chat="diagnostic_chat".equals(b.getString("task"));memory="memory".equals(b.getString("task"));consent=b.getBoolean("online_consent");destination=b.getString("destination","");deadline=Math.min(b.getLong("deadline",0),SystemClock.elapsedRealtime()+(memory?120000:recall?8000:45000));}
         public boolean cancelled(){return cancellation!=null;}
         public long deadline(){return deadline;}
         public void process(Process p){process=p;if(p!=null&&cancelled())p.destroyForcibly();}
@@ -28,8 +28,8 @@ public final class LocalInferenceService extends Service {
         public void binderDied(){main.post(()->cancel("client_died"));}
         public void run(){
             thread=Thread.currentThread();long started=SystemClock.elapsedRealtime();String value=null,status="unavailable";
-            Log.i("RezossV73Local","task="+(recall?"recall":summary?"summary":"replies")+" queueMs="+(started-submitted)+" remainingMs="+(deadline-started));
-            try{if(!cancelled()){value=chat?backend.generateChat(input,destination,consent,this):diagnostic?backend.generateDiagnostic(input,destination,consent,this):recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
+            Log.i("RezossV73Local","task="+(memory?"memory":recall?"recall":summary?"summary":"replies")+" queueMs="+(started-submitted)+" remainingMs="+(deadline-started));
+            try{if(!cancelled()){value=memory?backend.generateMemory(input,this):chat?backend.generateChat(input,destination,consent,this):diagnostic?backend.generateDiagnostic(input,destination,consent,this):recall?backend.generateRecall(input,this):backend.generateLocal(input,summary,this);status="generated";}}
             catch(Exception e){
                 if(SystemClock.elapsedRealtime()>=deadline)status="deadline";
                 else if(e instanceof IOException && "deadline".equals(e.getMessage()))status="deadline";
@@ -55,9 +55,10 @@ public final class LocalInferenceService extends Service {
                 if(message.replyTo==null)return;
                 try{
                     boolean summaryCaller=trusted(message.sendingUid,"io.mesalabs.unica.localsummary");
+                    boolean memoryCaller=trusted(message.sendingUid,"com.samsung.android.app.memory");
                     boolean recallCaller=trusted(message.sendingUid,"com.samsung.android.ssco");
                     boolean diagnosticCaller=message.sendingUid==1000 && getPackageManager().checkSignatures("android","com.android.settings")==android.content.pm.PackageManager.SIGNATURE_MATCH;
-                    if(!summaryCaller&&!recallCaller&&!diagnosticCaller)throw new SecurityException("caller_denied");
+                    if(!summaryCaller&&!recallCaller&&!diagnosticCaller&&!memoryCaller)throw new SecurityException("caller_denied");
                     IBinder key=message.replyTo.getBinder();
                     if(message.what==2){Job job=jobs.get(key);if(job!=null&&job.uid==message.sendingUid)job.cancel("client_cancelled");return;}
                     if(message.what==3){
@@ -67,15 +68,17 @@ public final class LocalInferenceService extends Service {
                     }
                     if(message.what!=1)return;
                     Bundle request=message.getData();boolean recall="recall".equals(request.getString("task"));
-                    if("diagnostic".equals(request.getString("task"))||"diagnostic_chat".equals(request.getString("task"))){
+                    if("memory".equals(request.getString("task"))){
+                        if(!memoryCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
+                    }else if("diagnostic".equals(request.getString("task"))||"diagnostic_chat".equals(request.getString("task"))){
                         if(!diagnosticCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
                     }else if(recall){
                         if(!recallCaller||request.getBoolean("summary"))throw new SecurityException("task_denied");
                     }else if(!summaryCaller||request.containsKey("task"))throw new SecurityException("task_denied");
-                    if(backend==null||!backend.configured()){respond(message.replyTo,null,"backend_unavailable");return;}
+                    if(backend==null||!("memory".equals(request.getString("task"))?backend.memoryConfigured():backend.configured())){respond(message.replyTo,null,"backend_unavailable");return;}
                     if(!jobs.isEmpty()){respond(message.replyTo,null,"busy");return;}
                     Job job=new Job(message);
-                    if(job.input.isEmpty()||job.input.length()>(job.diagnostic?1400:12000)||job.deadline<=SystemClock.elapsedRealtime()){respond(message.replyTo,null,"invalid_or_expired");return;}
+                    if(job.input.isEmpty()||job.input.length()>(job.memory?MemoryContract.MAX_INPUT_CHARS:job.diagnostic?1400:12000)||job.deadline<=SystemClock.elapsedRealtime()){respond(message.replyTo,null,"invalid_or_expired");return;}
                     String blocked=ThermalGuard.blocked(LocalInferenceService.this);
                     if(blocked!=null){respond(message.replyTo,null,blocked);return;}
                     key.linkToDeath(job,0);jobs.put(key,job);

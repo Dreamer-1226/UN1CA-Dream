@@ -25,7 +25,7 @@ public final class SettingsActivity extends Activity {
     private final ExecutorService storage=Executors.newSingleThreadExecutor();
     private final Handler main=new Handler(Looper.getMainLooper());
     private LinearLayout page;
-    private TextView active,backend,screening,endpointRow,modelRow,keyState;
+    private TextView active,backend,screening,memory,endpointRow,modelRow,keyState;
     private String endpoint,model;
     private boolean dark;
     private String localModelName(){
@@ -53,6 +53,7 @@ public final class SettingsActivity extends Activity {
         active=row(routing,"",null);
         backend=row(routing,"Now Nudge, replies and summaries",()->choose(false));
         screening=row(routing,"Call Screening",()->choose(true));
+        memory=row(routing,"Memory backend",()->chooseMemory());
         if(localModel.startsWith("Gemma")){
             row(routing,"Local model setup\nImport or prepare "+localModel,()->{
                 try{startActivity(new android.content.Intent().setClassName("com.samsung.android.aioskernelservice","io.mesalabs.rezoss.nudge.GemmaSetupActivity"));}
@@ -60,13 +61,13 @@ public final class SettingsActivity extends Activity {
             });
             note("ROM default runs "+localModel+" offline after importing the separate model file. First GPU preparation can take over ten seconds; prepare it before testing.");
         }else note("ROM default uses Qwen3 offline after installing the separate QWEN model APK.");
-        note("Cloud providers receive conversation or notification text only after you explicitly select an API backend. Call Screening has a short response deadline.");
+        note("Cloud providers receive conversation, notification or Memory text only after you explicitly select an API backend. Call Screening has a short response deadline.");
         LinearLayout config=card(transparent);
         row(config,"Configure API provider",this::provider);
         endpointRow=row(config,"",()->edit(false));modelRow=row(config,"",()->edit(true));
         keyState=row(config,"",this::saveKey);
-        row(config,"Remove saved API key",()->new AlertDialog.Builder(this).setMessage("Remove the API key and return both backends to ROM default?").setNegativeButton("Cancel",null).setPositiveButton("Remove",(d,w)->storage.execute(()->{ApiSettingsStore.clearKey(this);main.post(this::refresh);})).show());
-        note("Saving API configuration returns both backends to ROM default. Select a cloud backend afterward to enable transmission. Endpoint changes require a new key. The saved key is encrypted with Android Keystore and is never displayed.");
+        row(config,"Remove saved API key",()->new AlertDialog.Builder(this).setMessage("Remove the API key and return all backends to ROM default?").setNegativeButton("Cancel",null).setPositiveButton("Remove",(d,w)->storage.execute(()->{ApiSettingsStore.clearKey(this);main.post(this::refresh);})).show());
+        note("Saving API configuration returns all backends to ROM default. Select a cloud backend afterward to enable transmission. Endpoint changes require a new key. The saved key is encrypted with Android Keystore and is never displayed.");
         setContentView(scroll);refresh();
     }
     private int text(){return dark?Color.WHITE:0xff111111;}
@@ -96,11 +97,18 @@ public final class SettingsActivity extends Activity {
     private void refresh(){
         ApiSettingsStore.Settings s=ApiSettingsStore.display(this);endpoint=s.endpoint;model=s.model;
         String host;try{host=URI.create(endpoint).getHost();}catch(Exception e){host="Not configured";}
-        setRow(active,"Selected providers\n"+label(ApiSettingsStore.backend(this,false))+"\nCall Screening: "+label(ApiSettingsStore.backend(this,true)));
+        setRow(active,"Selected providers\n"+label(ApiSettingsStore.backend(this,false))+"\nCall Screening: "+label(ApiSettingsStore.backend(this,true))+"\nMemory: "+label(ApiSettingsStore.memoryBackend(this)));
         setRow(backend,"Now Nudge, replies and summaries\n"+label(ApiSettingsStore.backend(this,false)));
         setRow(screening,"Call Screening\n"+label(ApiSettingsStore.backend(this,true)));
+        setRow(memory,"Memory backend\n"+label(ApiSettingsStore.memoryBackend(this)));
         setRow(endpointRow,"API endpoint\n"+host+"\n"+endpoint);setRow(modelRow,"API model\n"+(model.isEmpty()?"Not configured":model));
         setRow(keyState,"Save API configuration / key\n"+(ApiSettingsStore.hasSavedKey(this)?"Key saved; never displayed":"No API key saved"));
+    }
+    private void chooseMemory(){
+        new AlertDialog.Builder(this).setTitle("Memory backend").setItems(LABELS,(d,i)->{
+            if(i==0){ApiSettingsStore.selectMemory(this,IDS[i]);refresh();return;}
+            new AlertDialog.Builder(this).setTitle("Use "+LABELS[i]+" for Memory?").setMessage("Memory text, OCR and transcripts will be sent to "+endpoint+" using model "+model+". Network access and provider charges may apply.").setNegativeButton("Cancel",null).setPositiveButton("Use API",(a,b)->storage.execute(()->{try{ApiSettingsStore.selectMemory(this,IDS[i]);main.post(this::refresh);}catch(Exception e){error(e.getMessage());}})).show();
+        }).show();
     }
     private void choose(boolean call){
         new AlertDialog.Builder(this).setTitle(call?"Call Screening backend":"AI backend").setItems(LABELS,(d,i)->{

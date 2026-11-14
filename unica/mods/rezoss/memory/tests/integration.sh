@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -euo pipefail
-[[ $# == 3 ]] || { echo "Usage: $0 ORIGINAL_LAUNCHER.apk VALIDATED_SIGNED_LAUNCHER.apk CLEAN_SERVICES_DECODE" >&2; exit 2; }
+[[ $# == 4 ]] || { echo "Usage: $0 ORIGINAL_LAUNCHER.apk VALIDATED_SIGNED_LAUNCHER.apk CLEAN_SERVICES_DECODE VALIDATED_SIGNED_MEMORY.apk" >&2; exit 2; }
 MEMORY_TEST_ORIGINAL=$(realpath "$1")
 MEMORY_TEST_SIGNED=$(realpath "$2")
 MEMORY_TEST_SERVICES=$(realpath "$3")
+MEMORY_TEST_MEMORY=$(realpath "$4")
 MEMORY_TEST_SOURCE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 SRC_DIR=$(cd -- "$MEMORY_TEST_SOURCE/../../../.." && pwd)
 source "$SRC_DIR/scripts/utils/common_utils.sh"
@@ -15,6 +16,7 @@ MODPATH="$SRC_DIR/unica/mods/rezoss"
 MEMORY_TEST_TEMP=$(mktemp -d /tmp/rezoss-memory-integration-test.XXXXXX)
 APKTOOL_DIR="$MEMORY_TEST_TEMP/apktool"
 MEMORY_TEST_BUILDS=0
+MEMORY_TEST_AI_BUILDS=0
 # The actual signed package was built/verified separately. Substitute only that
 # expensive build; staging and metadata use the real repository helpers.
 bash() {
@@ -22,6 +24,12 @@ bash() {
         [[ -f "$2" && ! -e "$3" ]]
         cp -p "$MEMORY_TEST_SIGNED" "$3"
         MEMORY_TEST_BUILDS=$((MEMORY_TEST_BUILDS + 1))
+    elif [[ "$1" == "$MEMORY_TEST_SOURCE/prepare-memory.sh" ]]; then
+        [[ -f "$2" && ! -e "$3" ]]
+        [[ "$(sha256sum "$2" | cut -d ' ' -f 1)" == \
+            ea088fe8329289b9b1494d805ac0555eea9f888757cba394c99b429985f3939a ]]
+        cp -p "$MEMORY_TEST_MEMORY" "$3"
+        MEMORY_TEST_AI_BUILDS=$((MEMORY_TEST_AI_BUILDS + 1))
     else
         command bash "$@"
     fi
@@ -81,6 +89,7 @@ touch "$WORK_DIR/system/system/priv-app/TouchWizHome_2017/oat/arm64/stale.odex" 
     "$WORK_DIR/system/system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk.prof"
 source "$MEMORY_TEST_SOURCE/integrate.sh"
 [[ "$MEMORY_TEST_BUILDS" == 1 ]]
+[[ "$MEMORY_TEST_AI_BUILDS" == 1 ]]
 grep -q 'MemorySideKey;->handle' "$APKTOOL_DIR/system/framework/services.jar/$MEMORY_TEST_NATIVE"
 [[ -s "$APKTOOL_DIR/system/framework/services.jar/smali_classes2/io/mesalabs/rezoss/memory/MemorySideKey.smali" ]]
 if python3 "$MEMORY_TEST_SOURCE/sidekey/check-target.py" "$APKTOOL_DIR/system/framework/services.jar"; then
@@ -89,14 +98,14 @@ fi
 cmp "$MEMORY_TEST_SIGNED" "$WORK_DIR/system/system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk"
 [[ ! -e "$WORK_DIR/system/system/priv-app/TouchWizHome_2017/oat" ]]
 [[ ! -e "$WORK_DIR/system/system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk.prof" ]]
-python3 - "$WORK_DIR" <<'PY'
+python3 - "$WORK_DIR" "$MEMORY_TEST_MEMORY" <<'PY'
 from pathlib import Path
 import hashlib
 import sys
 import xml.etree.ElementTree as E
 root = Path(sys.argv[1])
 memory = root / "system/system/priv-app/Memory/Memory.apk"
-assert hashlib.sha256(memory.read_bytes()).hexdigest() == "28c74ddee923b8de0cf3abe816aa44a8135f6b5259d54d275d9c30f04f0bb5e8"
+assert memory.read_bytes() == Path(sys.argv[2]).read_bytes()
 assert sorted(p.name for p in memory.parent.iterdir()) == ["Memory.apk"]
 preloads = E.parse(root / "system/system/etc/sysconfig/allowed-system-preload-apps.xml")
 assert len(preloads.findall('./allowed-system-preload[@package="com.samsung.android.app.memory"]')) == 1
@@ -114,7 +123,7 @@ for entry, mode in [("system/priv-app/Memory", "755"),
                     ("system/etc/permissions/privapp-permissions-com.samsung.android.app.memory.xml", "644"),
                     ("system/etc/permissions/signature-permissions-com.samsung.android.app.memory.xml", "644")]:
     assert f"{entry} 0 0 {mode} capabilities=0x0" in config, entry
-print("PASS: real-helper staging, original Memory APK hash, six privileged permissions, signature WRITE_SECURE_SETTINGS and metadata")
+print("PASS: real-helper staging, validated patched Memory .48, six privileged permissions, signature WRITE_SECURE_SETTINGS and metadata")
 PY
 echo "PASS: disabled/other targets skip; wrong APK, missing library and prior decode reject; stale profiles removed"
 echo "Integration fixture retained: $MEMORY_TEST_TEMP"

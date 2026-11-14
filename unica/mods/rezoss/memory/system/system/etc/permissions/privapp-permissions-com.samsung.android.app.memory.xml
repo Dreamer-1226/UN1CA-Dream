@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Only requested permissions carrying the privileged flag in dm3q framework-res.
-     Signature-only permissions rely on the original Samsung platform certificate.
+     Signature-only permissions rely on the matching ROM platform certificate.
      Runtime permissions remain under the app's normal consent flow. -->
 <permissions>
     <privapp-permissions package="com.samsung.android.app.memory">

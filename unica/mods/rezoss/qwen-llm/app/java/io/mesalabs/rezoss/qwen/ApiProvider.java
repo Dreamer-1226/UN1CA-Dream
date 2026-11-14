@@ -34,6 +34,7 @@ public final class ApiProvider extends ContentProvider {
         if("backend_config".equals(method)){
             result.putString("backend",ApiSettingsStore.backend(getContext(),false));
             result.putString("screening_backend",ApiSettingsStore.backend(getContext(),true));
+            result.putString("memory_backend",ApiSettingsStore.memoryBackend(getContext()));
             ApiSettingsStore.Settings display=ApiSettingsStore.display(getContext());
             result.putInt("diagnostic_protocol",1);
             result.putString("endpoint",display.endpoint);result.putString("model",display.model);return result;
@@ -59,10 +60,12 @@ public final class ApiProvider extends ContentProvider {
         int maxTokens = extras.getInt("max_tokens", 96);
         try {
             String backend=extras.getString("backend","default");
-            if("default".equals(backend)||(!backend.equals(ApiSettingsStore.backend(getContext(),false))&&!backend.equals(ApiSettingsStore.backend(getContext(),true))))
+            boolean memory="memory".equals(extras.getString("task"));
+            if(memory&&!backend.equals(ApiSettingsStore.memoryBackend(getContext())))throw new ApiClient.ApiException("backend_changed");
+            if("default".equals(backend)||(!memory&&!backend.equals(ApiSettingsStore.backend(getContext(),false))&&!backend.equals(ApiSettingsStore.backend(getContext(),true))))
                 throw new ApiClient.ApiException("backend_changed");
             if(!ApiSettingsStore.matchesEndpoint(backend,ApiSettingsStore.display(getContext()).endpoint))throw new ApiClient.ApiException("provider_mismatch");
-            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend, extras.getString("destination"));
+            String content = ApiClient.complete(getContext(), null, prompt, maxTokens, deadline, requestId, backend, extras.getString("destination"),memory);
             result.putString("content", content);
             result.putString("status", "generated");
         } catch (ApiClient.ApiException failure) {

@@ -16,6 +16,9 @@ import android.content.Context;
 final class ApiSettingsStore {
  static final class Settings {String endpoint="https://provider.invalid/v1/chat/completions",model="test-model",apiKey="test-key";boolean ready(){return true;}}
  static Settings forBackend(Context c,String backend){if(!"custom".equals(backend))throw new IllegalArgumentException("backend_changed");return new Settings();}
+ static String activeMemory="default";
+ static String memoryBackend(Context c){return activeMemory;}
+ static Settings forMemoryBackend(Context c,String backend){if("default".equals(backend)||!backend.equals(activeMemory))throw new IllegalArgumentException("backend_changed");return new Settings();}
  static String activeBackend="custom";
  static String backend(Context c,boolean screening){return activeBackend;}
  static void validateEndpoint(String endpoint){}
@@ -52,12 +55,25 @@ public class TransportTest {
    consentPrior=last;ApiSettingsStore.activeBackend="default";
    try{ApiClient.complete(new android.content.Context(),null,"private log",256,SystemClock.elapsedRealtime()+2000,"changed-route","custom",consent.toString());throw new AssertionError("changed general route accepted");}
    catch(ApiClient.ApiException e){check("backend_changed".equals(e.status));}check(last==consentPrior);ApiSettingsStore.activeBackend="custom";
+   String memoryPrompt=new String(new char[50000]).replace('\0','x');
+   Fake memoryPrior=last;
+   try{ApiClient.complete(new android.content.Context(),null,memoryPrompt,4096,SystemClock.elapsedRealtime()+2000,"memory-no-consent","custom",null,true);throw new AssertionError("Memory cloud sent without selection");}
+   catch(ApiClient.ApiException e){check("backend_changed".equals(e.status));}check(last==memoryPrior);
+   ApiSettingsStore.activeMemory="custom";
+   check("hello".equals(ApiClient.complete(new android.content.Context(),null,memoryPrompt,4096,SystemClock.elapsedRealtime()+2000,"memory-cloud","custom",null,true)));
+   payload=new org.json.JSONObject(last.body.toString("UTF-8"));check(payload.getInt("max_tokens")==4096);check(payload.getJSONArray("messages").getJSONObject(0).getString("content").length()==50000);
+   memoryPrior=last;
+   try{ApiClient.complete(new android.content.Context(),null,memoryPrompt,4096,SystemClock.elapsedRealtime()+2000,"normal-budget","custom");throw new AssertionError("Normal budget widened");}
+   catch(ApiClient.ApiException e){check("invalid_request".equals(e.status));}check(last==memoryPrior);
+   ApiSettingsStore.activeMemory="default";
+   try{ApiClient.complete(new android.content.Context(),null,"memory",4096,SystemClock.elapsedRealtime()+2000,"memory-revoked","custom",null,true);throw new AssertionError("Memory route change ignored");}
+   catch(ApiClient.ApiException e){check("backend_changed".equals(e.status));}check(last==memoryPrior);
    reason="length";reject("incomplete_output","truncated",2000);
    reason="content_filter";reject("incomplete_output","filtered",2000);
    reason="stop";ApiClient.cancel("cancelled");reject("cancelled","cancelled",2000);
    Fake prior=last;try{call("local",2000,"default");throw new AssertionError();}catch(IllegalArgumentException expected){}check(prior==last);
    block=true;long start=SystemClock.elapsedRealtime();reject("deadline","timeout",100);check(SystemClock.elapsedRealtime()-start<1500);check(last.disconnected);
-   System.out.println("API transport passed: payload, complete/truncated/filtered output, pre-cancel, local no-network, consent fingerprint, changed general route, total deadline");System.exit(0);
+   System.out.println("API transport passed: payload, complete/truncated/filtered output, pre-cancel, local no-network, consent fingerprint, changed general route, Memory explicit route and independent larger budget, total deadline");System.exit(0);
   }catch(Throwable e){e.printStackTrace();System.exit(1);}
  }
 }'''

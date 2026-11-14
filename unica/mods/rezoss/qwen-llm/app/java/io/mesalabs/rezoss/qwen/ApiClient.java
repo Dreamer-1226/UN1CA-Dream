@@ -34,8 +34,11 @@ final class ApiClient {
         return complete(context,systemPrompt,userPrompt,maxTokens,deadline,requestId,backend,null);
     }
     static String complete(Context context,String systemPrompt,String userPrompt,int maxTokens,long deadline,String requestId,String backend,String destination)throws Exception {
-        if (userPrompt == null || userPrompt.isEmpty() || userPrompt.length() > 16000
-                || maxTokens < 1 || maxTokens > 2048 || requestId == null || requestId.isEmpty())
+        return complete(context,systemPrompt,userPrompt,maxTokens,deadline,requestId,backend,destination,false);
+    }
+    static String complete(Context context,String systemPrompt,String userPrompt,int maxTokens,long deadline,String requestId,String backend,String destination,boolean memory)throws Exception {
+        if (userPrompt == null || userPrompt.isEmpty() || userPrompt.length() > (memory?100000:16000)
+                || maxTokens < 1 || maxTokens > (memory?4096:2048) || requestId == null || requestId.isEmpty())
             throw new ApiException("invalid_request");
         if (Thread.currentThread().isInterrupted()) throw new ApiException("cancelled");
         long remaining = deadline - SystemClock.elapsedRealtime();
@@ -44,7 +47,8 @@ final class ApiClient {
         ApiSettingsStore.Settings settings;
         synchronized(ApiSettingsStore.class){
             if(destination!=null&&!backend.equals(ApiSettingsStore.backend(context,false)))throw new ApiException("backend_changed");
-            settings=ApiSettingsStore.forBackend(context,backend);
+            if(memory&&!backend.equals(ApiSettingsStore.memoryBackend(context)))throw new ApiException("backend_changed");
+            settings=memory?ApiSettingsStore.forMemoryBackend(context,backend):ApiSettingsStore.forBackend(context,backend);
         }
         if(destination!=null){
             byte[] hash=java.security.MessageDigest.getInstance("SHA-256").digest((backend+"\n"+settings.model+"\n"+settings.endpoint).getBytes("UTF-8"));
@@ -75,7 +79,7 @@ final class ApiClient {
             if(SystemClock.elapsedRealtime()>=deadline)throw new ApiException("deadline");
             connection.setInstanceFollowRedirects(false);
             connection.setConnectTimeout((int) Math.max(1, Math.min(10000, remaining)));
-            connection.setReadTimeout((int) Math.max(1, Math.min(45000, remaining)));
+            connection.setReadTimeout((int) Math.max(1, Math.min(memory?120000:45000, remaining)));
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Authorization", "Bearer " + settings.apiKey);
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
@@ -109,7 +113,7 @@ final class ApiClient {
             String content = message == null ? null : message.optString("content", null);
             if (content == null) throw new ApiException("invalid_response");
             content = content.trim();
-            if (content.isEmpty() || content.length() > MAX_OUTPUT_CHARS)
+            if (content.isEmpty() || content.length() > (memory?32768:MAX_OUTPUT_CHARS))
                 throw new ApiException("invalid_output");
             return content;
         } catch (ApiException failure) {

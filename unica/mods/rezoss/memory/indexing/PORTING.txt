@@ -1,0 +1,98 @@
+Memory v48 indexing compatibility
+================================
+
+Baseline identities
+  Memory 1.0.00.48:
+    ea088fe8329289b9b1494d805ac0555eea9f888757cba394c99b429985f3939a
+  Current dm3q SamsungSmartSuggestions target:
+    a8ce715f3058138ffa8f7263514ab177abcf60454b23537f10c755712feafaf2
+  Read-only device package version: SamsungSmartSuggestions 7.3.20.17.
+  No installed APK, source firmware, target tree, or device state modified here.
+
+Why v1 cannot simply be renamed
+  Current SearchProvider UriInfo has no Memory/collection v1 routes. The Memory
+  notifier sends only ids (_id selection + string ids, empty ContentValues),
+  expecting a Samsung collector to load document data. That collector is absent.
+  Renaming to a contacts/notes/etc URI would index/delete the wrong data.
+
+Implemented adapter
+  Four exact invoke substitutions in original classes.dex/classes2.dex preserve locals,
+  register arguments, labels, coroutine suspension, catches and cancellation:
+    1. notifier ContentResolver.update -> MemoryIndexAdapter.update
+    2. notifier ContentResolver.delete -> MemoryIndexAdapter.delete
+    3. cursor helper ContentResolver.query -> MemoryIndexAdapter.query
+    4. SearchCraftProvider REINDEX call -> MemoryIndexAdapter.call
+  All unknown authorities and non-Memory URI paths delegate unchanged.
+  Supported native v1 operations remain first choice. UnsupportedOperationException
+  marks only that precise route unavailable for this process.
+
+  Missing native routes use two caller-owned, non-semantic public v2 schemas:
+    com.samsung.android.app.memory.unica_memory
+    com.samsung.android.app.memory.unica_memory_collection
+  REGISTER_SCHEMA extras contain name and schema-content UTF-8 XML. status=0 is
+  required. XML has no internal prefKey; package defaults to namespace prefix,
+  keyFieldName=_id, useUpsert=true. Own-package permission checks remain intact.
+
+  Native v2 URI is content://com.samsung.android.smartsuggestions.search/v2/<name>
+  (no /search suffix: request constructor uses lastPathSegment as schema name).
+  bulkInsert upserts full documents in batches of 64, requiring exact written count.
+  Native public delete consumes JSON query selection, so explicit id deletions use
+  term fields=[_id], texts=[...ids] (OR is the default clause). Empty/null ids are
+  never interpreted as delete all. Full rebuild resets only our own schema once
+  per process to purge stale/deleted/locked items.
+
+  Data is read through Memory's own verified public MemoryProvider contract:
+    content://com.samsung.android.app.memory.provider.memory/v1/memory
+      _id,title,body,source_text,user_note,memo,representative_tag,category,
+      deep_link,created_time,modified_time,is_locked
+    content://com.samsung.android.app.memory.provider.memory/v1/collections
+      _id,name,searchable_keywords
+  MemoryProvider SQL excludes deleted memories; adapter selects is_locked=0.
+  title/content are indexed text, link/time are preserved stored string metadata.
+
+  V2 search query uses query-json, match fields title/content, text=<literal input>,
+  field_operator=or, limit=200. Source exact MatchModel escapes queryparser input.
+  Projection contains _id only. Native Memory cursor consumers already handle
+  absent similarity/matched_source, using their ordinary keyword default score.
+  When v2 is unavailable, a parameterized LIKE search queries MemoryProvider
+  directly, escapes percent/underscore/backslash, excludes locked memories, limits
+  copied results to 200, and preserves CancellationSignal.
+  Native save/analysis exceptions are not altered. Indexing failure returns -1,
+  logs the error class without document contents, and invalidates actual Memory
+  source/search-provider observers. No fake success response is manufactured.
+
+Build integration
+  Compile indexing/java alongside ai/java into the Memory helper DEX.
+  Apply 0001-Add-Memory-index-compatibility.patch to exact clean v48 decode.
+  Reassemble classes.dex/classes2.dex and retain original-container resource packaging.
+  No SmartSuggestions provider-side patch or additional permissions required.
+  Generate with:
+    python3 indexing/generate-patch.py CLEAN_MEMORY_V48_DECODE
+  Verify with:
+    bash indexing/tests/run.sh
+    patch --dry-run --fuzz=0 -p1 -d CLEAN_MEMORY_V48_DECODE < indexing/0001-Add-Memory-index-compatibility.patch
+
+Validation and limits
+  Android37 compilation, 52 host schema/namespace/id/query-safety checks, and six
+  SQLite cases using actual Java-produced SQL predicates pass (literal wildcard,
+  SQL injection, locked/deleted exclusion for Memory and collection matching).
+  Exact v48 clean decode zero-fuzz patch check passes. All source projections,
+  JSON field names, schema ownership, upsert attribute, query dispatch, and native
+  cursor expectations were checked against exact APK DEX, not just strings.
+  Host checks do not prove SCS schema registration/index/search on the device.
+  Samsung embedding/semantic search and global Finder collector integration are
+  not created by this adapter. Keyword search is the compatibility contract.
+  SearchCraft bulk-import REINDEX also rebuilds both caller-owned mirrors,
+  preserving the original native return/exception contract and local observers.
+
+Retained REA evidence
+  Memory package identity: ev_c63de336e244c3f97d00e022af458b55751e5ead5799777ba3545b74b2db4500
+  Missing Memory collector: ev_73c459f805da424f32e2c600a3ba2e35f246526b0348bcecf32051bc1e136bd1
+  UriInfo routes: ev_99fa2090af576936aa6e7c53c06d4deacd022fae47f9cd997c31d4c6342866de
+  Native update: ev_4e708a0172d754abaf25ad76fc802c30d7b6b20964db3400ae7dc11affe4a666
+  Native delete: ev_6f8dee0e657b6fbf4acd5505e6e4f60a6bf4f506f87ff7651ab549feb98be472
+  Public schema ownership: ev_1842279449d8c90507750cb1637ccca23728cf586d7163be7039d207ec0a5009
+  Public bulkInsert: ev_22c1828729ac68d94ad055a5b3d6756a10376a9b6da3c54f97c6523474a0cbad
+  Public owner checks: ev_4ff0c29f214c3424ca04475a4310fde50e481c18ab208e0083c11a4d1297704b
+  Query bundle dispatch: ev_fd3845359e5d21461f3d7fbe9732f3dfa5b3377885b56e65f47527fa72fe3983
+  Raw source/smali working copies: /tmp/memory-index-provider and /tmp/memory-index-scs-clean

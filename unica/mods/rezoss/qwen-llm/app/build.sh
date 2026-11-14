@@ -31,8 +31,8 @@ if mode == '--stub':
     root.set('{http://schemas.android.com/apk/res/android}versionCode', '1')
     root.set('{http://schemas.android.com/apk/res/android}versionName', '3.2-stub')
     if backend == 'gemma-gpu' and target == 'dm3q' and native == 'true':
-        root.set('{http://schemas.android.com/apk/res/android}versionCode', '10')
-        root.set('{http://schemas.android.com/apk/res/android}versionName', '3.3-gemma-api')
+        root.set('{http://schemas.android.com/apk/res/android}versionCode', '11')
+        root.set('{http://schemas.android.com/apk/res/android}versionName', '3.4-memory-api')
     app = root.find('application')
     for provider in list(app.findall('provider')):
         if provider.get('{http://schemas.android.com/apk/res/android}name') == '.ModelProvider':

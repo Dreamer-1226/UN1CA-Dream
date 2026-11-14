@@ -87,7 +87,7 @@ APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
 
 # Keep the device-specific Power schedule menu aligned with its Rezoss backend.
 python3 "$SRC_DIR/unica/mods/rezoss/scheduled-power-on/install-settings-menu.py" \
-    "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_top_settings.xml" \
+    "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml" \
     "$TARGET_CODENAME" || ABORT "Failed to configure Power schedule menu"
 
 # Expose UN1CA-selected SamsungSans source-bank fonts through Samsung's normal

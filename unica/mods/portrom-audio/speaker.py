@@ -298,8 +298,9 @@ def prepare(work, stage):
                      for p in sorted(FINAL))
     rc = ('# SPDX-License-Identifier: GPL-3.0-or-later\n'
           '# Boot only: never mount or unmount in response to a live toggle.\n'
-          'on load_persist_props_action && property:persist.sys.unica.portrom_audio=true\n'
-          + mounts + '    mount none /system/etc/unica/portrom-audio/audio /system/media/audio bind\n')
+          'on load_persist_props_action && property:persist.sys.unica.speaker_profile=true\n'
+          + mounts + '\non load_persist_props_action && property:persist.sys.unica.portrom_audio=true\n'
+          '    mount none /system/etc/unica/portrom-audio/audio /system/media/audio bind\n')
     dest = stage / 'system/system/etc/init/unica_portrom_audio.rc'
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(rc)

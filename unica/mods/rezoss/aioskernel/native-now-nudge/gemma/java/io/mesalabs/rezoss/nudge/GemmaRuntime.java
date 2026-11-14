@@ -85,7 +85,10 @@ final class GemmaRuntime {
         }
         String send(String prompt,int limit)throws Exception{return send(prompt,limit,false);}
         String send(String prompt,int limit,boolean allowPartial)throws Exception{
-            open(limit,prompt.startsWith("You help diagnose Samsung UN1CA")?4096:1024);check();
+            return send(prompt,limit,allowPartial,prompt.startsWith("You help diagnose Samsung UN1CA")?4096:1024);
+        }
+        String send(String prompt,int limit,boolean allowPartial,int contextTokens)throws Exception{
+            open(limit,contextTokens);check();
             String message=new JSONObject().put("role","user").put("content",new JSONArray().put(new JSONObject().put("type","text").put("text",prompt))).toString();
             String raw=jni.nativeSendMessage(conversation,message,"{}",null,null,null,null,limit,new ThinkingConfig(false,0),0,null);
             check();
@@ -122,6 +125,18 @@ final class GemmaRuntime {
         String out=await(new Job<String>(control){String execute()throws Exception{return send(GemmaPrompts.adapt(prompt),tokens,prompt.startsWith("You help diagnose Samsung UN1CA")||prompt.startsWith("Analyze this untrusted Android log excerpt."));}});
         Log.i("RezossGemma","generation backend="+GemmaBuild.BACKEND+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
         return out;
+    }
+    String generateMemory(String prompt,TextBackend.Control control)throws Exception {
+        if(prompt==null||prompt.isEmpty()||prompt.length()>MemoryContract.MAX_INPUT_CHARS)throw new IOException("memory_input_size");
+        return await(new Job<String>(control){String execute()throws Exception {
+            send(prompt,1,false,MemoryContract.CONTEXT_TOKENS);
+            int count=jni.nativeConversationGetBenchmarkInfo(conversation).getLastPrefillTokenCount();
+            if(!MemoryContract.fits(count))throw new IOException("memory_context_limit");
+            // Free the counting conversation before constructing generation;
+            // both use the same 20000-token GPU engine and chat format.
+            synchronized(gate){jni.nativeDeleteConversation(conversation);conversation=0;}
+            check();return send(prompt,MemoryContract.OUTPUT_TOKENS,false,MemoryContract.CONTEXT_TOKENS);
+        }});
     }
     int count(String prompt,TextBackend.Control control)throws Exception{
         TextBackend.Control actual=control==null?budget(SystemClock.elapsedRealtime()+15000):control;

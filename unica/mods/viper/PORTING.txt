@@ -1,0 +1,53 @@
+ViPER4Android 2.1.1 for dm3q / One UI 9
+
+Audio Tweaks order:
+  Play boot sound effect
+  PortROM audio by Lindir Music
+  ViPER4Android (master processing switch)
+  ViPER effects and profiles (opens the app)
+
+The APK owns the master preference, device profiles and presets. Settings calls
+a provider protected by WRITE_SECURE_SETTINGS and a caller-package check. The
+app and QS tile continue to use the same DataStore preference. Disabling the
+master releases effects and preserves profiles. No reboot is needed to toggle.
+Default processing is OFF; global mode defaults ON. Per-app mode is available
+with MODIFY_AUDIO_ROUTING. Boot autostart remains controlled by the app.
+
+The non-AIDL driver is extracted from the pinned upstream release ZIP. Native
+installation adds registrations to existing effect XML files after paradigm and
+PortROM. It preserves all existing Samsung effects, offload configuration,
+Audio Eraser, speaker protection and audio policy. No root-manager scripts,
+live mounts, permissive SELinux or audio-service restart hooks are installed.
+prepare.py rejects an unexpected HAL and verifies pinned payload checksums.
+
+Source: https://github.com/likelikeslike/ViPER4Android
+App commit: 1f0c824f3f28040f64790a4fd2c22543059152a4
+Driver: https://github.com/likelikeslike/ViPERFX_RE/releases/tag/v2.1.1
+See payload.json and LICENSE-app / LICENSE-driver.
+The source archive plus patch-app.py and UnicaControlProvider.kt reproduce the
+modified app. It uses the ROM AOSP test certificate, not platform identity.
+Upstream APK updates use a different signing identity and cannot update this
+ROM variant. Update the ROM payload through build-app.sh instead.
+
+Host verification (from the repository root):
+  source buildenv.sh dm3q
+  bash unica/mods/viper/build-controller.sh
+  bash unica/mods/viper/build-app.sh
+  python3 unica/mods/viper/tests/verify.py out/target/dm3q/work_dir
+  bash unica/mods/viper/tests/packaging.sh out/target/dm3q/work_dir
+  bash -n unica/mods/viper/customize.sh
+  git diff --check
+
+Device validation after an authorized ROM build/flash:
+  /mnt/c/platform-tools/adb.exe shell dumpsys package com.llsl.viper4android
+  /mnt/c/platform-tools/adb.exe shell dumpsys media.audio_flinger
+Check MODIFY_AUDIO_ROUTING and START_FOREGROUND_SERVICES_FROM_BACKGROUND grants.
+Enable ViPER from Settings and verify UUID 90380da3-8536-4744-a6a3-5731970e640f
+is active during playback. Toggle in the app/QS tile, then return to Settings;
+the same state must appear. Disable and verify the effect instances are released.
+Test reboot restoration, saved profiles and speaker/Bluetooth SSC/USB routes.
+Test Dolby on/off and Audio Eraser real-time playback plus editing/export.
+Inspect logcat for audio-service failures, hidden-API failures and SELinux AVCs.
+Legacy ViPER does not advertise offload support: confirm audible processing on
+each route rather than relying solely on the saved ON switch. No global offload
+or Dolby disable is applied by this mod.

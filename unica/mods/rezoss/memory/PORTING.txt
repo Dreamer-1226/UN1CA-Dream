@@ -1,3 +1,62 @@
+Samsung Memory .48 / UN1CA AI integration
+2026-11-11 / dm3q only
+
+Current baseline replaces the historical .46 described below with exact Samsung
+Memory 1.0.00.48 / versionCode 100048000. Original APK SHA-256:
+ea088fe8329289b9b1494d805ac0555eea9f888757cba394c99b429985f3939a.
+The .00/.01 payloads contain that original APK; prepare-memory.sh applies the AI
+and indexing patches in /tmp and signs the result with the ROM platform key.
+The original resources, native libraries and other DEX files are preserved.
+
+UN1CA Ai Backend is appended to the developer model selection and selected once
+on migration. Subsequent model choices remain persistent. AI backend Settings
+has an independent Memory backend selector beneath Call Screening, defaulting
+to local inference, with the existing API configuration available as an option.
+
+The adapter retains Memory's rendered instructions, extracted text, language
+and output schema. Full, summary and collection analysis are supported. Dedicated
+query/insights routes keep their Samsung implementation. Images need extracted
+text; this text-only backend does not claim to inspect image pixels or audio.
+Missing IntelliVoice service selects the UN1CA route immediately. Eligible
+authentication, unavailable-service and timeout failures fall back once; user
+cancellation, safety/refusal and unclassified failures retain their semantics.
+Vertex errors preserve their original cause before Samsung's null-result wrapper.
+Samsung's existing timeout preference is unchanged. UN1CA requests have a 120s
+deadline and coroutine cancellation; Call Screening may preempt Memory inference.
+
+Gemma Memory context is 20000 total tokens, including up to 4096 output tokens
+and 256 tokens of margin. Actual native prefill must fit 15648 tokens. Oversized
+requests fail explicitly rather than silently truncating input. Other tasks keep
+their existing context budgets. API providers must support the requested size.
+
+Index compatibility uses owner-scoped Smart Suggestions v2 schemas and local
+keyword search when unavailable. Local saves and analysis remain independent of
+index service availability. See indexing/PORTING.txt for the exact contract;
+this does not add semantic embeddings or global Finder integration.
+
+Reproduce host checks/builds (no device writes):
+  source buildenv.sh dm3q
+  bash unica/mods/rezoss/memory/ai/tests/run.sh
+  bash unica/mods/rezoss/memory/indexing/tests/run.sh
+  bash unica/mods/rezoss/aioskernel/native-now-nudge/validation/run_memory_contract_test.sh
+  bash unica/mods/rezoss/qwen-llm/validation/run_memory_routing_test.sh
+  bash unica/mods/rezoss/memory/prepare-memory.sh ORIGINAL_V48.apk NEW_OUTPUT.apk
+The builder requires project Apktool/frameworks, Android SDK 37 tools, javac,
+Python and baksmali. It checks the exact baseline, ordered zero-fuzz patches,
+helper DEX linkage, ZIP integrity, 16K alignment and APK signing.
+Integration test now also takes the validated signed Memory APK as argument 4.
+
+Host validation artifacts and backups:
+  out/archived/memory-fallback-20261111/
+No full ROM build, device deployment, GPU 20K allocation test, native UI rendering
+or live Smart Suggestions registration was performed for this change. Deployment
+needs the coordinated Memory, AIOS, Settings and association-policy updates;
+installing Memory alone is not the complete integration. Existing Samsung-signed
+user updates may also need handling during deployment; preserve user data.
+
+Historical gesture integration notes follow. Their .46 baseline/signing paragraph
+is superseded by the current .48 platform-signed integration above.
+
 Samsung Memory ROM integration and three-finger gestures
 2026-11-09 / dm3q only
 

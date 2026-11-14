@@ -6,7 +6,7 @@
     <string name="unica_disable_signature_verification_title">Disable signature verification !!!</string>
     <string name="unica_allow_sdkbypass_title">Disable low target SDK block</string>
     <string name="unica_asks_title">Disable ASKS</string>
-    <string name="unica_boot_sound_title">Play boot sound effect</string>
+    <string name="unica_boot_sound_title">Play power on/off sound effects</string>
     <string name="unica_camera_feature_export_summary">Save the active runtime camera-feature.xml to a file.</string>
     <string name="unica_camera_feature_export_title">Export camera-feature.xml</string>
     <string name="unica_camera_feature_import_summary">Load a validated camera-feature.xml override for Samsung Camera.</string>
