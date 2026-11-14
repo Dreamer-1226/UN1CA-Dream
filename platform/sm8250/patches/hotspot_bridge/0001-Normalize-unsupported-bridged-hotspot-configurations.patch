@@ -1,29 +1,23 @@
+Subject: [PATCH] Use one hotspot interface on the S20 HIDL 1.4 HAL
+
 --- a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
 +++ b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
-@@ -11689,6 +11689,14 @@
+@@ -11689,6 +11689,10 @@
      move-result-wide v2
  
      :try_start_0
-+    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getAospWifiManager()Landroid/net/wifi/WifiManager;
-+
-+    move-result-object v0
-+
-+    invoke-static {v0, p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++    invoke-static {p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
 +
 +    move-result-object p1
 +
      iget-object p0, p0, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->mWifiApConfigStore:Lcom/samsung/android/server/wifi/ap/SemWifiApConfigStore;
  
      if-eqz p0, :cond_1
-@@ -13645,6 +13653,15 @@
+@@ -13645,6 +13649,11 @@
  .method public final startTethering(Landroid/net/wifi/SoftApConfiguration;)Z
      .locals 3
  
-+    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getAospWifiManager()Landroid/net/wifi/WifiManager;
-+
-+    move-result-object v0
-+
-+    invoke-static {v0, p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++    invoke-static {p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
 +
 +    move-result-object p1
 +
@@ -33,31 +27,15 @@
      if-nez v0, :cond_0
 --- /dev/null
 +++ b/smali/com/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility.smali
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,35 @@
 +.class public final Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;
 +.super Ljava/lang/Object;
 +
-+.method public static normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
-+    .locals 2
-+    if-eqz p1, :unchanged
-+    invoke-virtual {p1}, Landroid/net/wifi/SoftApConfiguration;->getBands()[I
-+    move-result-object v0
-+    array-length v0, v0
-+    const/4 v1, 0x1
-+    if-le v0, v1, :unchanged
-+    invoke-virtual {p0}, Landroid/net/wifi/WifiManager;->isBridgedApConcurrencySupported()Z
-+    move-result v0
-+    invoke-static {p1, v0}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalizeForCapability(Landroid/net/wifi/SoftApConfiguration;Z)Landroid/net/wifi/SoftApConfiguration;
-+    move-result-object p1
-+    :unchanged
-+    return-object p1
-+.end method
-+
++# S20 HIDL 1.4 cannot create bridged APs, even when donor feature flags claim support.
 +# Samsung's band fallback list must not become multiple AP interfaces on HIDL 1.4.
-+.method public static normalizeForCapability(Landroid/net/wifi/SoftApConfiguration;Z)Landroid/net/wifi/SoftApConfiguration;
++.method public static normalize(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
 +    .locals 5
 +    if-eqz p0, :unchanged
-+    if-nez p1, :unchanged
 +    invoke-virtual {p0}, Landroid/net/wifi/SoftApConfiguration;->getBands()[I
 +    move-result-object v0
 +    array-length v1, v0
