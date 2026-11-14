@@ -1,0 +1,5 @@
+id=bestface
+name=Best Face CPU face swap
+version=1.0.0
+author=ssch71
+description=Runs the Best Face faceswap SNAP models on the CPU, since the S23 HTP caches cannot load on the SM8250 DSP.

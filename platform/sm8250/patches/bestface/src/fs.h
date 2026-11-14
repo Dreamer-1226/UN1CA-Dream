@@ -1,0 +1,92 @@
+// Best Face face-swap replacement for SM8250 (no HTP). ssch71
+// Optical: dense pyramidal Lucas-Kanade flow + bilinear warp. Fusion: Poisson membrane blend + feather.
+static float *fa(long n){ return (float*)malloc(n*sizeof(float)); }
+static void fz(float *p,long n){ for(long i=0;i<n;i++) p[i]=0; }
+static int clampi(int v,int lo,int hi){ return v<lo?lo:(v>hi?hi:v); }
+static float flr(float x){ int i=(int)x; return (float)(x<i?i-1:i); }
+static void boxh(const float *s,float *d,int w,int h,int r){
+    for(int y=0;y<h;y++){ const float *row=s+(long)y*w; float *o=d+(long)y*w; float acc=0;
+        for(int k=-r;k<=r;k++) acc+=row[clampi(k,0,w-1)];
+        for(int x=0;x<w;x++){ o[x]=acc/(2*r+1); acc+=row[clampi(x+r+1,0,w-1)]-row[clampi(x-r,0,w-1)]; } } }
+static void boxv(const float *s,float *d,int w,int h,int r){
+    for(int x=0;x<w;x++){ float acc=0;
+        for(int k=-r;k<=r;k++) acc+=s[(long)clampi(k,0,h-1)*w+x];
+        for(int y=0;y<h;y++){ d[(long)y*w+x]=acc/(2*r+1); acc+=s[(long)clampi(y+r+1,0,h-1)*w+x]-s[(long)clampi(y-r,0,h-1)*w+x]; } } }
+static void boxf(float *a,float *t,int w,int h,int r,int passes){ for(int p=0;p<passes;p++){ boxh(a,t,w,h,r); boxv(t,a,w,h,r);} }
+static float bil(const float *img,int w,int h,int c,int ch,float x,float y,int rep){
+    float fx=flr(x), fy=flr(y); int x0=(int)fx,y0=(int)fy; float ax=x-fx, ay=y-fy; float v[4]; int k=0;
+    for(int dy=0;dy<2;dy++) for(int dx=0;dx<2;dx++){ int xx=x0+dx,yy=y0+dy;
+        if(xx<0||yy<0||xx>=w||yy>=h){ if(!rep){ v[k++]=0; continue;} xx=clampi(xx,0,w-1); yy=clampi(yy,0,h-1);} v[k++]=img[((long)yy*w+xx)*c+ch]; }
+    return (v[0]*(1-ax)+v[1]*ax)*(1-ay)+(v[2]*(1-ax)+v[3]*ax)*ay;
+}
+static void down2(const float *s,int w,int h,float *d){ int W=w/2,H=h/2;
+    for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)2*y*w+2*x; d[(long)y*W+x]=0.25f*(s[i]+s[i+1]+s[i+w]+s[i+w+1]); } }
+static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *fy){
+    enum{ LV=5, IT=4, R=7 };
+    const float *P0[LV],*P1[LV]; int PW[LV],PH[LV]; P0[0]=g0;P1[0]=g1;PW[0]=w;PH[0]=h;
+    for(int l=1;l<LV;l++){ PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
+        down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; }
+    long N=(long)w*h; float *u=fa(N),*v=fa(N),*nu=fa(N),*nv=fa(N),*bw=fa(N),*A=fa(N),*B=fa(N),*C=fa(N),*D=fa(N),*E=fa(N),*T=fa(N);
+    int cw=PW[LV-1],chh=PH[LV-1]; fz(u,(long)cw*chh); fz(v,(long)cw*chh);
+    for(int l=LV-1;l>=0;l--){ int W=PW[l],H=PH[l]; long n=(long)W*H;
+        if(l!=LV-1){ for(int y=0;y<H;y++) for(int x=0;x<W;x++){ int sx=clampi(x/2,0,cw-1), sy=clampi(y/2,0,chh-1);
+                nu[(long)y*W+x]=2*u[(long)sy*cw+sx]; nv[(long)y*W+x]=2*v[(long)sy*cw+sx]; }
+            for(long i=0;i<n;i++){ u[i]=nu[i]; v[i]=nv[i]; } cw=W; chh=H; }
+        const float *a=P0[l],*b=P1[l];
+        for(int it=0;it<IT;it++){
+            for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; bw[i]=bil(b,W,H,1,0,x+u[i],y+v[i],1); }
+            for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
+                float ix=0.5f*(bw[(long)y*W+clampi(x+1,0,W-1)]-bw[(long)y*W+clampi(x-1,0,W-1)]);
+                float iy=0.5f*(bw[(long)clampi(y+1,0,H-1)*W+x]-bw[(long)clampi(y-1,0,H-1)*W+x]);
+                float itt=bw[i]-a[i]; A[i]=ix*ix; B[i]=ix*iy; C[i]=iy*iy; D[i]=ix*itt; E[i]=iy*itt; }
+            boxf(A,T,W,H,R,1); boxf(B,T,W,H,R,1); boxf(C,T,W,H,R,1); boxf(D,T,W,H,R,1); boxf(E,T,W,H,R,1);
+            for(long i=0;i<n;i++){ float det=A[i]*C[i]-B[i]*B[i]+1e-4f; u[i]+=-(C[i]*D[i]-B[i]*E[i])/det; v[i]+=-(A[i]*E[i]-B[i]*D[i])/det; }
+            boxf(u,T,W,H,1,1); boxf(v,T,W,H,1,1);
+        }
+    }
+    for(long i=0;i<N;i++){ fx[i]=u[i]; fy[i]=v[i]; }
+    for(int l=1;l<LV;l++){ free((void*)P0[l]); free((void*)P1[l]); }
+    free(u);free(v);free(nu);free(nv);free(bw);free(A);free(B);free(C);free(D);free(E);free(T);
+}
+// in: i0,i1 HxWx3, m2,e2,m1 HxWx1 ; out HxWx8
+static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,int w,int h,float *out){
+    long N=(long)w*h; float *g0=fa(N),*g1=fa(N),*fx=fa(N),*fy=fa(N);
+    for(long i=0;i<N;i++){ g0[i]=0.114f*i0[3*i]+0.587f*i0[3*i+1]+0.299f*i0[3*i+2]; g1[i]=0.114f*i1[3*i]+0.587f*i1[3*i+1]+0.299f*i1[3*i+2]; }
+    lkflow(g0,g1,w,h,fx,fy);
+    for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; float sx=x+fx[i], sy=y+fy[i]; float *o=out+8*i;
+        o[0]=i0[3*i]; o[1]=i0[3*i+1]; o[2]=i0[3*i+2];
+        for(int c=0;c<3;c++) o[3+c]=bil(i1,w,h,3,c,sx,sy,0);
+        o[6]=bil(m2,w,h,1,0,sx,sy,0); o[7]=bil(e2,w,h,1,0,sx,sy,0); }
+    free(g0);free(g1);free(fx);free(fy);
+}
+// in HxWx8 (ArcSoft: i0, warped*mask, 1-mask, eye) ; out HxWx3
+static void fs_fusion(const float *in,int w,int h,float *out){
+    long N=(long)w*h; float *m=fa(N),*e=fa(N),*T=fa(N),*cc=fa(N),*wo=fa(N),*w2=fa(3*N),*fe=fa(N);
+    int x0=w,y0=h,x1=-1,y1=-1;
+    for(long i=0;i<N;i++){ const float *p=in+8*i; float a=1.0f-p[6]; m[i]=a;
+        for(int c=0;c<3;c++) w2[3*i+c]= a>0.05f ? p[3+c]/a : p[c]; }
+    // binary inside = (a>0.5) eroded by 4px
+    for(long i=0;i<N;i++) T[i]=m[i]>0.5f?1.0f:0.0f;
+    for(int y=0;y<h;y++) for(int x=0;x<w;x++){ float mn=1; for(int dy=-4;dy<=4&&mn>0;dy++) for(int dx=-4;dx<=4;dx++){ int xx=x+dx,yy=y+dy;
+            if(xx<0||yy<0||xx>=w||yy>=h||T[(long)yy*w+xx]<0.5f){ mn=0; break; } }
+        long i=(long)y*w+x; e[i]=mn; if(mn>0){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+    float *res=fa(3*N);
+    if(x1<0){ for(long i=0;i<N;i++) for(int c=0;c<3;c++) out[3*i+c]=in[8*i+c]; goto done; }
+    for(long i=0;i<N;i++) wo[i]=1.0f-e[i];
+    { float *ow=fa(N); for(long i=0;i<N;i++) ow[i]=wo[i]; boxf(ow,T,w,h,12,3);
+      for(int c=0;c<3;c++){
+        for(long i=0;i<N;i++) cc[i]=(in[8*i+c]-w2[3*i+c])*wo[i];
+        boxf(cc,T,w,h,12,3);
+        for(long i=0;i<N;i++){ float d=in[8*i+c]-w2[3*i+c]; cc[i]= e[i]>0 ? cc[i]/(ow[i]+1e-6f) : d; }
+        int X0=clampi(x0-1,1,w-2),X1=clampi(x1+1,1,w-2),Y0=clampi(y0-1,1,h-2),Y1=clampi(y1+1,1,h-2);
+        for(int k=0;k<300;k++) for(int par=0;par<2;par++)
+            for(int y=Y0;y<=Y1;y++) for(int x=X0+((y+X0+par)&1);x<=X1;x+=2){ long i=(long)y*w+x; if(e[i]<=0) continue;
+                float avg=0.25f*(cc[i-1]+cc[i+1]+cc[i-w]+cc[i+w]); cc[i]+=1.9f*(avg-cc[i]); }
+        for(long i=0;i<N;i++) res[3*i+c]=w2[3*i+c]+cc[i];
+      }
+      free(ow); }
+    for(long i=0;i<N;i++) fe[i]=e[i]; boxf(fe,T,w,h,3,3);
+    for(long i=0;i<N;i++) for(int c=0;c<3;c++){ float f=fe[i]; float v=in[8*i+c]*(1-f)+res[3*i+c]*f; out[3*i+c]= v<0?0:(v>1?1:v); }
+done:
+    free(res); free(m);free(e);free(T);free(cc);free(wo);free(w2);free(fe);
+}
