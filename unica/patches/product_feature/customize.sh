@@ -1216,6 +1216,12 @@ else
             "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
             "SPF_DualAp=true" \
             "SPF_DualAp=false"
+        # Hide the "2.4 GHz and 5 GHz" band option: the target WLAN driver cannot
+        # run a bridged AP, so the hotspot silently falls back to "5 GHz preferred".
+        PF_SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali/com/android/settings/Utils.smali" "replaceall" \
+            "sput-boolean v2, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z" \
+            "sput-boolean v1, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z"
         LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP" "TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP"
     fi
 fi
