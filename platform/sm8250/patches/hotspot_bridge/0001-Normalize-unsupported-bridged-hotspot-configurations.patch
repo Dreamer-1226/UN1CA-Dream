@@ -1,0 +1,87 @@
+--- a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
++++ b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
+@@ -11689,6 +11689,14 @@
+     move-result-wide v2
+ 
+     :try_start_0
++    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getAospWifiManager()Landroid/net/wifi/WifiManager;
++
++    move-result-object v0
++
++    invoke-static {v0, p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object p1
++
+     iget-object p0, p0, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->mWifiApConfigStore:Lcom/samsung/android/server/wifi/ap/SemWifiApConfigStore;
+ 
+     if-eqz p0, :cond_1
+@@ -13645,6 +13653,15 @@
+ .method public final startTethering(Landroid/net/wifi/SoftApConfiguration;)Z
+     .locals 3
+ 
++    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getAospWifiManager()Landroid/net/wifi/WifiManager;
++
++    move-result-object v0
++
++    invoke-static {v0, p1}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object p1
++
++
+     iget-object v0, p0, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->mStartTetheringCallback:Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl$StartTetheringCallback;
+ 
+     if-nez v0, :cond_0
+--- /dev/null
++++ b/smali/com/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility.smali
+@@ -0,0 +1,51 @@
++.class public final Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;
++.super Ljava/lang/Object;
++
++.method public static normalize(Landroid/net/wifi/WifiManager;Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++    .locals 2
++    if-eqz p1, :unchanged
++    invoke-virtual {p1}, Landroid/net/wifi/SoftApConfiguration;->getBands()[I
++    move-result-object v0
++    array-length v0, v0
++    const/4 v1, 0x1
++    if-le v0, v1, :unchanged
++    invoke-virtual {p0}, Landroid/net/wifi/WifiManager;->isBridgedApConcurrencySupported()Z
++    move-result v0
++    invoke-static {p1, v0}, Lcom/samsung/android/server/wifi/ap/Sm8250SoftApCompatibility;->normalizeForCapability(Landroid/net/wifi/SoftApConfiguration;Z)Landroid/net/wifi/SoftApConfiguration;
++    move-result-object p1
++    :unchanged
++    return-object p1
++.end method
++
++# Samsung's band fallback list must not become multiple AP interfaces on HIDL 1.4.
++.method public static normalizeForCapability(Landroid/net/wifi/SoftApConfiguration;Z)Landroid/net/wifi/SoftApConfiguration;
++    .locals 5
++    if-eqz p0, :unchanged
++    if-nez p1, :unchanged
++    invoke-virtual {p0}, Landroid/net/wifi/SoftApConfiguration;->getBands()[I
++    move-result-object v0
++    array-length v1, v0
++    const/4 v2, 0x1
++    if-le v1, v2, :unchanged
++    const/4 v1, 0x0
++    const/4 v2, 0x0
++    :next_band
++    array-length v3, v0
++    if-ge v1, v3, :build
++    aget v4, v0, v1
++    or-int/2addr v2, v4
++    add-int/lit8 v1, v1, 0x1
++    goto :next_band
++    :build
++    new-instance v0, Landroid/net/wifi/SoftApConfiguration$Builder;
++    invoke-direct {v0, p0}, Landroid/net/wifi/SoftApConfiguration$Builder;-><init>(Landroid/net/wifi/SoftApConfiguration;)V
++    # setBand selects one AP with automatic channel selection across these bands.
++    invoke-virtual {v0, v2}, Landroid/net/wifi/SoftApConfiguration$Builder;->setBand(I)Landroid/net/wifi/SoftApConfiguration$Builder;
++    invoke-virtual {v0}, Landroid/net/wifi/SoftApConfiguration$Builder;->build()Landroid/net/wifi/SoftApConfiguration;
++    move-result-object p0
++    const-string v0, "Sm8250SoftAp"
++    const-string v1, "Collapsed unsupported bridged AP to one interface"
++    invoke-static {v0, v1}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
++    :unchanged
++    return-object p0
++.end method

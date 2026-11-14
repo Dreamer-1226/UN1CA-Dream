@@ -1,0 +1,6 @@
+id=sm8250_hotspot_bridge
+name=Galaxy S20 series legacy Wi-Fi HAL hotspot compatibility
+version=v1
+versionCode=1
+author=GoRhanHee
+description=Normalize unsupported multi-AP hotspot configurations before saving and starting tethering on x1q, y2q, and z3q.
