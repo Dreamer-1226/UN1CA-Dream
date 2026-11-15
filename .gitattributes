@@ -60,3 +60,7 @@ target/t2s/patches/variants/vendor/** binary
 unica/mods/tee-simulator/source/gradlew.bat binary
 unica/mods/rezoss/smali/system/app/HoneyBoard/HoneyBoard.apk/*.patch merge=ours
 unica/mods/rezoss/fancam/sm8250/vendor/** binary
+*.tflite binary
+*.caffemodel binary
+*.nnc binary
+*.dla binary
