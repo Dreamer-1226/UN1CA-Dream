@@ -63,4 +63,30 @@ replace(repository, 'default: Boolean = false,', 'default: Boolean = key == PREF
 replace(app / 'java/com/llsl/viper4android/ui/screens/main/MainViewModel.kt',
         'repository.getBooleanPreference(PREF_GLOBAL_MODE, false).first()',
         'repository.getBooleanPreference(PREF_GLOBAL_MODE, true).first()')
-print('Applied UN1CA Settings bridge and global master-state integration')
+# Credit the upstream app developer in the existing About card.
+settings = app / 'java/com/llsl/viper4android/ui/screens/settings/SettingsDialog.kt'
+replace(settings, 'import androidx.compose.ui.platform.LocalContext',
+        'import androidx.compose.ui.platform.LocalUriHandler\nimport androidx.compose.ui.platform.LocalContext')
+replace(settings, '    val context = LocalContext.current',
+        '    val context = LocalContext.current\n    val uriHandler = LocalUriHandler.current')
+replace(settings, '                        onClick = onCheckUpdate,\n                    )',
+        '''                        onClick = onCheckUpdate,
+                    )
+                    RowDivider()
+                    InfoRow(
+                        label = stringResource(R.string.unica_original_developer),
+                        value = "likelikeslike",
+                    )
+                    RowDivider()
+                    NavRow(
+                        label = stringResource(R.string.unica_original_repository),
+                        subtitle = "github.com/likelikeslike/ViPER4Android",
+                        onClick = { uriHandler.openUri("https://github.com/likelikeslike/ViPER4Android") },
+                    )''')
+(app / 'res/values/unica_about.xml').write_text('''<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_original_developer">Original developer</string>
+    <string name="unica_original_repository">Original GitHub repository</string>
+</resources>
+''')
+print('Applied UN1CA Settings bridge, global master state and upstream About credits')
