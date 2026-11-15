@@ -15,6 +15,8 @@
     <allow-association target="com.samsung.android.aioskernelservice" allowed="com.samsung.android.offline.languagemodel" />
     <allow-association target="com.samsung.android.aioskernelservice" allowed="io.mesalabs.unica.localsummary" />
     <allow-association target="com.samsung.android.aioskernelservice" allowed="io.mesalabs.rezoss.qwen" />
+    <!-- Memory uses its own task/provider selection in the shared AIOS service. -->
+    <allow-association target="com.samsung.android.aioskernelservice" allowed="com.samsung.android.app.memory" />
     <allow-association target="com.samsung.android.ssco" allowed="com.samsung.android.aicore" />
     <allow-association target="com.samsung.android.ssco" allowed="com.samsung.android.smartsuggestions" />
     <!-- Settings search reads SemanticDataProvider while indexing device Q&A. -->

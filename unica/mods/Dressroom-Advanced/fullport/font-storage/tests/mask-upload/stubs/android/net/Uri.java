@@ -1,1 +1,0 @@
-package android.net;import java.util.*;public class Uri {private final String value;private Uri(String v){value=v;}public static Uri parse(String v){return new Uri(v);}public List<String> getPathSegments(){String p=java.net.URI.create(value).getPath();return Arrays.asList(p.substring(1).split("/"));}}

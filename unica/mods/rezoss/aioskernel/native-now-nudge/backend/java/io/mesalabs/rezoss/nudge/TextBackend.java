@@ -141,6 +141,9 @@ public final class TextBackend {
     private byte select(int uid,Object adapter)throws Exception {
         if(adapter==null)return 3;String name=(String)get(adapter,"getLoraName");
         if(!CallScreeningContract.PROFILE.equals(name)&&!"initialization".equals(name)&&!"contextual_reply".equals(name)&&!"smart_reply".equals(name)){Log.w(TAG,"Unsupported adapter="+name);return 3;}
+        // Screening prepares its profile before submitting a task. Preempt
+        // Memory here as well, before model validation can wait on its engine.
+        if(CallScreeningContract.PROFILE.equals(name)){Thread memory=memoryThread;if(memory!=null)memory.interrupt();}
         String route=api.route(CallScreeningContract.PROFILE.equals(name));if(!ready(route)||("default".equals(route)&&!validate()))return 3;profiles.put(uid,name);Log.i(TAG,"Prepared replacement profile="+name+" uid="+uid);return 0;
     }
     private List<Task> snapshot(){synchronized(tasks){return new ArrayList<Task>(tasks);}}
@@ -161,6 +164,7 @@ public final class TextBackend {
             out.writeException(new UnsupportedOperationException("Only cancellation supported"));return true;
         }
         synchronized void armTimeout(){
+            if(screening!=null){Thread memory=memoryThread;if(memory!=null)memory.interrupt();}
             if(screening!=null&&!done.done())timeout=deadlines.schedule(new Runnable(){public void run(){
                 if(done.done())return;
                 Log.w(TAG,"Call Screening deadline expired ageMs="+(SystemClock.elapsedRealtime()-submitted));
@@ -350,4 +354,23 @@ public final class TextBackend {
         }finally{if(job!=null){File[] files=job.listFiles();if(files!=null)for(File f:files)f.delete();job.delete();}runnerLock.unlock();}
     }
     static String adapt(String raw){return PromptAdapter.adapt(raw);}
+    private volatile Thread memoryThread;
+    boolean memoryConfigured(){try{return ready(api.memoryRoute());}catch(Exception e){return false;}}
+    String generateMemory(String input,Control control)throws Exception {
+        if(!runnerLock.tryLock(Math.max(1,control.deadline()-SystemClock.elapsedRealtime()),TimeUnit.MILLISECONDS))throw new IOException("busy");
+        try {
+            if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("cancelled");
+            for(Task task:snapshot())if(task.screening!=null&&!task.done.done())throw new IOException("busy");
+            memoryThread=Thread.currentThread();
+            String prompt=MemoryContract.prompt(input),route=api.memoryRoute(),raw;
+            if("default".equals(route))raw=memoryLocal(prompt,control);
+            else {
+                String id=UUID.randomUUID().toString();control.request(id);
+                try{raw=api.generateMemory(prompt,MemoryContract.OUTPUT_TOKENS,control.deadline(),id,route);}finally{control.request(null);}
+            }
+            if(control.cancelled()||SystemClock.elapsedRealtime()>=control.deadline())throw new IOException("deadline");
+            return MemoryContract.output(raw,input);
+        }finally{memoryThread=null;runnerLock.unlock();}
+    }
+    private String memoryLocal(String prompt,Control control)throws Exception {throw new IOException("memory_gemma_required");}
 }

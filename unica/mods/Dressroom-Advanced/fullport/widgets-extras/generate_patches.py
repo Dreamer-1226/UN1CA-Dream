@@ -63,10 +63,15 @@ class Patcher:
   def change(s):
    m=re.search(r'    \.locals (\d+)',s)
    if not m:raise ValueError('locals absent')
-   n=int(m[1]);raw=[int(v) for v in re.findall(r'(?<![\w/$])v(\d+)\b',s)]
-   if raw and max(raw)>=n:
-    s=re.sub(r'(?<![\w/$])v(\d+)\b',lambda m: 'p'+str(int(m[1])-n) if int(m[1])>=n else m[0],s)
-    m=re.search(r'    \.locals (\d+)',s)
+   n=int(m[1])
+   # Convert only instruction register operands, never descriptors such as
+   # Laod/v92;, member names, labels, string literals or debug metadata.
+   operands=re.compile(r'^([ \t]+[a-z][\w/-]*[ \t]+)(\{[^}\n]*\}|[vp]\d+(?:[ \t]*,[ \t]*[vp]\d+)*)',re.M)
+   def aliases(match):
+    registers=re.sub(r'\bv(\d+)\b',lambda reg: 'p'+str(int(reg[1])-n) if int(reg[1])>=n else reg[0],match[2])
+    return match[1]+registers
+   s=operands.sub(aliases,s)
+   m=re.search(r'    \.locals (\d+)',s)
    count=len(args)+int(bool(returned))
    self.report[-1:] # report appended outside
    s=s[:m.start()]+f'    .locals {n+count}'+s[m.end():]

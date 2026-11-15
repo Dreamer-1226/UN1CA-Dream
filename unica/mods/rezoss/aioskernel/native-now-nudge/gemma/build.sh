@@ -36,6 +36,8 @@ for BACKEND in gpu; do
     patch --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0001-Use-LiteRT-for-local-inference.patch"
     patch --dry-run --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0002-Use-Gemma-for-diagnostic-analysis.patch"
     patch --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0002-Use-Gemma-for-diagnostic-analysis.patch"
+    patch --dry-run --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0003-Add-Memory-context.patch"
+    patch --fuzz=0 -p1 -d "$STAGE" -i "$HERE/0003-Add-Memory-context.patch"
     cp -a "$HERE/java/." "$STAGE/backend/java/"
     cat > "$STAGE/backend/java/io/mesalabs/rezoss/nudge/GemmaBuild.java" <<JAVA
 package io.mesalabs.rezoss.nudge;
@@ -45,7 +47,7 @@ JAVA
 import sys,xml.etree.ElementTree as ET
 path,backend=sys.argv[1:];ns='{http://schemas.android.com/apk/res/android}'
 ET.register_namespace('android',ns[1:-1]);tree=ET.parse(path);root=tree.getroot()
-root.set(ns+'versionCode','142801211');root.set(ns+'versionName','1.4.28')
+root.set(ns+'versionCode','142801212');root.set(ns+'versionName','1.4.28')
 app=root.find('application');app.set(ns+'label','AIOS Gemma '+backend.upper())
 ET.SubElement(app,'meta-data',{ns+'name':'unica.local_model_name',ns+'value':'Gemma 4 E2B GPU'})
 for lib in ['libOpenCL.so','libvndksupport.so']:

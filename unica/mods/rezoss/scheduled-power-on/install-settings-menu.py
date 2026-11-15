@@ -6,6 +6,10 @@ import re
 import sys
 
 def configure(path, active):
+    if path.is_dir():
+        for menu in sorted(path.glob('unica_*.xml')):
+            configure(menu, active)
+        return
     if active:
         return
     old = path.read_text()

@@ -1,4 +1,4 @@
 id=bootsound
 name=Custom boot sound
 author=salvogiangri
-description=Adds a custom boot sound.
+description=Adds a custom boot sound and lets the power-sound switch control startup and shutdown sounds.

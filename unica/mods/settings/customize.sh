@@ -1,4 +1,3 @@
-# shellcheck disable=SC2016
 # Show battery regulatory info in Settings
 # Requires SEM_BATTERY_PROPERTY_IC_AUTHENTICATION_RESULT support
 if [ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_BATTERY_SUPPORT_BSOH_SETTINGS")" ]; then
@@ -21,23 +20,25 @@ SMALI_PATCH "system" "system/framework/framework.jar" \
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
-
-# The camera feature override hooks an obfuscated SamsungCamera class that only
-# matches the S23 (S911N) build, so apply it only where it still fits.
-UNICA_CAM_PATCH="$MODPATH/camera/SamsungCamera.apk/0001-Allow-runtime-camera-feature-override.patch"
-UNICA_CAM_APK="$APKTOOL_DIR/system/priv-app/SamsungCamera/SamsungCamera.apk"
-DECODE_APK "system" "system/priv-app/SamsungCamera/SamsungCamera.apk"
-if LC_ALL=C patch -p1 -d "$UNICA_CAM_APK" -N --forward -l --dry-run -s < "$UNICA_CAM_PATCH" &> /dev/null; then
-    APPLY_PATCH "system" "system/priv-app/SamsungCamera/SamsungCamera.apk" "$UNICA_CAM_PATCH"
-else
-    LOGW "Skipping \"$(basename "$UNICA_CAM_PATCH")\": SamsungCamera smali does not match"
+# Relax SDHMS uses the inspected dm3q persistent process, with no root shell,
+# kernel changes or cross-app data writes. Reject an unreviewed SDHMS ABI.
+if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
+    python3 "$MODPATH/thermal/verify-input.py" \
+        "$WORK_DIR/system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        || ABORT "Relax SDHMS firmware compatibility check failed"
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/thermal/patches/0001-Add-protected-SDHMS-policy-switch.patch" \
+        || ABORT "Failed to install Relax SDHMS policy control"
 fi
-unset UNICA_CAM_PATCH UNICA_CAM_APK
+
+# SoftwareUpdateUtils no longer exposes isOTAUpgradeAllowed(Context) on One UI 9.
 
 # Always show One UI minor version
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali" "return" \
-    'isDeviceWithMicroVersion()Z' 'true'
+    "smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali" "replace" \
+    'isDeviceWithMicroVersion()Z' \
+    'move-result p0' \
+    'const/4 p0, 0x1'
 
 # Show real device model number
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
@@ -83,6 +84,11 @@ done < <(find "$MODPATH/SecSettings.apk" -type f \
 APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
     "$MODPATH/now-nudge/0001-Show-AI-backend-only-when-Now-Nudge-is-enabled.patch" \
     || ABORT "Failed to configure Now Nudge backend menu visibility"
+
+# Keep the device-specific Power schedule menu aligned with its Rezoss backend.
+python3 "$SRC_DIR/unica/mods/rezoss/scheduled-power-on/install-settings-menu.py" \
+    "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml" \
+    "$TARGET_CODENAME" || ABORT "Failed to configure Power schedule menu"
 
 # Expose UN1CA-selected SamsungSans source-bank fonts through Samsung's normal
 # Display > Font list and apply path.
@@ -189,7 +195,7 @@ if [ ! "$SEARCH_INDEX_RESOURCES" ]; then
     LOGE "Settings search provider registry not found in /system/system/priv-app/SecSettings.apk"
     return 1
 fi
-SEARCH_INDEX_RESOURCES_SMALI="${SEARCH_INDEX_RESOURCES#"$APKTOOL_DIR"/system/priv-app/SecSettings/SecSettings.apk/}"
+SEARCH_INDEX_RESOURCES_SMALI="${SEARCH_INDEX_RESOURCES#$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/}"
 
 ADD_UNICA_SETTINGS_SEARCH_INDEX_DATA_PROVIDER()
 {
@@ -230,7 +236,7 @@ if [ ! "$TOP_LEVEL_KEYS_COLLECTOR" ]; then
     LOGE "TopLevelKeysCollector smali not found in /system/system/priv-app/SecSettingsIntelligence.apk"
     return 1
 fi
-TOP_LEVEL_KEYS_COLLECTOR_SMALI="${TOP_LEVEL_KEYS_COLLECTOR#"$APKTOOL_DIR"/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/}"
+TOP_LEVEL_KEYS_COLLECTOR_SMALI="${TOP_LEVEL_KEYS_COLLECTOR#$APKTOOL_DIR/system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk/}"
 
 if ! grep -q '"top_level_unica"' "$TOP_LEVEL_KEYS_COLLECTOR"; then
     SMALI_PATCH "system" "system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk" \
@@ -260,8 +266,7 @@ LOG_STEP_OUT
 # ROM-native Battery Saving: the native worker only accepts fixed kernel controls.
 LOG "- Installing Battery Saving service policy"
 python3 "$MODPATH/battery/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Battery Saving service policy"
-# The certificate worker only uses the system cacerts store, so any SM8550 or
-# SM8250 target (S23/Z5 or S20/S20 FE/Note20) can run it.
+python3 "$MODPATH/ota/install-policy.py" "$WORK_DIR" || ABORT "Failed to install OTA staging service policy"
 if [[ "$TARGET_CODENAME" == "dm3q" ]]; then
     python3 "$MODPATH/movecertificate/install-policy.py" "$WORK_DIR" || ABORT "Failed to install Move Certificate service policy"
 else
