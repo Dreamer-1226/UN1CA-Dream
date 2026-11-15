@@ -63,9 +63,9 @@ class Patcher:
   def change(s):
    m=re.search(r'    \.locals (\d+)',s)
    if not m:raise ValueError('locals absent')
-   n=int(m[1]);raw=[int(v) for v in re.findall(r'\bv(\d+)\b',s)]
+   n=int(m[1]);raw=[int(v) for v in re.findall(r'(?<![\w/$])v(\d+)\b',s)]
    if raw and max(raw)>=n:
-    s=re.sub(r'\bv(\d+)\b',lambda m: 'p'+str(int(m[1])-n) if int(m[1])>=n else m[0],s)
+    s=re.sub(r'(?<![\w/$])v(\d+)\b',lambda m: 'p'+str(int(m[1])-n) if int(m[1])>=n else m[0],s)
     m=re.search(r'    \.locals (\d+)',s)
    count=len(args)+int(bool(returned))
    self.report[-1:] # report appended outside
