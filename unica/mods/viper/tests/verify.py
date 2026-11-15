@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Exercise ROM staging against real input, preservation and rejection paths."""
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -15,6 +16,19 @@ prepare = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(prepare)
 work = Path(sys.argv[1]).resolve()
 ns = prepare.NS
+
+# Inspect the shipped APK, not only source: systemExempted caused an observed
+# service-start crash even with its permission granted on the dm3q device.
+sdk = Path(os.environ.get('ANDROID_HOME', Path.home() / 'Android/Sdk'))
+manifest = subprocess.check_output([
+    str(sdk / 'build-tools/37.0.0/aapt2'), 'dump', 'xmltree',
+    str(here / 'ViPER4Android.apk'), '--file', 'AndroidManifest.xml',
+], text=True)
+service = manifest.split('="com.llsl.viper4android.service.ViperService"', 1)[1].split('E: service', 1)[0]
+assert 'foregroundServiceType' in service and '=0x40000000' in service, 'ViPER must use specialUse FGS'
+assert 'android.permission.FOREGROUND_SERVICE_SPECIAL_USE' in manifest
+assert 'android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED' not in manifest
+print('PASS: compiled APK retains specialUse FGS and omits systemExempted permission')
 
 def original_effects(data):
     root = ET.fromstring(data)

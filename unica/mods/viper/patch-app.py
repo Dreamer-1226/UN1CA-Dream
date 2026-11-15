@@ -15,10 +15,9 @@ def replace(path, old, new):
     path.write_text(text.replace(old, new))
 
 replace(app / 'AndroidManifest.xml', '    <application',
-        '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />\n'
         '    <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />\n\n    <application')
-replace(app / 'AndroidManifest.xml', 'android:foregroundServiceType="specialUse"',
-        'android:foregroundServiceType="systemExempted"')
+# Keep upstream's specialUse audio-processing service. Priv-app placement alone
+# does not qualify for systemExempted on the dm3q framework.
 replace(app / 'AndroidManifest.xml', 'android:allowBackup="true"',
         'android:allowBackup="true"\n        android:usesNonSdkApi="true"')
 replace(app / 'AndroidManifest.xml', '        <provider', '''        <provider
