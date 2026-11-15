@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ssch71 <s01093450498@gmail.com>
+Subject: [PATCH] Hide the 2.4 GHz and 5 GHz hotspot band without MOBILEAP_DUALAP
+
+---
+--- a/smali_classes4/com/samsung/android/settings/wifi/mobileap/utils/WifiApSoftApUtils.smali
++++ b/smali_classes4/com/samsung/android/settings/wifi/mobileap/utils/WifiApSoftApUtils.smali
+@@ -440,6 +440,8 @@
+ 
+     move-result v1
+ 
++    sget-boolean v1, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z
++
+     const/4 v2, 0x1
+ 
+     if-eqz v1, :cond_0

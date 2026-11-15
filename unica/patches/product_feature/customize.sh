@@ -1222,6 +1222,8 @@ else
             "smali/com/android/settings/Utils.smali" "replaceall" \
             "sput-boolean v2, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z" \
             "sput-boolean v1, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z"
+        PF_APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/wifi/no_dualap/SecSettings.apk/0001-Hide-the-dual-band-hotspot-option.patch"
         LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP" "TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP"
     fi
 fi
