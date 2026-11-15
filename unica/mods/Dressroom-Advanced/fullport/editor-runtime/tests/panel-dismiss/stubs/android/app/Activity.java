@@ -1,1 +1,0 @@
-package android.app;import android.view.*;public class Activity {public Window window=new Window();public WindowManager manager=new WindowManager();public Window getWindow(){return window;}public <T>T getSystemService(Class<T> c){return c.cast(manager);}}
