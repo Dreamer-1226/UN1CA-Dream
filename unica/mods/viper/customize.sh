@@ -1,5 +1,6 @@
 # Copyright (c) 2026 UN1CA contributors
 # SPDX-License-Identifier: GPL-3.0-or-later
+# shellcheck disable=SC2034 # read by the module installer, not this script
 SKIPUNZIP=1
 
 # Runs after paradigm/PortROM. No root-manager mounts or audio-service restarts.
