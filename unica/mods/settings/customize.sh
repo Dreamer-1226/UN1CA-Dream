@@ -294,6 +294,9 @@ else
     DELETE_FROM_WORK_DIR "system" "system/bin/unica-gpu"
     DELETE_FROM_WORK_DIR "system" "system/etc/init/unica_gpu.rc"
     DELETE_FROM_WORK_DIR "system" "system/etc/unica/gpu"
+    # The KonaBess page only works with the dm3q backend above; hide its entry.
+    sed -i '/android:key="unica_gpu"/,/<\/io.mesalabs.unica.settings.preference.IconPreference>/d' \
+        "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_battery_performance_settings.xml"
 fi
 
 # User-triggered Troubleshooting worker; no automatic boot-time module changes.
