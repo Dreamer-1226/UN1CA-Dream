@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/JingMatrix/TEESimulator.git",
-  "revision": "06f9f2ee11b86c5144a1f345f70f8fb23cae4493",
+  "revision": "6602444a2c180819b1f21a1066e4a2ae0218d87d",
   "dependencies": [
     {
       "path": "third_party/lsplt",
