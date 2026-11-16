@@ -14,9 +14,9 @@ if [[ ! "$TARGET_CODENAME" =~ ^(dm1q|b5q)$ ]]; then
     return 0
 fi
 
-GK_TAG="v2026.11.02"
+GK_TAG="v2026.11.17"
 GK_ZIP="GoRhanHee_Kernel-kalama-universal-susfs-oneui-AnyKernel3.zip"
-GK_SHA256="3b06f51dbf9a638e9732929a3ea5c3ee18cde509a455c75a0029fade10c2c02f"
+GK_SHA256="b61538101be06638f86686c477822f2eb12b9a7583f7b8c38ab0a2f6b7396827"
 GK_URL="https://github.com/GoRhanHee/android_kernel_samsung_sm8550/releases/download/$GK_TAG/$GK_ZIP"
 GK_DIR="$TMP_DIR/gorhanhee"
 
