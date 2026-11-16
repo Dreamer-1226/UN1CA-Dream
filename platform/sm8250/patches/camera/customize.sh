@@ -9,18 +9,35 @@ ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libYuv.polarr.so" 0 0 644 "u:ob
 # Add camera libs
 ADD_TO_WORK_DIR "r9qxxx" "system" "system/lib64/libSceneDetector_v1.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 EVAL "echo \"libSceneDetector_v1.camera.samsung.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt\""
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libSwIsp_core.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhigh_dynamic_range.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhigh_res.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-EVAL "echo \"libhigh_res.arcsoft.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt\""
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhumantracking.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libhumantracking_util.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/liblow_light_hdr.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libsuperresolution.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
-EVAL "echo \"libsuperresolution.arcsoft.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-arcsoft.txt\""
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libsuperresolution_wrapper_v2.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
-EVAL "echo \"libsuperresolution_wrapper_v2.camera.samsung.so\" >> \"$WORK_DIR/system/system/etc/public.libraries-camera.samsung.txt\""
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib64/libveengine.arcsoft.so" 0 0 644 "u:object_r:system_lib_file:s0"
+# Not every SM8250 stock firmware ships these (the Tab S7 has no libhigh_res or
+# libsuperresolution), so only take the ones the target firmware actually has.
+# Must return 0 when skipping: apply_modules.sh sources this under set -e.
+TARGET_FW_SYSTEM="$FW_DIR/$(cut -d "/" -f 1 <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 <<< "$TARGET_FIRMWARE")/system"
+ADD_TARGET_CAMERA_LIB()
+{
+    local LIB="$1"
+    local PUBLIC_LIST="$2"
+
+    if [ ! -f "$TARGET_FW_SYSTEM/$LIB" ]; then
+        LOGW "$LIB is not in the target firmware, skipping"
+        return 0
+    fi
+    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "$LIB" 0 0 644 "u:object_r:system_lib_file:s0"
+    if [ "$PUBLIC_LIST" ]; then
+        EVAL "echo \"$(basename "$LIB")\" >> \"$WORK_DIR/system/system/etc/$PUBLIC_LIST\""
+    fi
+}
+ADD_TARGET_CAMERA_LIB "system/lib64/libSwIsp_core.camera.samsung.so"
+ADD_TARGET_CAMERA_LIB "system/lib64/libhigh_dynamic_range.arcsoft.so"
+ADD_TARGET_CAMERA_LIB "system/lib64/libhigh_res.arcsoft.so" "public.libraries-arcsoft.txt"
+ADD_TARGET_CAMERA_LIB "system/lib64/libhumantracking.arcsoft.so"
+ADD_TARGET_CAMERA_LIB "system/lib64/libhumantracking_util.camera.samsung.so"
+ADD_TARGET_CAMERA_LIB "system/lib64/liblow_light_hdr.arcsoft.so"
+ADD_TARGET_CAMERA_LIB "system/lib64/libsuperresolution.arcsoft.so" "public.libraries-arcsoft.txt"
+ADD_TARGET_CAMERA_LIB "system/lib64/libsuperresolution_wrapper_v2.camera.samsung.so" "public.libraries-camera.samsung.txt"
+ADD_TARGET_CAMERA_LIB "system/lib64/libveengine.arcsoft.so"
+unset -f ADD_TARGET_CAMERA_LIB
+unset TARGET_FW_SYSTEM
 
 BLOBS_LIST="
 system/lib64/libhigh_dynamic_range.arcsoft.so
