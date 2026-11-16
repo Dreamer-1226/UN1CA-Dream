@@ -33,12 +33,22 @@ fi
 
 # SoftwareUpdateUtils no longer exposes isOTAUpgradeAllowed(Context) on One UI 9.
 
-# Always show One UI minor version
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali" "replace" \
-    'isDeviceWithMicroVersion()Z' \
-    'move-result p0' \
-    'const/4 p0, 0x1'
+# Always show One UI minor version. The controller is not in the same dex on
+# every source firmware, so locate it and only patch the expected method shape.
+DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+ONEUI_VERSION_SMALI="$(cd "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" && \
+    find smali* -path "*/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali" | head -n 1)"
+if [ "$ONEUI_VERSION_SMALI" ] && sed -n "/^\.method .* isDeviceWithMicroVersion()Z/,/^\.end method/p" \
+        "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$ONEUI_VERSION_SMALI" | grep -q "move-result p0"; then
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$ONEUI_VERSION_SMALI" "replace" \
+        'isDeviceWithMicroVersion()Z' \
+        'move-result p0' \
+        'const/4 p0, 0x1'
+else
+    LOGW "OneUIVersionPreferenceController.isDeviceWithMicroVersion() not in the expected form, skipping the One UI minor version patch"
+fi
+unset ONEUI_VERSION_SMALI
 
 # Show real device model number
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
