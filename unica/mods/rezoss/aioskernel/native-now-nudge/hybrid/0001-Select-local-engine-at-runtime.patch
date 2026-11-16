@@ -65,7 +65,7 @@ API routes, Samsung IPC, output validation and deadlines are unchanged.
 +        Log.i("RezossGemma","generation backend="+loadedBackend+" elapsedMs="+(SystemClock.elapsedRealtime()-started)+" chars="+out.length());
          return out;
      }
-     int count(String prompt,TextBackend.Control control)throws Exception{
+     String generateMemory(String prompt,TextBackend.Control control)throws Exception {
 --- a/backend/java/io/mesalabs/rezoss/nudge/GemmaSetupActivity.java
 +++ b/backend/java/io/mesalabs/rezoss/nudge/GemmaSetupActivity.java
 @@ -37,7 +37,7 @@
