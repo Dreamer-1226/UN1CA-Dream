@@ -161,3 +161,10 @@ if [ -f "$WORK_DIR/vendor/lib/libstagefright_bufferqueue_helper_vendor.so" ] && 
 fi
 
 LOG_STEP_OUT
+# The S23 (qssi) camera app does not know the 4032x1728 21:9 snapshot size used by
+# the S20 camera-feature.xml. The patch targets that app's obfuscated classes, so
+# only apply it on the qssi source (the Tab S9+ app is laid out differently).
+if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "qssi" ]]; then
+    APPLY_PATCH "system" "system/priv-app/SamsungCamera/SamsungCamera.apk" \
+        "$MODPATH/qssi/0001-Add-4032x1728-camera-resolution.patch" || return 1
+fi
