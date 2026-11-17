@@ -59,7 +59,12 @@ SKIPUNZIP=1
 LOG_STEP_IN "- Developer options refresh loop"
 
 _APK="system/priv-app/SecSettings/SecSettings.apk"
-_SMALI="smali_classes2/com/android/settings/development/DevelopmentSettingsDashboardFragment.smali"
+# The class moves between dex files with every donor build (smali_classes2 on the
+# old X810 8.5, smali/ on X810XXS6EZI2), so find it instead of hardcoding it.
+DECODE_APK "system" "$_APK" || return 1
+_SMALI="$(cd "$APKTOOL_DIR/$_APK" && \
+    find smali* -path "*/com/android/settings/development/DevelopmentSettingsDashboardFragment.smali" | head -n 1)"
+[ "$_SMALI" ] || ABORT "! DevelopmentSettingsDashboardFragment.smali is in no SecSettings dex"
 _ADD="invoke-static {v0}, Landroid/os/SystemProperties;->addChangeCallback(Ljava/lang/Runnable;)V"
 _DEL="invoke-static {v0}, Landroid/os/SystemProperties;->removeChangeCallback(Ljava/lang/Runnable;)V"
 
