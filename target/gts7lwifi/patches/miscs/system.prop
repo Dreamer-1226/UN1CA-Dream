@@ -8,3 +8,6 @@ ro.netflix.bsp_rev=Q8250-19134-1
 # ro.factory.model is NOT set here on purpose - it is per-device and is derived from the target's
 # own vendor in customize.sh. A hardcoded model in a file that gets copied when a target is
 # scaffolded is how SM-G990B reached three Tab S7 device trees in the first place.
+
+# WiFi-only: drop the platform-wide RIL slot count
+ro.telephony.sim_slots.count=
