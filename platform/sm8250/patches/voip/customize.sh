@@ -21,6 +21,11 @@ elif xxd -p -c 0 "$WORK_DIR/system/system/bin/audioserver" | grep -q "08f0a75285
     HEX_PATCH "$WORK_DIR/system/system/bin/audioserver" \
         "08f0a752850300b90d000014" "08f0a7521f2003d50d000014"
 else
+    if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" != "qssi" ]]; then
+        # Only the qssi (S23) audioserver patterns are known; other sources skip it.
+        LOGW "No matching pattern found in audioserver for VoIP call volume fix, skipping"
+        return 0
+    fi
     LOGE "No matching pattern found in audioserver for VoIP call volume fix"
     return 1
 fi

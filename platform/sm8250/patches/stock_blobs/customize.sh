@@ -19,6 +19,18 @@ _SB_ADD()
     ADD_TO_WORK_DIR "$@"
 }
 
+# Cover feature xmls only exist on phones with those covers (S20); the Tab S7
+# firmware does not ship them. Copy what the target firmware actually has.
+_SB_TARGET_SYSTEM="$FW_DIR/$(cut -d "/" -f 1 <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 <<< "$TARGET_FIRMWARE")/system"
+_SB_ADD_TARGET()
+{
+    if [ ! -e "$_SB_TARGET_SYSTEM/$3" ]; then
+        LOGW "Skipping /$2/$3: not in the target firmware"
+        return 0
+    fi
+    ADD_TO_WORK_DIR "$@"
+}
+
 LOG_STEP_IN "- Merging stock framework vintf HALs from $TARGET_CODENAME"
 SB_TARGET_MANIFEST="$FW_DIR/$(cut -d "/" -f 1 <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 <<< "$TARGET_FIRMWARE")/system/system/etc/vintf/manifest.xml"
 SB_SOURCE_MANIFEST="$WORK_DIR/system/system/etc/vintf/manifest.xml"
@@ -57,7 +69,7 @@ LOG_STEP_OUT
 DELETE_FROM_WORK_DIR "system" "system/etc/permissions/com.sec.feature.cover.clearcameraviewcover.xml"
 DELETE_FROM_WORK_DIR "system" "system/etc/permissions/com.sec.feature.cover.flip.xml"
 LOG_STEP_IN "- Add stock system features"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.clearsideviewcover.xml" 0 0 644 "u:object_r:system_file:s0"
+_SB_ADD_TARGET "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.clearsideviewcover.xml" 0 0 644 "u:object_r:system_file:s0"
 LOG_STEP_OUT
 
 
@@ -136,10 +148,10 @@ _SB_ADD "pa1qxxx" "system" "system/lib64/libnfc_sec_jni.so"
 _SB_ADD "pa1qxxx" "system" "system/lib64/libnfc-nci_flags.so"
 _SB_ADD "pa1qxxx" "system" "system/lib64/libnfc-sec.so"
 _SB_ADD "pa1qxxx" "system" "system/lib64/libstatslog_nfc.so"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.clearsideviewcover.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.sview.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.nfc_authentication_cover.xml" 0 0 644 "u:object_r:system_file:s0"
+_SB_ADD_TARGET "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.clearsideviewcover.xml" 0 0 644 "u:object_r:system_file:s0"
+_SB_ADD_TARGET "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.xml" 0 0 644 "u:object_r:system_file:s0"
+_SB_ADD_TARGET "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.sview.xml" 0 0 644 "u:object_r:system_file:s0"
+_SB_ADD_TARGET "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.nfc_authentication_cover.xml" 0 0 644 "u:object_r:system_file:s0"
 LOG_STEP_OUT
 
 LOG_STEP_IN "- Adding r9qxxx biometric blobs"
@@ -154,3 +166,5 @@ _SB_ADD "r9qxxx" "vendor" "lib64/vendor.samsung.hardware.biometrics.face@3.0.so"
 LOG_STEP_OUT
 
 unset -f _SB_ADD
+unset -f _SB_ADD_TARGET
+unset _SB_TARGET_SYSTEM
