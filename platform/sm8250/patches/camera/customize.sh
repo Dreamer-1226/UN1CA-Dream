@@ -166,5 +166,5 @@ LOG_STEP_OUT
 # only apply it on the qssi source (the Tab S9+ app is laid out differently).
 if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "qssi" ]]; then
     APPLY_PATCH "system" "system/priv-app/SamsungCamera/SamsungCamera.apk" \
-        "$MODPATH/qssi/0001-Add-4032x1728-camera-resolution.patch" || return 1
+        "$MODPATH/qssi-patches/0001-Add-4032x1728-camera-resolution.patch" || return 1
 fi
