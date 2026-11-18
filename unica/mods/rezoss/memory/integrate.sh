@@ -5,17 +5,13 @@ if [[ -f "$MODPATH/memory/disable" ]]; then
     LOG "- Samsung Memory integration is disabled"
     return 0
 fi
-if [[ "$TARGET_CODENAME" != "dm3q" ]]; then
-    LOG "- Samsung Memory: skipping unsupported target $TARGET_CODENAME"
-    return 0
-fi
 
 REZOSS_MEMORY_ROOT="$MODPATH/memory"
 REZOSS_MEMORY_LAUNCHER="system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk"
 if [[ "$(sha256sum "$WORK_DIR/system/$REZOSS_MEMORY_LAUNCHER" | cut -d ' ' -f 1)" != \
         "4630968289288d355aa3f8884ef45679ced56c0b3c0925d96a9a77ca6fcf47cf" ]]; then
-    LOGE "Memory gestures require the validated One UI Home 18.0.07.53; revalidate the patch for this launcher"
-    return 1
+    LOGW "Samsung Memory: skipping $TARGET_CODENAME, its One UI Home is not the validated 18.0.07.53"
+    return 0
 fi
 
 # The required Java shared library must be registered as well as present.
