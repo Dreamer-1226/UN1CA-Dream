@@ -176,8 +176,7 @@ if [ -f "$SRC_DIR/unica/shared/volume_tables/patch_volume_tables.py" ]; then
             >> "$WORK_DIR/configs/file_context-vendor"
     LOG "- Audio volume curves patched for quad speakers (including situation volume table)"
 else
-    LOGE "unica/shared/volume_tables/patch_volume_tables.py missing - is unica-mods synced?"
-    exit 1
+    LOGW "unica/shared/volume_tables/patch_volume_tables.py missing - keeping the stock T870 volume curves"
 fi
 LOG_STEP_OUT
 

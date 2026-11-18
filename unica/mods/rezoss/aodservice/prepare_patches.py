@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Resolve known AOD obfuscation drift and preflight the ordered patch stack."""
 import argparse
+import difflib
 import os
 import re
 import shutil
@@ -15,6 +16,54 @@ def unique(values, description):
     if len(values) != 1:
         raise ValueError(f'{description}: expected one match, found {len(values)}')
     return values[0]
+
+
+PROVIDER_GLOB = 'smali*/com/samsung/android/app/aodservice/provider/AODContentProvider.smali'
+SYNC_CALL = 'Lio/mesalabs/unica/aod/ClockFontSettingsSync;->syncAodLockClockStyle(Landroid/content/Context;)V'
+
+
+def provider_hook_diff(decoded):
+    """Rebuild the AODContentProvider startup hook against the decoded APK.
+
+    Galaxy Store AOD builds move the DBAdapter field and the provider's
+    register layout, so the fixed-line hunk in 0003 stops applying. Hook
+    onCreate() right before its final "return true", after the DBAdapter is
+    set up, and fetch the Context with getContext() into v0. v0 is free there
+    because only the constant return follows.
+    """
+    path = unique(list(decoded.glob(PROVIDER_GLOB)), 'AODContentProvider')
+    rel = path.relative_to(decoded).as_posix()
+    lines = path.read_text().splitlines(keepends=True)
+    start = unique([i for i, line in enumerate(lines) if re.fullmatch(r'\.method public (final )?onCreate\(\)Z\n', line)],
+                   'AODContentProvider.onCreate')
+    end = next(i for i in range(start, len(lines)) if lines[i] == '.end method\n')
+    found = re.match(r'^    \.locals (\d+)\n$', lines[start + 1])
+    if not found or int(found.group(1)) < 1:
+        raise ValueError('AODContentProvider.onCreate has no free local register')
+    body = [i for i in range(start + 2, end) if lines[i].strip()]
+    ret, const = body[-1], body[-2]
+    reg = re.fullmatch(r'const/4 ([vp]\d+), 0x1', lines[const].strip())
+    if not reg or lines[ret].strip() != 'return ' + reg.group(1):
+        raise ValueError('AODContentProvider.onCreate does not end with "return true"')
+    if not any('/DBAdapter;' in lines[i] for i in range(start, const)):
+        raise ValueError('AODContentProvider.onCreate no longer sets up DBAdapter')
+    hook = ['    invoke-virtual {p0}, Landroid/content/ContentProvider;->getContext()Landroid/content/Context;\n',
+            '\n',
+            '    move-result-object v0\n',
+            '\n',
+            '    invoke-static {v0}, ' + SYNC_CALL + '\n',
+            '\n']
+    patched = lines[:const] + hook + lines[const:]
+    diff = difflib.unified_diff(lines, patched, 'a/' + rel, 'b/' + rel, n=3)
+    return f'diff --git a/{rel} b/{rel}\n' + ''.join(diff)
+
+
+def replace_provider_section(content, section):
+    parts = re.split(r'(?m)^(?=diff --git )', content)
+    hits = [i for i, part in enumerate(parts) if part.startswith('diff --git ') and 'AODContentProvider.smali' in part.splitlines()[0]]
+    unique(hits, '0003 AODContentProvider section')
+    parts[hits[0]] = section if section.endswith('\n') else section + '\n'
+    return ''.join(parts)
 
 
 def prepare(decoded, templates, output, native_full=False):
@@ -55,6 +104,8 @@ def prepare(decoded, templates, output, native_full=False):
     generated = []
     for patch in patches:
         content = patch.read_text()
+        if patch.name.startswith('0003-'):
+            content = replace_provider_section(content, provider_hook_diff(decoded))
         content = content.replace('smali_classes3/aod/rl2.smali', font_path)
         content = content.replace('Laod/rl2;', descriptor)
         if patch.name.startswith('0007-'):
