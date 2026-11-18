@@ -5,9 +5,9 @@ ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "product" "priv-app/HotwordEnrollmentOKGoogle
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "product" "priv-app/HotwordEnrollmentXGoogleEx3HEXAGON" 0 0 755 "u:object_r:system_file:s0"
 LOG_STEP_OUT
 
-LOG_STEP_IN "- Fixing brightness [Light HAL from A73XQ]"
-ADD_TO_WORK_DIR "a73xqxx" "vendor" "bin/hw/vendor.samsung.hardware.light-service"
-ADD_TO_WORK_DIR "a73xqxx" "vendor" "lib64/vendor.samsung.hardware.light-V1-ndk_platform.so"
+LOG_STEP_IN "- Fixing brightness [Light HAL from DM3Q, as on the SM8250 phones]"
+ADD_TO_WORK_DIR "dm3qxxx" "vendor" "bin/hw/vendor.samsung.hardware.light-service"
+ADD_TO_WORK_DIR "dm3qxxx" "vendor" "lib64/vendor.samsung.hardware.light-V1-ndk_platform.so"
 LOG_STEP_OUT
 
 DELETE_FROM_WORK_DIR "system" "system/etc/permissions/com.sec.feature.cover.flip.xml"
@@ -94,15 +94,15 @@ LOG_STEP_IN "- Fix face unlock"
 # itself exists - it is the one the @2.0 rule names.
 DELETE_FROM_WORK_DIR "vendor" "bin/hw/vendor.samsung.hardware.biometrics.face@2.0-service"
 DELETE_FROM_WORK_DIR "vendor" "etc/init/vendor.samsung.hardware.biometrics.face@2.0-service.rc"
-ADD_TO_WORK_DIR "a73xqxx" "vendor" "bin/hw/vendor.samsung.hardware.biometrics.face@3.0-service" \
+ADD_TO_WORK_DIR "r9qxxx" "vendor" "bin/hw/vendor.samsung.hardware.biometrics.face@3.0-service" \
     0 2000 755 "u:object_r:hal_face_default_exec:s0"
-ADD_TO_WORK_DIR "a73xqxx" "vendor" "etc/init/vendor.samsung.hardware.biometrics.face@3.0-service.rc" \
+ADD_TO_WORK_DIR "r9qxxx" "vendor" "etc/init/vendor.samsung.hardware.biometrics.face@3.0-service.rc" \
     0 0 644 "u:object_r:vendor_configs_file:s0"
 for _l in lib/vendor.samsung.hardware.biometrics.face@2.0.so \
           lib/vendor.samsung.hardware.biometrics.face@3.0.so \
           lib64/vendor.samsung.hardware.biometrics.face@2.0.so \
           lib64/vendor.samsung.hardware.biometrics.face@3.0.so; do
-    ADD_TO_WORK_DIR "a73xqxx" "vendor" "$_l" 0 0 644 "u:object_r:vendor_file:s0"
+    ADD_TO_WORK_DIR "r9qxxx" "vendor" "$_l" 0 0 644 "u:object_r:vendor_file:s0"
 done
 unset _l
 
