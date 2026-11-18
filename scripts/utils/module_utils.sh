@@ -268,3 +268,31 @@ SET_PROP_IF_DIFF()
     CURRENT="$(GET_PROP "$PARTITION" "$PROP")"
     [ -z "$CURRENT" ] || [ "$CURRENT" = "$EXPECTED" ] || SET_PROP "$PARTITION" "$PROP" "$EXPECTED"
 }
+
+# RESOLVE_SMALI <partition> <apk/jar> <smali path>
+# Prints the decoded path of a smali file. Dex splits move between donor builds,
+# so when the class is not in the given smali dir, the same class in any other
+# smali dir of the APK/JAR is printed instead. Always returns 0: callers check
+# the printed path with [ -f ].
+RESOLVE_SMALI()
+{
+    _CHECK_NON_EMPTY_PARAM "PARTITION" "$1" || return 1
+    _CHECK_NON_EMPTY_PARAM "FILE" "$2" || return 1
+    _CHECK_NON_EMPTY_PARAM "SMALI" "$3" || return 1
+
+    local FILE="${2#/}"
+    [[ "$1" == "system" ]] && FILE="${FILE#system/}"
+    local DIR="$APKTOOL_DIR/$1/$FILE"
+    local f
+
+    if [ ! -f "$DIR/$3" ]; then
+        for f in "$DIR"/smali*/"${3#*/}"; do
+            if [ -f "$f" ]; then
+                echo "$f"
+                return 0
+            fi
+        done
+    fi
+
+    echo "$DIR/$3"
+}
