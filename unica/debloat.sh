@@ -230,9 +230,10 @@ system/app/DsmsAPK
 system/etc/permissions/privapp-permissions-com.samsung.android.dqagent.xml
 system/etc/permissions/privapp-permissions-com.sec.android.diagmonagent.xml
 system/etc/permissions/privapp-permissions-com.sec.android.soagent.xml
-system/priv-app/DeviceQualityAgent36
-system/priv-app/DiagMonAgent95
-system/priv-app/SOAgent76
+"
+# Their version suffixes change with every source build (EZI2 ships 37/97/77)
+SYSTEM_DEBLOAT+="
+$(find "$WORK_DIR/system/system/priv-app" -maxdepth 1 -type d \( -name "DeviceQualityAgent[0-9]*" -o -name "DiagMonAgent[0-9]*" -o -name "SOAgent[0-9]*" \) | sed "s|$WORK_DIR/system/||g")
 "
 
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CONTEXTSERVICE_ENABLE_SURVEY_MODE" --delete

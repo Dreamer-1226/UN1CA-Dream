@@ -56,14 +56,3 @@ framework/org.carconnectivity.android.digitalkey.rangingintent.jar
 framework/org.carconnectivity.android.digitalkey.secureelement.jar
 priv-app/com.qualcomm.qti.services.systemhelper
 "
-
-# Telemetry. unica/debloat.sh:191-193 lists DeviceQualityAgent36, DiagMonAgent95 and SOAgent76, but
-# the X810 donor ships them as 37, 97 and 77 (EZF1 and EZI2 alike), so those three upstream lines
-# match nothing and _debloat drops its "File not found" quietly. Measured on a T970 running 1.1.3
-# (ops/v114_baseline/20260926_1531): diagmonagent stays resident at adj -800, dqagent and soagent
-# start twice during every boot and get killed, and DIAGMON writes 472 lines in 20 minutes.
-SYSTEM_DEBLOAT+="
-system/priv-app/DeviceQualityAgent37
-system/priv-app/DiagMonAgent97
-system/priv-app/SOAgent77
-"

@@ -22,7 +22,7 @@ priv-app/Velvet
 
 #Auto Blocker
 SYSTEM_DEBLOAT+="
-system/app//Rampart
+system/app/Rampart
 "
 
 # GameDriver
@@ -50,7 +50,6 @@ system/app/SmartManager_v6_DeviceSecurity
 system/priv-app/AREmoji
 system/priv-app/HybridRadio
 system/priv-app/QRreader
-system/priv-app/SOAgent77
 system/priv-app/SPPPushClient
 system/priv-app/SamsungMagnifier3
 system/priv-app/SwiftkeyIme
