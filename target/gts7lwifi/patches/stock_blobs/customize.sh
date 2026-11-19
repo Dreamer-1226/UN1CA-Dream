@@ -2,7 +2,8 @@
 # 12.4-inch tree this patch came from adds features the T870 never shipped.
 _TAB_ADD_STOCK()
 {
-    local SRC="$FW_DIR/$(awk -F/ '{print $1"_"$2}' <<< "$TARGET_FIRMWARE")/$1/$2"
+    local SRC
+    SRC="$FW_DIR/$(awk -F/ '{print $1"_"$2}' <<< "$TARGET_FIRMWARE")/$1/$2"
     if [ ! -e "$SRC" ]; then
         LOGW "${2##*/} is not in the $TARGET_FIRMWARE firmware, skipping"
         return 0
