@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000009010 Mon Sep 17 00:00:00 2001
+From: MinsOS <minsos@local>
+Date: Sun, 4 Oct 2026 23:00:00 +0900
+Subject: [PATCH] skip dropbox writes before the service is published (One UI 9, y2q)
+
+Settings mod 9010-oneui85 (d2ab671) re-derived on the S918B ActivityManagerService.
+Same guard: at the top of addErrorToDropBox, return when ServiceManager.checkService
+("dropbox") is null. One UI 9 moved the opening register moves (v9/v10 for p1/p2), so
+the 8.5 context no longer matches. v0 is scratch here and is written again by
+"move-object/from16 v0, p3" before any other use; the first try block starts after
+these moves. r10 logged 712 am_wtf "No service published for: dropbox" at its soft restart.
+---
+--- a/smali/com/android/server/am/ActivityManagerService.smali
++++ b/smali/com/android/server/am/ActivityManagerService.smali
+@@ -11423,6 +11423,21 @@
+ .method public final addErrorToDropBox(Ljava/lang/String;Lcom/android/server/am/ProcessRecord;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/android/server/am/ProcessRecord;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Landroid/app/ApplicationErrorReport$CrashInfo;Ljava/lang/Float;Landroid/os/incremental/IncrementalMetrics;Ljava/util/UUID;Lcom/android/server/am/ActivityManagerService$VolatileDropboxEntryStates;)V
+     .locals 20
+ 
++    # MinsOS: nothing to add to before DropBoxManagerService is published. Asking for it then
++    # makes SystemServiceRegistry Log.wtf "No service published for: dropbox", and that wtf comes
++    # straight back here - 712 rounds at the r10 soft restart on y2q (826 on the 8.5 EZI2 donor).
++    const-string v0, "dropbox"
++
++    invoke-static {v0}, Landroid/os/ServiceManager;->checkService(Ljava/lang/String;)Landroid/os/IBinder;
++
++    move-result-object v0
++
++    if-nez v0, :minsos_dropbox_published
++
++    return-void
++
++    :minsos_dropbox_published
++
+     move-object/from16 v1, p0
+ 
+     move-object/from16 v9, p1

@@ -1,0 +1,6 @@
+id=fw_dropbox_wtf
+name=No dropbox wtf loop before the service is published (9010 on One UI 9)
+version=v1
+versionCode=1
+author=MinsOS
+description=Early in boot addErrorToDropBox asks for a DropBoxManager that is not published yet, SystemServiceRegistry answers with Log.wtf, and that wtf posts addErrorToDropBox again: r10 logged 712 'No service published for: dropbox' at its soft restart. The tablets' guard (settings mod 9010, d2ab671) SKIPped on One UI 9 because the opening register moves changed; this is the same guard re-derived on the S918B ActivityManagerService.
