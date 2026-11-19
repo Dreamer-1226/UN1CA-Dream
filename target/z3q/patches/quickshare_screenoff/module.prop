@@ -1,0 +1,5 @@
+id=quickshare_screenoff
+name=Quick Share screen-off discovery
+version=1.0
+author=ssch71
+description=Raise mdx.kit's screen-off BLE scan window so z3q answers Quick Share requests with the screen off.

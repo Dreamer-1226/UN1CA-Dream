@@ -1,0 +1,19 @@
+From: ssch71 <ssch71@users.noreply.github.com>
+Subject: [PATCH] Raise the screen-off Quick Share scan window
+
+Screen-off discovery runs a custom 55/3120 scan (~1.8% duty). On b5q a
+GMS screen-off scan lifts the controller to 160/3120, but z3q's QCA
+controller gets no GMS screen-off scan, so the 55 window is all there is
+and no REQUEST_0x01 from a searching phone is ever received. Use 160.
+
+--- a/smali/o2/o.smali
++++ b/smali/o2/o.smali
+@@ -630,7 +630,7 @@
+ 
+     .line 132
+     .line 133
+-    const/16 p0, 0x37
++    const/16 p0, 0xa0
+ 
+     .line 134
+     .line 135
