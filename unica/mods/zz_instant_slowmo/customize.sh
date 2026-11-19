@@ -3,6 +3,14 @@
 # OpenCL on Adreno 650) behind an mpp V1 AIDL server, so libaplayer is pointed at that instead
 # and libmppclient is taught to live with the V1 server.
 
+# This lives in unica/mods (sorted last) rather than target/z3q/patches because the mods replace
+# both system libraries afterwards: paradigm installs the S26U libaplayer and rezoss the S26U
+# libmppclient. Patching the donor copies earlier left the shipped ROM with unpatched libraries.
+if [[ "$TARGET_CODENAME" != "z3q" ]]; then
+    LOG "- Skipping Instant Slow-mo: z3q only"
+    return 0
+fi
+
 # _MASKED_PATCH <file> <from> <to>
 # Like HEX_PATCH, but "??" in <from> matches any byte (used for PC-relative bl/adrp operands,
 # which move whenever the donor library is rebuilt) and "??" in <to> keeps the original byte.
