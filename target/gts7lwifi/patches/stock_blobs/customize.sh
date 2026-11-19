@@ -1,3 +1,15 @@
+# Copy a file from this device's own firmware only when it is there. The
+# 12.4-inch tree this patch came from adds features the T870 never shipped.
+_TAB_ADD_STOCK()
+{
+    local SRC="$FW_DIR/$(awk -F/ '{print $1"_"$2}' <<< "$TARGET_FIRMWARE")/$1/$2"
+    if [ ! -e "$SRC" ]; then
+        LOGW "${2##*/} is not in the $TARGET_FIRMWARE firmware, skipping"
+        return 0
+    fi
+    ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "$@"
+}
+
 LOG_STEP_IN "- Fixing Google Assistant"
 DELETE_FROM_WORK_DIR "product" "priv-app/HotwordEnrollmentOKGoogleEx4HEXAGON"
 DELETE_FROM_WORK_DIR "product" "priv-app/HotwordEnrollmentXGoogleEx4HEXAGON"
@@ -13,13 +25,13 @@ LOG_STEP_OUT
 DELETE_FROM_WORK_DIR "system" "system/etc/permissions/com.sec.feature.cover.flip.xml"
 DELETE_FROM_WORK_DIR "system" "system/etc/permissions/com.sec.feature.pocketsensitivitymode_level1.xml"
 LOG_STEP_IN "- Adding stock system features"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.pocketmode_level33.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.flip.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/com.sec.feature.cover.xml" 0 0 644 "u:object_r:system_file:s0"
+_TAB_ADD_STOCK "system" "system/etc/permissions/com.sec.feature.pocketmode_level33.xml" 0 0 644 "u:object_r:system_file:s0"
+_TAB_ADD_STOCK "system" "system/etc/permissions/com.sec.feature.cover.flip.xml" 0 0 644 "u:object_r:system_file:s0"
+_TAB_ADD_STOCK "system" "system/etc/permissions/com.sec.feature.cover.xml" 0 0 644 "u:object_r:system_file:s0"
 LOG_STEP_OUT
 
 LOG_STEP_IN "- Adding stock GameDriver"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/priv-app/GameDriver-SM8250/GameDriver-SM8250.apk" 0 0 644 "u:object_r:system_file:s0"
+_TAB_ADD_STOCK "system" "system/priv-app/GameDriver-SM8250/GameDriver-SM8250.apk" 0 0 644 "u:object_r:system_file:s0"
 LOG_STEP_OUT
 
 
@@ -194,3 +206,5 @@ unset _TFP _SM _OM _MISSING
 #
 # The patcher is kept at scripts/patch_sdm_pcc_constant.py with its measurements, but nothing
 # invokes it. Do not re-add it without a device photo where the 50% grey bar stays grey.
+
+unset -f _TAB_ADD_STOCK
