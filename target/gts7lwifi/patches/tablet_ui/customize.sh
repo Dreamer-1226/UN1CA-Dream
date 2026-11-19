@@ -37,21 +37,25 @@ LOG_STEP_IN "- Fixing the oversized One UI Edge panel"
 # NOTE: SMALI_PATCH's const-string branch adds the quotes itself (smali_utils.sh:
 # sub("\"" STR "\"", ...)), so VALUE is the bare string content - passing a whole
 # `const-string vN, "..."` line would silently no-op.
-SMALI_PATCH "system" "system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk" \
-    "smali_classes4/M9/j.smali" "replace" \
-    '<clinit>()V' \
-    'gts9p' \
-    'gts7l'
-_EP="$(RESOLVE_SMALI "system" "priv-app/TouchWizHome_2017/TouchWizHome_2017.apk" "smali_classes4/M9/j.smali")"
-# The launcher keys the edge-panel scale off a table of device codenames, and this patch swaps the
-# donor's entry for ours. A newer donor may not carry that table at all: measured on one, the APK
-# holds no gts* codename string anywhere, while the donor this ROM ships from has nine. That is a
-# different situation from "the patch silently failed on the donor we build against", which is what
-# this abort exists to catch, so keep aborting for our donor and downgrade to a loud warning
-# elsewhere. The One UI 8.5 launcher this ROM ships is that case: none of its dex holds a gts*
-# string, and on a T970 running v1.2.0 the edge panel is not oversized (2026-10-06), so the bug
-# this step fixed was the older launcher's and there is nothing left to patch.
-if ! grep -q '"gts7l"' "$_EP"; then
+_TWH="system/priv-app/TouchWizHome_2017/TouchWizHome_2017.apk"
+DECODE_APK "system" "$_TWH"
+_EP="$(RESOLVE_SMALI "system" "$_TWH" "smali_classes4/M9/j.smali")"
+if [ -f "$_EP" ] && grep -q '"gts9p"' "$_EP"; then
+    SMALI_PATCH "system" "$_TWH" \
+        "${_EP#"$APKTOOL_DIR/system/${_TWH#system/}/"}" "replace" \
+        '<clinit>()V' \
+        'gts9p' \
+        'gts7l'
+    grep -q '"gts7l"' "$_EP" \
+        || ABORT "[$TARGET_CODENAME] Edge panel scale fix did NOT apply - M9/j.smali codename table changed"
+elif grep -rqs '"gts9p"' "$APKTOOL_DIR/system/${_TWH#system/}"/smali*; then
+    # The table is still there but moved to another class: needs a human look.
+    ABORT "[$TARGET_CODENAME] Edge panel codename table moved: $(grep -rls '"gts9p"' "$APKTOOL_DIR/system/${_TWH#system/}"/smali* | head -1)"
+else
+    # The launcher keys the edge-panel scale off a table of device codenames. A newer donor may
+    # not carry that table at all: the One UI 8.5 launcher has no gts* codename string anywhere,
+    # and on a T970 running v1.2.0 the edge panel is not oversized (2026-10-06), so the bug this
+    # step fixed was the older launcher's and there is nothing left to patch.
     _OU="$(GET_PROP "system" "ro.build.version.oneui" 2>/dev/null || echo 0)"
     if [ "${_OU:-0}" -gt 80000 ]; then
         LOG "- Edge panel scale fix not needed: this One UI $_OU launcher has no codename table (the oversized panel was an older launcher's bug)"
@@ -60,7 +64,7 @@ if ! grep -q '"gts7l"' "$_EP"; then
     fi
     unset _OU
 fi
-unset _EP
+unset _EP _TWH
 LOG_STEP_OUT
 
 LOG_STEP_IN "- Samsung Camera"
