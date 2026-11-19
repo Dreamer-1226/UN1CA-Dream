@@ -17,6 +17,44 @@ def unique(values, description):
     return values[0]
 
 
+def adapt_startup_patch(content, decoded):
+    provider = unique(list(decoded.glob(
+        'smali*/com/samsung/android/app/aodservice/provider/AODContentProvider.smali')),
+        'AODContentProvider')
+    text = provider.read_text()
+    method = unique(re.findall(
+        r'^\.method public final onCreate\(\)Z\n(.*?)^\.end method',
+        text, re.M | re.S), 'AODContentProvider.onCreate method')
+    if not method.startswith('    .locals 2\n\n'):
+        raise ValueError('AODContentProvider.onCreate register layout changed')
+    owner = 'Lcom/samsung/android/app/aodservice/provider/AODContentProvider;'
+    manager = 'Lcom/samsung/android/app/aodservice/common/provider/DB/DBManager;'
+    adapter = 'Lcom/samsung/android/app/aodservice/common/provider/DB/DBAdapter;'
+    # Require the complete context/DB initialization sequence: v1 must still
+    # contain Context at the hook, and v0 must contain the adapter being stored.
+    prefix = (
+        '    invoke-virtual {p0}, Landroid/content/ContentProvider;->getContext()Landroid/content/Context;\n\n'
+        '    move-result-object v1\n\n'
+        f'    invoke-virtual {{v0, v1}}, {manager}->init(Landroid/content/Context;)V\n\n'
+        f'    invoke-virtual {{v0}}, {manager}->getDBAdapter(){adapter}\n\n'
+        '    move-result-object v0\n\n')
+    field = unique(re.findall(
+        re.escape(prefix) + r'    iput-object v0, p0, ' + re.escape(owner)
+        + r'->([^\s:]+):' + re.escape(adapter)
+        + r'\n\n    const/4 p0, 0x1\n\n    return p0\n', method),
+        'AOD startup DB assignment with live Context in v1')
+    unique(re.findall(r'^\.field [^\n]*\b' + re.escape(field + ':' + adapter)
+                      + r'$', text, re.M), 'AOD DB adapter field declaration')
+    pattern = (r'(?m)^     iput-object v0, p0, ' + re.escape(owner)
+               + r'->[^\s:]+:' + re.escape(adapter) + r'$')
+    unique(re.findall(pattern, content), 'startup patch DB assignment anchor')
+    content = re.sub(pattern, lambda _: f'     iput-object v0, p0, {owner}->{field}:{adapter}', content)
+    content = content.replace(
+        'smali_classes2/com/samsung/android/app/aodservice/provider/AODContentProvider.smali',
+        provider.relative_to(decoded).as_posix())
+    return content
+
+
 def prepare(decoded, templates, output, native_full=False):
     owners = []
     for path in decoded.glob('smali*/**/*.smali'):
@@ -57,6 +95,8 @@ def prepare(decoded, templates, output, native_full=False):
         content = patch.read_text()
         content = content.replace('smali_classes3/aod/rl2.smali', font_path)
         content = content.replace('Laod/rl2;', descriptor)
+        if patch.name.startswith('0003-'):
+            content = adapt_startup_patch(content, decoded)
         if patch.name.startswith('0007-'):
             content = content.replace('Laod/x89;', controller_type)
             content = content.replace('smali/com/samsung/android/app/facewidget/utils/KeyguardClockProvider.smali',

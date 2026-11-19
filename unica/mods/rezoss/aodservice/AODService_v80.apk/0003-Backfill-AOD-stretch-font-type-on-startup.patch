@@ -20,7 +20,7 @@ diff --git a/smali_classes2/com/samsung/android/app/aodservice/provider/AODConte
 @@ -1905,6 +1905,8 @@
      move-result-object v0
 
-     iput-object v0, p0, Lcom/samsung/android/app/aodservice/provider/AODContentProvider;->p:Lcom/samsung/android/app/aodservice/common/provider/DB/DBAdapter;
+     iput-object v0, p0, Lcom/samsung/android/app/aodservice/provider/AODContentProvider;->q:Lcom/samsung/android/app/aodservice/common/provider/DB/DBAdapter;
 +
 +    invoke-static {v1}, Lio/mesalabs/unica/aod/ClockFontSettingsSync;->syncAodLockClockStyle(Landroid/content/Context;)V
 

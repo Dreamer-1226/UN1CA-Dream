@@ -132,3 +132,9 @@
 (allow unica_teesim self (capability (setuid)))
 
 (allow unica_teesim remote_prov_prop (file (read open getattr map)))
+
+; The platform-signed WebView settings APK uses a normal app UID. Binder checks
+; its exact package, platform signature and preinstalled status in addition to UID.
+(allow platform_app unica_teesim_service (service_manager (find)))
+(allow platform_app unica_teesim (binder (call transfer)))
+(allow unica_teesim platform_app (binder (call transfer)))

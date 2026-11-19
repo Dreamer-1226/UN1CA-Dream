@@ -86,6 +86,11 @@ GET_GALAXY_STORE_DOWNLOAD_URL()
     # Galaxy S23 Ultra GBL_OPENX
     
     DEVICES=("SM-S948B" "SM-S938B" "SM-S938N" "SM-S918B")
+    # SemanticSearchCore must retain the S26 Ultra (m3qxxx) provider/model
+    # surface expected by the ROM's compatibility patches; never fall back.
+    if [[ "$PACKAGE" == "com.samsung.android.ssco" ]]; then
+        DEVICES=("SM-S948B")
+    fi
 
     OS="$(GET_PROP "system" "ro.build.version.sdk")"
     ONEUI="$(GET_PROP "system" "ro.build.version.oneui")"

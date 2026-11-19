@@ -400,6 +400,13 @@ ADD_TO_WORK_DIR "m3qxxx" "system" \
 # S26U provider surface and alias its bundled HTP payloads to the SM8550/V73
 # pair so the native QNN path can be tested on dm3q.
 LOG "- Adding S26U SemanticSearchCore with SM8550/V73 QNN payloads"
+LOG "- Checking Galaxy Store for a newer SemanticSearchCore prebuilt"
+SEMANTIC_SEARCH_STORE_URL="$(GET_GALAXY_STORE_DOWNLOAD_URL "com.samsung.android.ssco")" || SEMANTIC_SEARCH_STORE_URL=""
+python3 "$MODPATH/semanticsearch/update_prebuilt.py" \
+    "$SRC_DIR/prebuilts/samsung/m3qxxx/system/priv-app/SemanticSearchCore" \
+    "$SEMANTIC_SEARCH_STORE_URL" "$SRC_DIR/out/archived/semanticsearch-prebuilt-updates" || return 1
+unset SEMANTIC_SEARCH_STORE_URL
+# Copy the cached prebuilt, refreshed above only when the Store APK is newer.
 ADD_TO_WORK_DIR "m3qxxx" "system" \
     "system/priv-app/SemanticSearchCore/SemanticSearchCore.apk" 0 0 644 "u:object_r:system_file:s0"
 DECODE_APK "system" "system/priv-app/SemanticSearchCore/SemanticSearchCore.apk"
