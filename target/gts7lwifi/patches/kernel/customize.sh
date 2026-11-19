@@ -1,4 +1,4 @@
-KERNEL_TAG="boot-gts7lwifi-20261116-203354"
+KERNEL_TAG="boot-gts7lwifi-20261120-010554"
 KERNEL_REPO="https://github.com/ssch71/not_samsung.sm8250-4.19/releases/download/$KERNEL_TAG"
 
 LOG_STEP_IN "- Downloading not_kernel ($KERNEL_TAG)"
