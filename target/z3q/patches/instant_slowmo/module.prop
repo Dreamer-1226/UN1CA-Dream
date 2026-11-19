@@ -1,0 +1,5 @@
+id=instant_slowmo
+name=Instant Slow-mo (vendor 2x FRC)
+version=1.0
+author=ssch71
+description=Runs Gallery Instant Slow-mo on the SM8250 vendor FRUC (2x, 0.5x speed, up to 4K30 SDR) instead of AI FRC.
