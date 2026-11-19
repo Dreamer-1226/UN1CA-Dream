@@ -1,0 +1,5 @@
+id=rewind
+name=AI Select Rewind without SurfaceView latch tracking
+version=1.0
+author=ssch71
+description=The donor SurfaceFlinger stubs getLastSurfaceViewLatchTime() to 0, so WindowManager never detects video and AI Select Rewind gets no frames. Skip that check.

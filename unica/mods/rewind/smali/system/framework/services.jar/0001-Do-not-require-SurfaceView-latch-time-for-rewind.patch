@@ -1,0 +1,21 @@
+From: ssch71 <ssch71@users.noreply.github.com>
+Subject: [PATCH] Do not require SurfaceView latch time for AI Select rewind
+
+The donor SurfaceFlinger implements getLastSurfaceViewLatchTime() as a
+stub that always returns 0 ("outLastLatchTime = 0"), so
+takeAssistScreenshotForRewind() never sees a playing SurfaceView, never
+starts the screenshot runnable and AI Select Rewind shows an empty list.
+SmartCapture only calls this while an allowlisted video app is visible,
+so take the video path unconditionally.
+
+--- a/smali_classes2/com/android/server/wm/WindowManagerService.smali
++++ b/smali_classes2/com/android/server/wm/WindowManagerService.smali
+@@ -47856,8 +47856,6 @@
+ 
+     cmp-long v0, v0, v2
+ 
+-    if-gez v0, :cond_0
+-
+     const-string v0, "DETECT SurfaceView Video"
+ 
+     invoke-static {p1, v0}, Landroid/util/Slog;->d(Ljava/lang/String;Ljava/lang/String;)I
