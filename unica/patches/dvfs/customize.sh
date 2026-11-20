@@ -98,12 +98,20 @@ if [[ "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" != "$TARGET_DVFSAPP_CONFIG_S
         EVAL "cp -a \"$MODPATH/assets/siop_default.xml\" \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/ssrm_default.xml\""
     fi
 
-    # com/sec/android/sdhms/util/Feature
+    # com/sec/android/sdhms/util/Feature. R8 renames this class in every SDHMS build (n5/i0, ...),
+    # so find it by the policy name it holds instead of hardcoding the obfuscated path.
+    _SDHMS_DIR="$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk"
+    _SDHMS_FEATURE="$(grep -rlF "\"$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME\"" "$_SDHMS_DIR"/smali* 2> /dev/null \
+        | xargs -r grep -lF ".method static constructor <clinit>()V" 2> /dev/null)"
+    if [ "$(grep -c . <<< "$_SDHMS_FEATURE")" != "1" ]; then
+        ABORT "SDHMS Feature class not found by \"$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME\": ${_SDHMS_FEATURE:-no match}"
+    fi
     SMALI_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "smali/n5/i0.smali" "replace" \
+        "${_SDHMS_FEATURE#"$_SDHMS_DIR/"}" "replace" \
         "<clinit>()V" \
         "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" \
         "$TARGET_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME"
+    unset _SDHMS_DIR _SDHMS_FEATURE
 fi
 
 if [ -f "$SRC_DIR/target/$TARGET_CODENAME/dvfs/siop_model.xml" ]; then
