@@ -1,0 +1,43 @@
+Subject: [PATCH] Restore fluent dialog builder methods for UN1CA Settings
+
+The Android 17 donor retains void setters after optimization. Preserve
+those entry points for donor callers and add the Builder-returning
+signatures used by the injected reboot dialog.
+
+--- a/smali/androidx/appcompat/app/AlertDialog$Builder.smali
++++ b/smali/androidx/appcompat/app/AlertDialog$Builder.smali
+@@ -603,2 +603,34 @@
+     return-object p0
+ .end method
++
++.method public final setTitle(I)Landroidx/appcompat/app/AlertDialog$Builder;
++    .locals 0
++
++    invoke-virtual {p0, p1}, Landroidx/appcompat/app/AlertDialog$Builder;->setTitle(I)V
++
++    return-object p0
++.end method
++
++.method public final setMessage(I)Landroidx/appcompat/app/AlertDialog$Builder;
++    .locals 0
++
++    invoke-virtual {p0, p1}, Landroidx/appcompat/app/AlertDialog$Builder;->setMessage(I)V
++
++    return-object p0
++.end method
++
++.method public final setPositiveButton(ILandroid/content/DialogInterface$OnClickListener;)Landroidx/appcompat/app/AlertDialog$Builder;
++    .locals 0
++
++    invoke-virtual {p0, p1, p2}, Landroidx/appcompat/app/AlertDialog$Builder;->setPositiveButton(ILandroid/content/DialogInterface$OnClickListener;)V
++
++    return-object p0
++.end method
++
++.method public final setNegativeButton(ILandroid/content/DialogInterface$OnClickListener;)Landroidx/appcompat/app/AlertDialog$Builder;
++    .locals 0
++
++    invoke-virtual {p0, p1, p2}, Landroidx/appcompat/app/AlertDialog$Builder;->setNegativeButton(ILandroid/content/DialogInterface$OnClickListener;)V
++
++    return-object p0
++.end method

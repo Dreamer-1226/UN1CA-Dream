@@ -1,0 +1,4 @@
+id=settings_dialog
+name=Settings dialog compatibility
+author=GoRhanHee
+description=Restores the fluent dialog builder methods used by UN1CA Settings on Android 17.
