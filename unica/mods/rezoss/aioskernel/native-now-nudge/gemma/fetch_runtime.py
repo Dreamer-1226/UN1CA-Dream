@@ -13,7 +13,11 @@ for entry in json.loads((root/'runtime-lock.json').read_text()):
         source=next((p for p in candidates if p.is_file()),None)
         if source:shutil.copy2(source,target)
         else:
-            with urllib.request.urlopen(entry['url'],timeout=120) as src,target.open('xb') as dst:shutil.copyfileobj(src,dst,1024*1024)
+            try:
+                with urllib.request.urlopen(entry['url'],timeout=120) as src,target.open('xb') as dst:shutil.copyfileobj(src,dst,1024*1024)
+            except Exception as e:
+                target.unlink(missing_ok=True)
+                raise SystemExit('SDK artifact download failed: %s (%s): %s' % (entry['file'],entry['url'],e))
     with target.open('rb') as f:digest=hashlib.file_digest(f,'sha256').hexdigest()
     if target.stat().st_size!=entry['size'] or digest!=entry['sha256']:raise SystemExit('SDK artifact integrity failure: '+entry['file'])
 print('Pinned runtime artifacts verified')
