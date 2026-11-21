@@ -35,6 +35,14 @@ object Packages {
         pm = context.packageManager
     }
 
+    /** The WebView app has its own UID; never authorize by platform signature alone. */
+    fun isRomSettings(uid: Int): Boolean = try {
+        val name = "io.mesalabs.unica.teesettings"
+        uid == pm.getPackageUid(name, 0) &&
+            pm.checkSignatures("com.android.settings", name) == PackageManager.SIGNATURE_MATCH &&
+            (pm.getApplicationInfo(name, 0).flags and ApplicationInfo.FLAG_SYSTEM) != 0
+    } catch (_: Exception) { false }
+
     // android.os.UserHandle.PER_USER_RANGE: the stride between two users' uids for the same app. A
     // uid is therefore userId * 100000 + appId — user 0's Play Store is 10123, the work profile's
     // clone of it is 1010123, and the two are different callers to keystore.

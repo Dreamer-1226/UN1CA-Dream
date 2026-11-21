@@ -26,3 +26,19 @@ ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/unica/tee-simulator/daemon.sh" 0
 python3 "$MODPATH/install_policy.py" "$WORK_DIR" "$MODPATH" || return 1
 APPLY_PATCH "system" "system/framework/framework.jar" \
     "$MODPATH/patches/framework.jar/0001-Keep-keybox-Settings-and-PIF-compatibility.patch"
+
+# Normal-UID WebView frontend; same ROM signing key as SecSettings.
+local_teesim_cert=aosp
+$ROM_IS_OFFICIAL && local_teesim_cert=unica
+python3 "$MODPATH/settings-app/build.py" --check --cert-prefix "$local_teesim_cert" || {
+    python3 "$MODPATH/settings-app/build.py" --cert-prefix "$local_teesim_cert" || return 1
+}
+ADD_TO_WORK_DIR "$MODPATH/settings-app/payload" "system" "system/priv-app/TeeSimulatorSettings/TeeSimulatorSettings.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "$MODPATH/settings-app/payload" "system" "system/etc/permissions/privapp-permissions-io.mesalabs.unica.teesettings.xml" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "$MODPATH/settings-app/payload" "system" "system/etc/sysconfig/preinstalled-packages-io.mesalabs.unica.teesettings.xml" 0 0 644 "u:object_r:system_file:s0"
+# Samsung rejects privileged APKs absent from its separate preload allowlist.
+python3 "$MODPATH/settings-app/preload.py" "$WORK_DIR" || return 1
+DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+python3 "$MODPATH/settings-app/route_settings.py" \
+    "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_spoof_settings.xml" "$WORK_DIR" || return 1
+unset local_teesim_cert

@@ -24,7 +24,7 @@ object RomAdmin : Binder() {
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
         if (code == IBinder.INTERFACE_TRANSACTION) { reply?.writeString(DESCRIPTOR); return true }
         if (code != IBinder.FIRST_CALL_TRANSACTION) return super.onTransact(code, data, reply, flags)
-        require(Binder.getCallingUid() in setOf(0, 1000)) { "Settings caller required" }
+        require(Binder.getCallingUid() in setOf(0, 1000) || Packages.isRomSettings(Binder.getCallingUid())) { "Settings caller required" }
         data.enforceInterface(DESCRIPTOR)
         val raw = data.readString() ?: "{}"
         require(raw.toByteArray().size <= 32768) { "Request too large" }
