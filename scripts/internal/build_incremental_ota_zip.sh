@@ -12,6 +12,10 @@ PUBLIC_KEY_PATH="$SRC_DIR/security/"
 if $ROM_IS_OFFICIAL; then
     PRIVATE_KEY_PATH+="unica_ota"
     PUBLIC_KEY_PATH+="unica_ota"
+elif [ -f "$SRC_DIR/security/ssch71_ota.pk8" ] && [ -f "$SRC_DIR/security/ssch71_ota.x509.pem" ]; then
+    # Our OTA key (OTA_KEY_PK8 secret): the key UN1CA Updates trusts in these builds.
+    PRIVATE_KEY_PATH+="ssch71_ota"
+    PUBLIC_KEY_PATH+="ssch71_ota"
 else
     PRIVATE_KEY_PATH+="aosp_testkey"
     PUBLIC_KEY_PATH+="aosp_testkey"
