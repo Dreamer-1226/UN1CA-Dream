@@ -26,6 +26,22 @@ text = path.read_text()
 ET.fromstring(text)
 if text.count(NEW) == 1 and OLD not in text:
     raise SystemExit(0)
-if text.count(OLD) != 1 or NEW in text:
+if NEW in text or text.count(OLD) > 1:
     raise SystemExit('Unexpected Manage Keybox intent; refusing ambiguous routing')
-path.write_text(text.replace(OLD, NEW))
+if text.count(OLD) == 1:
+    path.write_text(text.replace(OLD, NEW))
+    raise SystemExit(0)
+# This Settings page has no Manage Keybox entry (no in-Settings KeyboxActivity):
+# add one for the TEE Settings app right after the keybox controls.
+ANCHOR = 'android:key="unica_keybox_clear"'
+if text.count(ANCHOR) != 1:
+    raise SystemExit('No unica_keybox_clear preference to place Manage Keybox after')
+start = text.index(ANCHOR)
+end = text.index('/>', start) + 2
+entry = ('\n    <SecPreference android:title="Manage Keybox" android:key="unica_keybox_settings" '
+         'android:summary="Keyboxes, app profiles and backend status">\n'
+         '        <intent ' + NEW + ' />\n'
+         '    </SecPreference>')
+text = text[:end] + entry + text[end:]
+ET.fromstring(text)
+path.write_text(text)
