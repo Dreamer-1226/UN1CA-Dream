@@ -316,3 +316,8 @@ SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:uni
 LOG "- Adding the problem report collector to UN1CA Settings"
 bash "$MODPATH/bugreport/patch_settings.sh" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \
     || ABORT "Failed to add the problem report collector"
+
+# Settings > UN1CA Settings > Create problem report (collector from GoRhanHee-World/UN1CA, derived from MinsOS)
+LOG "- Adding the problem report collector to UN1CA Settings"
+bash "$MODPATH/bugreport/patch_settings.sh" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \
+    || ABORT "Failed to add the problem report collector"
