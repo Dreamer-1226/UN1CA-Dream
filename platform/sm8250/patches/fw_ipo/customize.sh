@@ -7,7 +7,7 @@ SKIPUNZIP=1
 # donors (S23, the tablet's X810), so wrap whatever call is there instead of
 # applying a fixed-line patch.
 DECODE_APK "system" "system/framework/framework.jar"
-_IPO="$(RESOLVE_SMALI "system" "system/framework/framework.jar" 'smali/android/app/IProcessObserver$Stub.smali')"
+_IPO="$(RESOLVE_SMALI "system" "system/framework/framework.jar" "smali/android/app/IProcessObserver\$Stub.smali")"
 [ -f "$_IPO" ] || ABORT "IProcessObserver\$Stub.smali not found in framework.jar"
 LOG "- Catching AbstractMethodError around IProcessObserver.onProcessStarted"
 python3 "$MODPATH/wrap_ipo.py" "$_IPO" || ABORT "Failed to patch IProcessObserver\$Stub"
