@@ -331,6 +331,8 @@ jobs:
 
       - name: Upload to Hugging Face
         id: hf
+        # A failed upload falls back to GoFile instead of throwing the build away.
+        continue-on-error: true
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_REPO: ${{ vars.HF_REPO }}
@@ -341,18 +343,32 @@ jobs:
             echo "::warning::Hugging Face is not configured (HF_TOKEN secret, HF_REPO variable)"
             exit 0
           fi
-          TYPE="${HF_REPO_TYPE:-model}"
           FILES=("$FULL_ZIP")
           for f in out/release/*INCREMENTAL*.zip; do
             [ -f "$f" ] && FILES+=("$f")
           done
           pip install -q --break-system-packages -U huggingface_hub hf_xet 2> /dev/null \
             || pip install -q -U huggingface_hub hf_xet
-          python3 - "$HF_REPO" "$TYPE" "${{ matrix.target }}" "${FILES[@]}" <<'EOF'
+          TYPE_FILE="$RUNNER_TEMP/hf_repo_type"
+          python3 - "$HF_REPO" "$HF_REPO_TYPE" "$TYPE_FILE" "${{ matrix.target }}" "${FILES[@]}" <<'EOF'
           import os, sys, time
           from huggingface_hub import HfApi
-          repo, kind, target, *files = sys.argv[1:]
+          repo, kind, type_file, target, *files = sys.argv[1:]
           api = HfApi(token=os.environ["HF_TOKEN"])
+          # HF_REPO_TYPE is optional: find out whether the repo is a model,
+          # dataset or space repo.
+          for k in ([kind] if kind else ["model", "dataset", "space"]):
+              try:
+                  api.repo_info(repo, repo_type=k)
+                  kind = k
+                  break
+              except Exception:
+                  pass
+          else:
+              sys.exit(f"Hugging Face repo {repo} not found (or the token cannot see it)")
+          print(f"Hugging Face {kind} repo: {repo}")
+          with open(type_file, "w") as fp:
+              fp.write(kind)
           for f in files:
               name = os.path.basename(f)
               for attempt in range(3):
@@ -370,6 +386,7 @@ jobs:
           EOF
           # resolve/main/<file> answers with the file itself (via a CDN redirect),
           # no sign-in needed as long as the repo is public.
+          TYPE="$(cat "$TYPE_FILE")"
           case "$TYPE" in
             dataset) PREFIX="datasets/" ;;
             space) PREFIX="spaces/" ;;
