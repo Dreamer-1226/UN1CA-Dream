@@ -13,7 +13,7 @@ name: OTA
 # of those devices is an OTA build and phones never leave the chain. It can also
 # be run by hand, for several devices at once.
 #
-# Needs the OTA_KEY_PK8 / OTA_KEY_PEM secrets (base64 of security/ssch71_ota.*)
+# Needs the OTA_KEY_PK8 secret (base64 of security/ssch71_ota.pk8)
 # and the donor firmwares pinned (scripts/pin_firmware.sh), or Samsung updates
 # would turn every incremental into a full image.
 
@@ -140,7 +140,7 @@ jobs:
           OTA_KEY_PK8: ${{ secrets.OTA_KEY_PK8 }}
           OTA_KEY_PEM: ${{ secrets.OTA_KEY_PEM }}
         run: |
-          [ -n "$OTA_KEY_PK8" ] && [ -n "$OTA_KEY_PEM" ] || { echo "::error::OTA_KEY_PK8 / OTA_KEY_PEM secrets are not set"; exit 1; }
+          [ -n "$OTA_KEY_PK8" ] || { echo "::error::The OTA_KEY_PK8 secret is not set"; exit 1; }
           sudo apt update
           DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
             attr ccache clang ffmpeg libbrotli-dev libbz2-dev \
@@ -153,13 +153,20 @@ jobs:
           echo -n "${{ secrets.PLATFORM_KEY_PK8 }}" | base64 --decode > security/unica_platform.pk8
           echo -n "${{ secrets.PLATFORM_KEY_PEM }}" | base64 --decode > security/unica_platform.x509.pem
           echo -n "$OTA_KEY_PK8" | base64 --decode > security/ssch71_ota.pk8
-          echo -n "$OTA_KEY_PEM" | base64 --decode > /tmp/ssch71_ota.x509.pem
-          # Every build ships the committed certificate in otacerts.zip; the key
-          # must be its pair or devices would reject the packages.
-          if [ -f security/ssch71_ota.x509.pem ] && ! cmp -s /tmp/ssch71_ota.x509.pem security/ssch71_ota.x509.pem; then
-            echo "::error::OTA_KEY_PEM does not match security/ssch71_ota.x509.pem"; exit 1
+          # The certificate is public and committed; OTA_KEY_PEM is only needed
+          # when it is not.
+          if [ ! -f security/ssch71_ota.x509.pem ]; then
+            [ -n "$OTA_KEY_PEM" ] || { echo "::error::security/ssch71_ota.x509.pem is not committed and OTA_KEY_PEM is not set"; exit 1; }
+            echo -n "$OTA_KEY_PEM" | base64 --decode > security/ssch71_ota.x509.pem
           fi
-          mv /tmp/ssch71_ota.x509.pem security/ssch71_ota.x509.pem
+          # Every build ships this certificate in otacerts.zip; the key must be
+          # its pair or devices would reject the packages.
+          KEY_PUB="$(openssl pkey -inform DER -in security/ssch71_ota.pk8 -pubout 2> /dev/null \
+            || openssl pkey -in security/ssch71_ota.pk8 -pubout)"
+          CERT_PUB="$(openssl x509 -in security/ssch71_ota.x509.pem -noout -pubkey)"
+          if [ -z "$KEY_PUB" ] || [ "$KEY_PUB" != "$CERT_PUB" ]; then
+            echo "::error::OTA_KEY_PK8 is not the key of security/ssch71_ota.x509.pem"; exit 1
+          fi
 
       - name: Set up JDK 21 and 17
         uses: actions/setup-java@v6
