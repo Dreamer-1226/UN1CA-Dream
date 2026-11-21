@@ -322,6 +322,54 @@ jobs:
           rm -f "${{ steps.out.outputs.tf }}"
           ls -la out/release
 
+      - name: Upload to Hugging Face
+        id: hf
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO: ${{ vars.HF_REPO }}
+          HF_REPO_TYPE: ${{ vars.HF_REPO_TYPE }}
+        timeout-minutes: 90
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_REPO" ]; then
+            echo "::warning::Hugging Face is not configured (HF_TOKEN secret, HF_REPO variable)"
+            exit 0
+          fi
+          TYPE="${HF_REPO_TYPE:-model}"
+          FILES=("$FULL_ZIP")
+          for f in out/release/*INCREMENTAL*.zip; do
+            [ -f "$f" ] && FILES+=("$f")
+          done
+          pip install -q --break-system-packages -U huggingface_hub hf_xet 2> /dev/null \
+            || pip install -q -U huggingface_hub hf_xet
+          python3 - "$HF_REPO" "$TYPE" "${{ matrix.target }}" "${FILES[@]}" <<'EOF'
+          import os, sys, time
+          from huggingface_hub import HfApi
+          repo, kind, target, *files = sys.argv[1:]
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          for f in files:
+              name = os.path.basename(f)
+              for attempt in range(3):
+                  try:
+                      api.upload_file(path_or_fileobj=f, path_in_repo=f"{target}/{name}",
+                                      repo_id=repo, repo_type=kind,
+                                      commit_message=f"{target}: {name}")
+                      print(f"Uploaded {target}/{name}")
+                      break
+                  except Exception as e:
+                      print(f"Upload of {name} failed: {e}")
+                      if attempt == 2:
+                          raise
+                      time.sleep(30)
+          EOF
+          # resolve/main/<file> answers with the file itself (via a CDN redirect),
+          # no sign-in needed as long as the repo is public.
+          case "$TYPE" in
+            dataset) PREFIX="datasets/" ;;
+            space) PREFIX="spaces/" ;;
+            *) PREFIX="" ;;
+          esac
+          echo "base=https://huggingface.co/$PREFIX$HF_REPO/resolve/main/${{ matrix.target }}" >> "$GITHUB_OUTPUT"
+
       - name: Upload to SourceForge
         id: sf
         env:
@@ -353,7 +401,7 @@ jobs:
 
       - name: Upload full package to GoFile
         id: gofile
-        if: steps.sf.outputs.base == ''
+        if: steps.sf.outputs.base == '' && steps.hf.outputs.base == ''
         continue-on-error: true
         timeout-minutes: 40
         run: |
@@ -377,12 +425,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CHANGELOG: ${{ steps.prev.outputs.changelog }}
           SF_BASE: ${{ steps.sf.outputs.base }}
+          HF_BASE: ${{ steps.hf.outputs.base }}
           GOFILE: ${{ steps.gofile.outputs.link }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           FULL="$FULL_ZIP"
           FILES=(out/release/target_files.zip.part*)
-          if [ -n "$SF_BASE" ]; then
+          if [ -n "$HF_BASE" ]; then
+            LINK="$HF_BASE/$(basename "$FULL")"
+          elif [ -n "$SF_BASE" ]; then
             LINK="$SF_BASE/$(basename "$FULL")"
           else
             LINK="$GOFILE"
@@ -396,7 +447,7 @@ jobs:
             [ -n "$CHANGELOG" ] && { echo; echo "$CHANGELOG"; }
           } > out/notes.md
           echo "### ${{ matrix.target }} (${{ steps.prev.outputs.mode }}): ${LINK:-no full package link}" >> "$GITHUB_STEP_SUMMARY"
-          # Full packages over 2 GiB only go to SourceForge (or GoFile); smaller
+          # Full packages over 2 GiB only go to Hugging Face / SourceForge (or GoFile); smaller
           # ones go in the release too, as a second download URL.
           if [ "$(stat -c %s "$FULL")" -lt 2147483648 ]; then
             FILES+=("$FULL")
@@ -411,6 +462,7 @@ jobs:
         env:
           CHANGELOG: ${{ steps.prev.outputs.changelog }}
           SF_BASE: ${{ steps.sf.outputs.base }}
+          HF_BASE: ${{ steps.hf.outputs.base }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           BASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
@@ -423,6 +475,7 @@ jobs:
           {
             local f="$1" big="$2"
             [ "$big" = 1 ] || echo "$BASE_URL/$(basename "$f")"
+            [ -z "$HF_BASE" ] || echo "$HF_BASE/$(basename "$f")"
             [ -z "$SF_BASE" ] || echo "$SF_BASE/$(basename "$f")"
           }
           publish()
@@ -433,7 +486,7 @@ jobs:
             if [ "${#U[@]}" -gt 0 ]; then
               python3 "$MANIFEST_PY" add updates/manifest.json "$FULL" "${U[@]}" || return 1
             else
-              echo "::warning::Full package is over 2 GiB and SourceForge is not configured, so it is not in the manifest"
+              echo "::warning::Full package is over 2 GiB and neither Hugging Face nor SourceForge is configured, so it is not in the manifest"
             fi
             for f in "$RELEASE_DIR"/*INCREMENTAL*.zip; do
               [ -f "$f" ] || continue
