@@ -1,0 +1,55 @@
+name: ShellCheck
+
+# Lint only: runs next to the build workflows and never blocks them.
+# Pushes and PRs check the shell scripts they change; a manual run checks all.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['**.sh']
+  push:
+    branches: ['sembilan']
+    paths: ['**.sh']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            platform
+            scripts
+            target
+            unica
+
+      - name: Run shellcheck
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          FILTER='^(platform|scripts|target|unica)/.*\.sh$'
+          SKIP='(ssi\.sh|/config\.sh|/sff\.sh)$'
+          if [ "$EVENT" = push ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]]; then
+            FILES="$(git diff --name-only --diff-filter=d "$BEFORE" HEAD)"
+          elif [ "$EVENT" = pull_request ]; then
+            FILES="$(git diff --name-only --diff-filter=d "$BASE" HEAD)"
+          else
+            FILES="$(git ls-files)"
+          fi
+          FILES="$(grep -E "$FILTER" <<< "$FILES" | grep -vE "$SKIP" || true)"
+          if [ -z "$FILES" ]; then
+            echo "No shell scripts to check"
+            exit 0
+          fi
+          echo "Checking $(wc -l <<< "$FILES") file(s)"
+          tr '\n' '\0' <<< "$FILES" | xargs -0 -P "$(nproc)" -n 8 shellcheck -e SC1090,SC1091 -s bash
