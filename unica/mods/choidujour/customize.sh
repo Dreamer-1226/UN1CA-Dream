@@ -59,6 +59,11 @@ fi
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 _SETTINGS="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk"
 
+# Settings > Software update opens UN1CA Updates instead of the stock FOTA client.
+LOG "- Pointing Settings > Software update at UN1CA Updates"
+python3 "$MODPATH/redirect_update.py" "$_SETTINGS/res" \
+    || LOGW "Could not point Settings > Software update at UN1CA Updates"
+
 # Settings > Software update and the FOTA suggestion open UN1CA Updates. The
 # Settings side of this was written for older donors, so each step only runs
 # where it still fits; the app itself checks for updates on its own either way.

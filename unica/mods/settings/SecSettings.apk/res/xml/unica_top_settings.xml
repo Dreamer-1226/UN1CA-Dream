@@ -17,7 +17,7 @@
     <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_unica_design_lips" android:title="@string/unica_extra_settings_title" android:key="unica_extra_settings" android:fragment="io.mesalabs.unica.settings.extra.ExtraSettingsFragment" settings:controller="io.mesalabs.unica.settings.extra.ExtraSettingsPreferenceController" />
     <com.samsung.android.settings.widget.SecInsetCategoryPreference />
     <SecPreferenceCategory android:key="unica_design_141126_unica_top_settings_4" android:title="@string/unica_design_141126_unica_top_settings_group_4" />
-    <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_unica_design_poop" android:title="@string/unica_troubleshooting_title" android:key="unica_troubleshooting" android:summary="@string/unica_troubleshooting_summary">
+    <io.mesalabs.unica.settings.preference.IconPreference android:icon="@drawable/ic_unica_settings_troubleshoot" android:title="@string/unica_troubleshooting_title" android:key="unica_troubleshooting" android:summary="@string/unica_troubleshooting_summary">
         <intent android:targetPackage="com.android.settings" android:targetClass="io.mesalabs.unica.troubleshooting.TroubleshootingActivity" />
     </io.mesalabs.unica.settings.preference.IconPreference>
 </PreferenceScreen>
