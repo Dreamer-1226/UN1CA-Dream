@@ -146,6 +146,9 @@ jobs:
             attr ccache clang ffmpeg libbrotli-dev libbz2-dev \
             libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
             libzstd-dev lld protobuf-compiler webp
+          # The disk clean-up removes the GitHub CLI; the release and incremental
+          # steps need it.
+          command -v gh > /dev/null || sudo apt install -yq gh
           sudo apt install -yq "linux-modules-extra-$(uname -r)" || echo "::warning::linux-modules-extra-$(uname -r) is not available"
           sudo modprobe -a erofs f2fs || echo "::warning::erofs/f2fs kernel modules are not available"
           git config --global user.name "github-actions[bot]"
