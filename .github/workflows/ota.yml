@@ -1,18 +1,37 @@
 name: OTA
 
-# Builds a device from the "ota" branch and publishes it to the UN1CA Updates
-# channel (updates/manifest.json on the same branch):
-#   base        : full package. Starts the channel; users flash it once by hand.
-#   incremental : diff against the device's previous OTA build, so users on that
+# Builds devices and publishes them to the UN1CA Updates channel
+# (updates/manifest.json on the "ota" branch, which only holds channel data):
+#   base        : full package. Starts a device's channel; flash it once by hand.
+#   incremental : diff against the device's previous OTA build, so phones on that
 #                 build get a small update in UN1CA Updates.
-# Each build keeps its target-files zip in the release (split into <2 GiB parts),
-# which is what the next incremental is diffed against.
+#   auto        : incremental when the device has a previous OTA build, else base.
+# Each build keeps its target-files zip in its release (split into <2 GiB parts)
+# until the next build has been diffed against it.
+#
+# The CI workflows call this for the OTA devices on every push, so every build
+# of those devices is an OTA build and phones never leave the chain. It can also
+# be run by hand, for several devices at once.
 #
 # Needs the OTA_KEY_PK8 / OTA_KEY_PEM secrets (base64 of security/ssch71_ota.*)
-# and the donor firmwares pinned (scripts/pin_firmware.sh), or the base would
-# move under the incremental packages.
+# and the donor firmwares pinned (scripts/pin_firmware.sh), or Samsung updates
+# would turn every incremental into a full image.
 
 on:
+  workflow_call:
+    inputs:
+      targets:
+        description: JSON list of devices
+        required: true
+        type: string
+      mode:
+        required: false
+        type: string
+        default: auto
+      changelog:
+        required: false
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       dm1q:
@@ -51,9 +70,9 @@ on:
         description: Package
         required: true
         type: choice
-        options: [incremental, base]
+        options: [auto, incremental, base]
       changelog:
-        description: Changelog shown in UN1CA Updates (optional)
+        description: Changelog shown in UN1CA Updates (empty = commit titles since the previous build)
         required: false
         type: string
 
@@ -70,18 +89,19 @@ jobs:
     outputs:
       list: ${{ steps.pick.outputs.list }}
     steps:
-      - name: Collect the ticked devices
+      - name: Collect the devices
         id: pick
         env:
           INPUTS: ${{ toJSON(inputs) }}
         run: |
-          LIST="$(jq -c '[to_entries[] | select(.value == true or .value == "true") | .key]' <<< "$INPUTS")"
+          LIST="$(jq -c 'if (.targets // "") != "" then (.targets | fromjson)
+                         else [to_entries[] | select(.value == true or .value == "true") | .key] end' <<< "$INPUTS")"
           [ "$LIST" != "[]" ] || { echo "::error::Tick at least one device"; exit 1; }
           echo "Devices: $LIST"
           echo "list=$LIST" >> "$GITHUB_OUTPUT"
 
   build:
-    name: ${{ matrix.target }} (${{ inputs.mode }})
+    name: ${{ matrix.target }}
     needs: targets
     runs-on: ubuntu-24.04
     strategy:
@@ -97,7 +117,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v7
         with:
-          ref: ${{ env.OTA_BRANCH }}
           submodules: 'recursive'
 
       - name: Free disk space (1/3)
@@ -171,7 +190,7 @@ jobs:
       - name: Check pinned firmware
         run: |
           if [ -z "$SOURCE_FIRMWARE_VERSION" ]; then
-            echo "::error::$SOURCE_FIRMWARE is not pinned. Run scripts/pin_firmware.sh on the ota branch first."
+            echo "::error::$SOURCE_FIRMWARE is not pinned. Run scripts/pin_firmware.sh first."
             exit 1
           fi
           echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
@@ -180,16 +199,36 @@ jobs:
         id: prev
         env:
           GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.mode }}
+          CHANGELOG: ${{ inputs.changelog }}
         run: |
-          STATE="updates/state/${{ matrix.target }}"
-          if [ "${{ inputs.mode }}" = incremental ]; then
-            [ -f "$STATE" ] || { echo "::error::No previous OTA build for ${{ matrix.target }}. Run a base build first."; exit 1; }
-            # shellcheck disable=SC1090
-            source "$STATE"
+          git fetch -q --depth=1 origin "+refs/heads/$OTA_BRANCH:refs/remotes/origin/$OTA_BRANCH" || true
+          STATE="$(git show "origin/$OTA_BRANCH:updates/state/${{ matrix.target }}" 2> /dev/null || true)"
+          [ -n "$MODE" ] || MODE=auto
+          if [ "$MODE" = auto ]; then
+            if [ -n "$STATE" ]; then MODE=incremental; else MODE=base; fi
+          fi
+          if [ "$MODE" = incremental ]; then
+            [ -n "$STATE" ] || { echo "::error::No previous OTA build for ${{ matrix.target }}. Run a base build first."; exit 1; }
+            TAG="$(sed -n 's/^TAG=//p' <<< "$STATE")"
+            TIMESTAMP="$(sed -n 's/^TIMESTAMP=//p' <<< "$STATE")"
+            COMMIT="$(sed -n 's/^COMMIT=//p' <<< "$STATE")"
             echo "tag=$TAG" >> "$GITHUB_OUTPUT"
             echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
-            echo "Previous build: $TAG ($TIMESTAMP)"
+            echo "Previous build: $TAG ($TIMESTAMP, ${COMMIT:-unknown commit})"
+            # Default changelog: the commit titles since the previous build.
+            if [ -z "$CHANGELOG" ] && [ -n "$COMMIT" ]; then
+              CHANGELOG="$(gh api "repos/$GITHUB_REPOSITORY/compare/$COMMIT...$GITHUB_SHA" \
+                --jq '.commits[] | "- " + (.commit.message | split("\n")[0])' 2> /dev/null | grep -v '^- Merge ' | tail -n 50 || true)"
+            fi
           fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            printf '%s\n' "$CHANGELOG"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "Mode: $MODE"
 
       - name: Build dependencies
         run: ./scripts/build_dependencies.sh
@@ -247,7 +286,7 @@ jobs:
           df -h .
 
       - name: Build incremental package
-        if: inputs.mode == 'incremental'
+        if: steps.prev.outputs.mode == 'incremental'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -336,24 +375,27 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          CHANGELOG: ${{ inputs.changelog }}
+          CHANGELOG: ${{ steps.prev.outputs.changelog }}
           SF_BASE: ${{ steps.sf.outputs.base }}
+          GOFILE: ${{ steps.gofile.outputs.link }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           FULL="$FULL_ZIP"
           FILES=(out/release/target_files.zip.part*)
+          if [ -n "$SF_BASE" ]; then
+            LINK="$SF_BASE/$(basename "$FULL")"
+          else
+            LINK="$GOFILE"
+          fi
           {
-            echo "${{ matrix.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
+            echo "${{ matrix.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ steps.prev.outputs.mode }})"
             echo
             echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
-            if [ -n "$SF_BASE" ]; then
-              echo "Full package: $SF_BASE/$(basename "$FULL")"
-            elif [ -n "${{ steps.gofile.outputs.link }}" ]; then
-              echo "Full package: ${{ steps.gofile.outputs.link }}"
-            fi
+            [ -n "$LINK" ] && echo "Full package: $LINK"
             [ -n "${{ steps.prev.outputs.tag }}" ] && echo "Incremental from: ${{ steps.prev.outputs.tag }}"
             [ -n "$CHANGELOG" ] && { echo; echo "$CHANGELOG"; }
           } > out/notes.md
+          echo "### ${{ matrix.target }} (${{ steps.prev.outputs.mode }}): ${LINK:-no full package link}" >> "$GITHUB_STEP_SUMMARY"
           # Full packages over 2 GiB only go to SourceForge (or GoFile); smaller
           # ones go in the release too, as a second download URL.
           if [ "$(stat -c %s "$FULL")" -lt 2147483648 ]; then
@@ -362,17 +404,20 @@ jobs:
           for f in out/release/*INCREMENTAL*.zip; do
             [ -f "$f" ] && FILES+=("$f")
           done
-          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --target "$(git rev-parse HEAD)" \
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "$TAG" --notes-file out/notes.md "${FILES[@]}"
 
       - name: Update manifest
         env:
-          CHANGELOG: ${{ inputs.changelog }}
+          CHANGELOG: ${{ steps.prev.outputs.changelog }}
           SF_BASE: ${{ steps.sf.outputs.base }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           BASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
-          FULL="$FULL_ZIP"
+          FULL="$PWD/$FULL_ZIP"
+          MANIFEST_PY="$PWD/scripts/ota/manifest.py"
+          RELEASE_DIR="$PWD/out/release"
+          OTA="$RUNNER_TEMP/ota"
           # UN1CA Updates tries the URLs of an entry in order.
           urls()
           {
@@ -386,33 +431,48 @@ jobs:
             [ "$(stat -c %s "$FULL")" -lt 2147483648 ] || BIG=1
             mapfile -t U < <(urls "$FULL" "$BIG")
             if [ "${#U[@]}" -gt 0 ]; then
-              python3 scripts/ota/manifest.py add updates/manifest.json "$FULL" "${U[@]}" || return 1
+              python3 "$MANIFEST_PY" add updates/manifest.json "$FULL" "${U[@]}" || return 1
             else
               echo "::warning::Full package is over 2 GiB and SourceForge is not configured, so it is not in the manifest"
             fi
-            for f in out/release/*INCREMENTAL*.zip; do
+            for f in "$RELEASE_DIR"/*INCREMENTAL*.zip; do
               [ -f "$f" ] || continue
               mapfile -t U < <(urls "$f" 0)
-              python3 scripts/ota/manifest.py add updates/manifest.json "$f" "${U[@]}" || return 1
+              python3 "$MANIFEST_PY" add updates/manifest.json "$f" "${U[@]}" || return 1
             done
+            mkdir -p updates/state
             [ -f updates/manifest.json ] || echo '{"response": []}' > updates/manifest.json
-            python3 scripts/ota/manifest.py check updates/manifest.json || return 1
+            python3 "$MANIFEST_PY" check updates/manifest.json || return 1
             VERSION="$(unzip -p "$FULL" build_info.txt | sed -n 's/^version=//p')"
             if [ -n "$CHANGELOG" ]; then
               printf '%s\n' "$CHANGELOG" > "updates/$VERSION.txt"
             fi
-            mkdir -p updates/state
-            printf 'TAG=%s\nTIMESTAMP=%s\n' "$TAG" "${{ steps.out.outputs.timestamp }}" > "updates/state/${{ matrix.target }}"
+            printf 'TAG=%s\nTIMESTAMP=%s\nCOMMIT=%s\n' "$TAG" "${{ steps.out.outputs.timestamp }}" "$GITHUB_SHA" \
+              > "updates/state/${{ matrix.target }}"
             git add updates
-            git commit -m "ota: ${{ matrix.target }}: Publish ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
+            git commit -q -m "ota: ${{ matrix.target }}: Publish ${{ steps.out.outputs.timestamp }} (${{ steps.prev.outputs.mode }})"
           }
-          # Devices built side by side all edit manifest.json: on a rejected push,
-          # start again from the branch as the other device left it.
+          # The ota branch only holds channel data. Devices built side by side all
+          # edit manifest.json: on a rejected push, start again from the branch as
+          # the other device left it.
           for _ in 1 2 3 4 5; do
-            git fetch origin "$OTA_BRANCH"
-            git reset -q --hard "origin/$OTA_BRANCH"
-            publish || exit 1
-            git push origin "HEAD:$OTA_BRANCH" && exit 0
+            git fetch -q --depth=1 origin "+refs/heads/$OTA_BRANCH:refs/remotes/origin/$OTA_BRANCH"
+            rm -rf "$OTA"; git worktree prune
+            git worktree add -q --detach "$OTA" "origin/$OTA_BRANCH"
+            (cd "$OTA" && publish) || exit 1
+            git -C "$OTA" push origin "HEAD:$OTA_BRANCH" && exit 0
             sleep $((RANDOM % 20 + 5))
           done
           exit 1
+
+      - name: Drop the previous target-files
+        if: steps.prev.outputs.tag != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only the newest build is diffed against; keep the old packages.
+          PREV="${{ steps.prev.outputs.tag }}"
+          for a in $(gh release view "$PREV" -R "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep '^target_files\.zip\.part'); do
+            gh release delete-asset "$PREV" "$a" -R "$GITHUB_REPOSITORY" -y
+          done
