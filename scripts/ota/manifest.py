@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maintain the UN1CA Updates (ChoiDujour) manifest on the ota branch.
 
-  manifest.py add <manifest.json> <package.zip> <url>
+  manifest.py add <manifest.json> <package.zip> <url> [<url>...]
   manifest.py check <manifest.json>
 
 ChoiDujour offers an entry when device == ro.unica.device, datetime is not older
@@ -64,7 +64,7 @@ def check(data):
         seen.add(e['filename'])
 
 
-def add(path, package, url):
+def add(path, package, *urls):
     info = build_info(package)
     sha = hashlib.sha256()
     with open(package, 'rb') as f:
@@ -77,7 +77,7 @@ def add(path, package, url):
         'id': hashlib.sha256(f'{sha.hexdigest()} {info["timestamp"]}'.encode()).hexdigest(),
         'patch': info['security_patch_version'],
         'size': os.path.getsize(package),
-        'urls': [url],
+        'urls': list(urls),
         'version': info['version'],
         'incremental': int(info['incremental']),
     }
@@ -91,7 +91,7 @@ def add(path, package, url):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 5 and sys.argv[1] == 'add':
+    if len(sys.argv) >= 5 and sys.argv[1] == 'add':
         add(*sys.argv[2:])
     elif len(sys.argv) == 3 and sys.argv[1] == 'check':
         check(load(sys.argv[2]))

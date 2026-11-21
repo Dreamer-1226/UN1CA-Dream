@@ -235,8 +235,38 @@ jobs:
           rm -f "${{ steps.out.outputs.tf }}"
           ls -la out/release
 
+      - name: Upload to SourceForge
+        id: sf
+        env:
+          SF_USER: ${{ secrets.SF_USER }}
+          SF_SSH_KEY: ${{ secrets.SF_SSH_KEY }}
+          SF_PROJECT: ${{ vars.SF_PROJECT }}
+        timeout-minutes: 90
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SF_SSH_KEY" ] || [ -z "$SF_PROJECT" ]; then
+            echo "::warning::SourceForge is not configured (SF_USER / SF_SSH_KEY secrets, SF_PROJECT variable)"
+            exit 0
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SF_SSH_KEY" > ~/.ssh/sf && chmod 600 ~/.ssh/sf
+          ssh-keyscan -t ed25519,rsa frs.sourceforge.net >> ~/.ssh/known_hosts 2> /dev/null
+          DIR="/home/frs/project/$SF_PROJECT/${{ inputs.target }}"
+          printf -- '-mkdir %s\n' "$DIR" | sftp -i ~/.ssh/sf -b - "$SF_USER@frs.sourceforge.net"
+          FILES=("$FULL_ZIP")
+          for f in out/release/*INCREMENTAL*.zip; do
+            [ -f "$f" ] && FILES+=("$f")
+          done
+          for _ in 1 2 3; do
+            rsync -e "ssh -i $HOME/.ssh/sf" --partial --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:$DIR/" && break
+            sleep 30
+          done
+          rm -f ~/.ssh/sf
+          # downloads.sourceforge.net redirects to a mirror; UN1CA Updates follows it.
+          echo "base=https://downloads.sourceforge.net/project/$SF_PROJECT/${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+
       - name: Upload full package to GoFile
         id: gofile
+        if: steps.sf.outputs.base == ''
         continue-on-error: true
         timeout-minutes: 40
         run: |
@@ -259,6 +289,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           CHANGELOG: ${{ inputs.changelog }}
+          SF_BASE: ${{ steps.sf.outputs.base }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           FULL="$FULL_ZIP"
@@ -267,12 +298,16 @@ jobs:
             echo "${{ inputs.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
             echo
             echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
-            [ -n "${{ steps.gofile.outputs.link }}" ] && echo "Full package: ${{ steps.gofile.outputs.link }}"
+            if [ -n "$SF_BASE" ]; then
+              echo "Full package: $SF_BASE/$(basename "$FULL")"
+            elif [ -n "${{ steps.gofile.outputs.link }}" ]; then
+              echo "Full package: ${{ steps.gofile.outputs.link }}"
+            fi
             [ -n "${{ steps.prev.outputs.tag }}" ] && echo "Incremental from: ${{ steps.prev.outputs.tag }}"
             [ -n "$CHANGELOG" ] && { echo; echo "$CHANGELOG"; }
           } > out/notes.md
-          # Full packages over 2 GiB stay on GoFile; smaller ones go in the release
-          # too, so UN1CA Updates can offer them.
+          # Full packages over 2 GiB only go to SourceForge (or GoFile); smaller
+          # ones go in the release too, as a second download URL.
           if [ "$(stat -c %s "$FULL")" -lt 2147483648 ]; then
             FILES+=("$FULL")
           fi
@@ -285,15 +320,30 @@ jobs:
       - name: Update manifest
         env:
           CHANGELOG: ${{ inputs.changelog }}
+          SF_BASE: ${{ steps.sf.outputs.base }}
         run: |
           TAG="${{ steps.out.outputs.tag }}"
           BASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
           FULL="$FULL_ZIP"
-          if [ "$(stat -c %s "$FULL")" -lt 2147483648 ]; then
-            python3 scripts/ota/manifest.py add updates/manifest.json "$FULL" "$BASE_URL/$(basename "$FULL")"
+          # UN1CA Updates tries the URLs of an entry in order.
+          urls()
+          {
+            local f="$1" big="$2"
+            [ "$big" = 1 ] || echo "$BASE_URL/$(basename "$f")"
+            [ -z "$SF_BASE" ] || echo "$SF_BASE/$(basename "$f")"
+          }
+          BIG=0
+          [ "$(stat -c %s "$FULL")" -lt 2147483648 ] || BIG=1
+          mapfile -t U < <(urls "$FULL" "$BIG")
+          if [ "${#U[@]}" -gt 0 ]; then
+            python3 scripts/ota/manifest.py add updates/manifest.json "$FULL" "${U[@]}"
+          else
+            echo "::warning::Full package is over 2 GiB and SourceForge is not configured, so it is not in the manifest"
           fi
           for f in out/release/*INCREMENTAL*.zip; do
-            [ -f "$f" ] && python3 scripts/ota/manifest.py add updates/manifest.json "$f" "$BASE_URL/$(basename "$f")"
+            [ -f "$f" ] || continue
+            mapfile -t U < <(urls "$f" 0)
+            python3 scripts/ota/manifest.py add updates/manifest.json "$f" "${U[@]}"
           done
           [ -f updates/manifest.json ] || echo '{"response": []}' > updates/manifest.json
           python3 scripts/ota/manifest.py check updates/manifest.json
