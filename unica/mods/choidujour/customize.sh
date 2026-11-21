@@ -2,17 +2,19 @@
 SKIPUNZIP=1
 
 # UN1CA Updates (ChoiDujour) installs OTA packages it finds in a manifest, and
-# verifies them against /system/etc/security/otacerts.zip first. Ship it only
-# when this build can sign packages with a key the app will trust:
+# verifies them against /system/etc/security/otacerts.zip first. Ship it with
+# the certificate of the key the packages are signed with:
 # - the official UN1CA key (upstream manifest), or
-# - our own OTA key, security/ssch71_ota.pk8 (from the OTA_KEY_PK8 secret),
-#   with the app pointed at the manifest on our "ota" branch.
+# - our own OTA key, with the app pointed at the manifest on our "ota" branch.
+#   Its certificate (security/ssch71_ota.x509.pem) is public and in the tree, so
+#   every build ships the app; only the OTA workflow holds the private key
+#   (OTA_KEY_PK8) and signs packages with it.
 if $ROM_IS_OFFICIAL; then
     _OTA_KEY="unica_ota"
-elif [ -f "$SRC_DIR/security/ssch71_ota.pk8" ] && [ -f "$SRC_DIR/security/ssch71_ota.x509.pem" ]; then
+elif [ -f "$SRC_DIR/security/ssch71_ota.x509.pem" ]; then
     _OTA_KEY="ssch71_ota"
 else
-    LOG "\033[0;33m! No OTA signing key. Skipping\033[0m"
+    LOG "\033[0;33m! No OTA certificate. Skipping\033[0m"
     return 0
 fi
 

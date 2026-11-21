@@ -312,6 +312,18 @@ python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unic
 SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
 SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"
 
+# Settings > UN1CA Settings > UN1CA Updates, when the choidujour mod shipped the app.
+# This entry does not depend on the stock Settings layout, unlike the
+# Software update redirect in the choidujour mod.
+_UNICA_PAGE="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/res/xml/unica_top_settings.xml"
+if [ -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ] && \
+        ! grep -q 'android:key="unica_updates"' "$_UNICA_PAGE"; then
+    LOG "- Adding UN1CA Updates to UN1CA Settings"
+    [ "$(grep -c '</PreferenceScreen>' "$_UNICA_PAGE")" = "1" ] || ABORT "Unexpected UN1CA Settings page"
+    EVAL "sed -i 's|</PreferenceScreen>|    <io.mesalabs.unica.settings.preference.IconPreference android:icon=\"@drawable/ic_unica_settings_update\" android:title=\"@string/unica_updates_title\" android:key=\"unica_updates\" android:summary=\"@string/unica_updates_summary\">\\n        <intent android:targetPackage=\"io.mesalabs.choidujour\" android:targetClass=\"io.mesalabs.choidujour.activity.HomeActivity\" />\\n    </io.mesalabs.unica.settings.preference.IconPreference>\\n</PreferenceScreen>|' \"$_UNICA_PAGE\""
+fi
+unset _UNICA_PAGE
+
 # Settings > UN1CA Settings > Create problem report (collector from GoRhanHee-World/UN1CA, derived from MinsOS)
 LOG "- Adding the problem report collector to UN1CA Settings"
 bash "$MODPATH/bugreport/patch_settings.sh" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \

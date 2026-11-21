@@ -86,7 +86,13 @@ jobs:
           echo -n "${{ secrets.PLATFORM_KEY_PK8 }}" | base64 --decode > security/unica_platform.pk8
           echo -n "${{ secrets.PLATFORM_KEY_PEM }}" | base64 --decode > security/unica_platform.x509.pem
           echo -n "$OTA_KEY_PK8" | base64 --decode > security/ssch71_ota.pk8
-          echo -n "$OTA_KEY_PEM" | base64 --decode > security/ssch71_ota.x509.pem
+          echo -n "$OTA_KEY_PEM" | base64 --decode > /tmp/ssch71_ota.x509.pem
+          # Every build ships the committed certificate in otacerts.zip; the key
+          # must be its pair or devices would reject the packages.
+          if [ -f security/ssch71_ota.x509.pem ] && ! cmp -s /tmp/ssch71_ota.x509.pem security/ssch71_ota.x509.pem; then
+            echo "::error::OTA_KEY_PEM does not match security/ssch71_ota.x509.pem"; exit 1
+          fi
+          mv /tmp/ssch71_ota.x509.pem security/ssch71_ota.x509.pem
 
       - name: Set up JDK 21 and 17
         uses: actions/setup-java@v6

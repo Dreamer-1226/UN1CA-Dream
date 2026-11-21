@@ -70,7 +70,6 @@ security/unica_ota.x509.pem
 security/unica_ota.pk8
 security/unica_platform.x509.pem
 security/unica_platform.pk8
-security/ssch71_ota.x509.pem
 security/ssch71_ota.pk8
 
 #
