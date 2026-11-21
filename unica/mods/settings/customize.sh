@@ -311,3 +311,8 @@ python3 "$MODPATH/troubleshooting/install-policy.py" "$WORK_DIR" || ABORT "Faile
 python3 "$MODPATH/troubleshooting/registry.py" "$WORK_DIR/system/system/etc/unica/troubleshooting-targets.tsv" || ABORT "Failed to index ROM conflict targets"
 SET_METADATA "system" "system/etc/unica/troubleshooting-targets.tsv" 0 0 644 "u:object_r:system_file:s0"
 SET_METADATA "system" "system/bin/unica-troubleshooting" 0 0 755 "u:object_r:unica_troubleshooting_exec:s0"
+
+# Settings > UN1CA Settings > Create problem report (collector from GoRhanHee-World/UN1CA, derived from MinsOS)
+LOG "- Adding the problem report collector to UN1CA Settings"
+bash "$MODPATH/bugreport/patch_settings.sh" "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \
+    || ABORT "Failed to add the problem report collector"

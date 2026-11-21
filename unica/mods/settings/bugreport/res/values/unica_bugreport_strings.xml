@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_bugreport_title">Create problem report</string>
+    <string name="unica_bugreport_intro">Your phone\'s logs will be collected into a single file. Serial numbers, phone numbers, account names, network names, and addresses will be hidden before the file is saved. The file won\'t be sent anywhere.</string>
+    <string name="unica_bugreport_hint">Describe the problem (optional)</string>
+    <string name="unica_bugreport_create">Create</string>
+    <string name="unica_bugreport_share">Share</string>
+    <string name="unica_bugreport_share_failed">Couldn\'t share the file. It\'s saved in the UN1CA/reports folder.</string>
+    <string name="unica_bugreport_working">Collecting logs…\nThis may take a few minutes.</string>
+    <string name="unica_bugreport_done">Problem report saved.\n\n%1$s\n\nShare this file when you report the problem to the ROM maintainer. You can open the file to check its contents before sharing it.</string>
+    <string name="unica_bugreport_failed">Couldn\'t create problem report.\n\n%1$s</string>
+</resources>

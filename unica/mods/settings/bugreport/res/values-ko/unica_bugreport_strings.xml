@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_bugreport_title">문제 보고서 만들기</string>
+    <string name="unica_bugreport_intro">휴대전화의 로그를 파일 하나로 모읍니다. 일련번호, 전화번호, 계정 이름, 네트워크 이름 및 주소는 가려진 상태로 저장되며, 파일은 어디에도 전송되지 않습니다.</string>
+    <string name="unica_bugreport_hint">문제 내용 입력 (선택)</string>
+    <string name="unica_bugreport_create">만들기</string>
+    <string name="unica_bugreport_share">공유</string>
+    <string name="unica_bugreport_share_failed">파일을 공유할 수 없습니다. 파일은 UN1CA/reports 폴더에 저장되어 있습니다.</string>
+    <string name="unica_bugreport_working">로그 수집 중…\n몇 분 정도 걸릴 수 있습니다.</string>
+    <string name="unica_bugreport_done">문제 보고서가 저장되었습니다.\n\n%1$s\n\n롬 개발자에게 문제를 알릴 때 이 파일을 공유하세요. 공유하기 전에 파일을 열어 내용을 확인할 수 있습니다.</string>
+    <string name="unica_bugreport_failed">문제 보고서를 만들 수 없습니다.\n\n%1$s</string>
+</resources>
