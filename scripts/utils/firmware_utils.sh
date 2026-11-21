@@ -5,6 +5,20 @@
 source "$SRC_DIR/scripts/utils/build_utils.sh" || return 1
 # ]
 
+# GET_PINNED_FIRMWARE <firmware string>
+# Prints the build pinned for that firmware with SOURCE_FIRMWARE_VERSION or
+# TARGET_FIRMWARE_VERSION ("PDA/CSC/CP"), or nothing when it follows FUS.
+# Pinning keeps the OTA chain on one donor build: an incremental package only
+# applies to the exact build it was diffed against.
+GET_PINNED_FIRMWARE()
+{
+    if [[ "$1" == "$SOURCE_FIRMWARE" ]] && [ "${SOURCE_FIRMWARE_VERSION:-}" ]; then
+        echo -n "$SOURCE_FIRMWARE_VERSION"
+    elif [[ "$1" == "$TARGET_FIRMWARE" ]] && [ "${TARGET_FIRMWARE_VERSION:-}" ]; then
+        echo -n "$TARGET_FIRMWARE_VERSION"
+    fi
+}
+
 # COMPARE_SEC_BUILD_VERSION <string1> <string2>
 # Returns whether or not `string1` build number is older than `string2`.
 COMPARE_SEC_BUILD_VERSION()

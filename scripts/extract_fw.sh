@@ -349,7 +349,8 @@ PREPARE_SCRIPT "$@"
 for i in "${FIRMWARES[@]}"; do
     PARSE_FIRMWARE_STRING "$i" || exit 1
 
-    LATEST_FIRMWARE="$(GET_LATEST_FIRMWARE "$MODEL" "$CSC")"
+    LATEST_FIRMWARE="$(GET_PINNED_FIRMWARE "$i")"
+    [ "$LATEST_FIRMWARE" ] || LATEST_FIRMWARE="$(GET_LATEST_FIRMWARE "$MODEL" "$CSC")"
     if [ ! "$LATEST_FIRMWARE" ]; then
         LOGE "Latest available firmware could not be fetched"
         exit 1
@@ -364,7 +365,11 @@ for i in "${FIRMWARES[@]}"; do
 
     if ! $FORCE; then
         # Skip if firmware has been extracted
-        if [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ]; then
+        if [ "$(GET_PINNED_FIRMWARE "$i")" ] && [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ] && \
+                [[ "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" != "$LATEST_FIRMWARE" ]]; then
+            # A pinned build must be extracted exactly, never a newer one left over.
+            LOG "\033[0;33m! Extracted firmware is not the pinned $LATEST_FIRMWARE, extracting again\033[0m"
+        elif [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ]; then
             if ! COMPARE_SEC_BUILD_VERSION "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" "$LATEST_FIRMWARE"; then
                 if [ -f "$ODIN_DIR/${MODEL}_${CSC}/.downloaded" ] && \
                         ! COMPARE_SEC_BUILD_VERSION "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" "$(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded")"; then

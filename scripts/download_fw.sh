@@ -14,6 +14,7 @@ CSC=""
 IMEI=""
 SERIAL_NO=""
 LATEST_FIRMWARE=""
+PINNED_FIRMWARE=""
 ZIP_FILE=""
 
 PREPARE_SCRIPT()
@@ -113,8 +114,9 @@ PREPARE_SCRIPT "$@"
 for i in "${FIRMWARES[@]}"; do
     PARSE_FIRMWARE_STRING "$i" || exit 1
 
+    PINNED_FIRMWARE="$(GET_PINNED_FIRMWARE "$i")"
     LATEST_FIRMWARE="$(GET_LATEST_FIRMWARE "$MODEL" "$CSC")"
-    if [ ! "$LATEST_FIRMWARE" ]; then
+    if [ ! "$LATEST_FIRMWARE" ] && [ ! "$PINNED_FIRMWARE" ]; then
         LOGE "Latest available firmware could not be fetched"
         exit 1
     fi
@@ -126,7 +128,25 @@ for i in "${FIRMWARES[@]}"; do
 
     LOG_STEP_IN
 
-    if ! $FORCE; then
+    if [ "$PINNED_FIRMWARE" ]; then
+        LOG "- Pinned firmware: $PINNED_FIRMWARE"
+        if [ "$LATEST_FIRMWARE" ] && [[ "$LATEST_FIRMWARE" != "$PINNED_FIRMWARE" ]]; then
+            LOG "\033[0;33m! FUS has $LATEST_FIRMWARE, building with the pinned $PINNED_FIRMWARE\033[0m"
+        fi
+
+        if ! $FORCE && [[ "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted" 2> /dev/null)" == "$PINNED_FIRMWARE" ]]; then
+            LOG "\033[0;33m! This firmware has already been extracted, skipping\033[0m"
+            LOG_STEP_OUT; LOG_STEP_OUT
+            continue
+        fi
+        if ! $FORCE && [[ "$(cat "$ODIN_DIR/${MODEL}_${CSC}/.downloaded" 2> /dev/null)" == "$PINNED_FIRMWARE" ]]; then
+            LOG "\033[0;33m! This firmware has already been downloaded\033[0m"
+            LOG_STEP_OUT; LOG_STEP_OUT
+            continue
+        fi
+
+        LATEST_FIRMWARE="$PINNED_FIRMWARE"
+    elif ! $FORCE; then
         # Skip if firmware has been extracted and equal/newer than the one in FUS
         if [ -f "$FW_DIR/${MODEL}_${CSC}/.extracted" ]; then
             if COMPARE_SEC_BUILD_VERSION "$(cat "$FW_DIR/${MODEL}_${CSC}/.extracted")" "$LATEST_FIRMWARE"; then
@@ -154,7 +174,11 @@ for i in "${FIRMWARES[@]}"; do
     # Anan's samloader stores its logs in the current working directory, let's move into OUT_DIR just for this time
     (
     cd "$OUT_DIR" || exit 1
-    samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
+    if [ "$PINNED_FIRMWARE" ]; then
+        samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -v "$PINNED_FIRMWARE" -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
+    else
+        samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
+    fi
     )
 
     ZIP_FILE="$(find "$ODIN_DIR/${MODEL}_${CSC}" -name "*.zip" | sort -r | head -n 1)"
