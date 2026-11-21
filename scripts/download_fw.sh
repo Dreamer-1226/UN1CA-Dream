@@ -175,7 +175,11 @@ for i in "${FIRMWARES[@]}"; do
     (
     cd "$OUT_DIR" || exit 1
     if [ "$PINNED_FIRMWARE" ]; then
-        samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -v "$PINNED_FIRMWARE" -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
+        # samloader only normalizes versions it looks up itself; FUS wants the
+        # four-part PDA/CSC/CP/PDA form, with CP = PDA when there is no modem.
+        SAMLOADER_VERSION="$(awk -F/ -v OFS=/ '{ if ($3 == "") $3 = $1; if (NF < 4) $4 = $1; print }' <<< "$PINNED_FIRMWARE")"
+        LOG "- Requesting $SAMLOADER_VERSION from FUS"
+        samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -v "$SAMLOADER_VERSION" -O "$ODIN_DIR/${MODEL}_${CSC}" || exit 1
     else
         samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
     fi
