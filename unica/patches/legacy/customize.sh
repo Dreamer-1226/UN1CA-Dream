@@ -520,7 +520,13 @@ if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "35" ]; then
         PATCH_OMX_COLOR_FORMAT "system/app/MotionPhoto/MotionPhoto.apk" \
             "com/samsung/android/sum/core/filter/EncoderFilter.smali" \
             "configCodec(Lcom/samsung/android/sum/core/message/Message;)V"
-        if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "ceec002848d1724c0620"; then
+        # S23 One UI 9 ARM32 library (from GoRhanHee-World/UN1CA 24e574a3).
+        if xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -qF "002847d102205390"; then
+            HEX_PATCH "$WORK_DIR/system/system/lib/libstagefright.so" \
+                "002847d102205390" "002847e002205390"
+        elif xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -qF "002847e002205390"; then
+            LOG "- /system/system/lib/libstagefright.so already accepts HDR10+ HEVC"
+        elif xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "ceec002848d1724c0620"; then
             HEX_PATCH "$WORK_DIR/system/system/lib/libstagefright.so" \
                 "ceec002848d1724c0620" "ceec002848e0724c0620"
         elif xxd -p -c 0 "$WORK_DIR/system/system/lib/libstagefright.so" | grep -q "aaea002879d1264c0620"; then
