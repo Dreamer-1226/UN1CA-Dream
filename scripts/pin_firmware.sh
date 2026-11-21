@@ -43,7 +43,7 @@ for c in "${CONFIGS[@]}"; do
 
     VERSION="$REQUESTED"
     if [ ! "$VERSION" ]; then
-        VERSION="$(curl -fsSL --retry 3 \
+        VERSION="$(curl -fsSL --retry 3 -A "Kies2.0_FUS" \
             "https://fota-cloud-dn.ospserver.net/firmware/$CSC/$MODEL/version.xml" \
             | sed -n 's|.*<latest[^>]*>\([^<]*\)</latest>.*|\1|p' | head -n 1)"
     fi
