@@ -1,4 +1,4 @@
 id=stagefright
-name=Stagefright OMX encoder fix
+name=Stagefright OMX fixes
 author=ssch71
-description=Fix the screen recorder crash in ACodec::reconfigEncoder4OtherApps() on OMX vendors.
+description=Fix the screen recorder crash in ACodec::reconfigEncoder4OtherApps() and OMX decoders failing to switch output surfaces on OMX vendors.
