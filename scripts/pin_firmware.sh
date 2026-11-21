@@ -11,15 +11,15 @@
 # or even apply. Bump a pin on purpose, test that build, then publish a new base.
 #
 # Usage: scripts/pin_firmware.sh [<name> [<PDA/CSC/CP>]]
-#   no arguments : pin the donors (qssi, flip-qssi, tab-qssi) and every OTA
-#                  target (dm1q, b5q, gts7lwifi, z3q, x1q, y2q, c1q, c2q)
+#   no arguments : pin the donors (qssi, flip-qssi, tab-qssi) and the targets
+#                  Samsung still updates (dm1q, b5q); end-of-life targets need none
 #   <name>       : a donor config (qssi, ...), a target (z3q, ...) or a file
 #   <PDA/CSC/CP> : pin to this build instead of the current one
 
 set -euo pipefail
 
 SRC_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-NAMES=(qssi flip-qssi tab-qssi dm1q b5q gts7lwifi z3q x1q y2q c1q c2q)
+NAMES=(qssi flip-qssi tab-qssi dm1q b5q)
 
 if [ "$#" -ge 1 ]; then
     NAMES=("$1")
