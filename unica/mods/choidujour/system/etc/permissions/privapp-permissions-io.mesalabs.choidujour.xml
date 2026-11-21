@@ -21,4 +21,6 @@
         <permission name="android.permission.RECOVERY"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
     </privapp-permissions>
+    <!-- One UI 9 skips /system apps missing from this list (PMRune.PM_ALLOWED_SYSTEM_PRELOAD_APPS) -->
+    <allowed-system-preload package="io.mesalabs.choidujour" />
 </permissions>
