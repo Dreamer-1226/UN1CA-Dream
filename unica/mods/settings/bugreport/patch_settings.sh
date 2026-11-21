@@ -58,9 +58,14 @@ if grep -qF "android:name=\"$activity\"" "$manifest"; then
     grep -F "android:name=\"$activity\"" "$manifest" | grep -qF "android:theme=\"@style/$theme\"" \
         || fail "Unexpected report activity theme"
 else
+    # Insert before the first activity rather than at the end of <application>:
+    # smali patches applied after this (quick tiles) carry the closing lines as
+    # hunk context and must still find them unchanged.
+    grep -q '^[[:space:]]*<activity[[:space:]>]' "$manifest" || fail "No activity in the Settings manifest"
     awk -v activity="$activity" -v theme="$theme" '
-        /<\/application>/ {
+        !done && /^[ \t]*<activity[ \t>]/ {
             print "        <activity android:name=\"" activity "\" android:exported=\"false\" android:label=\"@string/unica_bugreport_title\" android:theme=\"@style/" theme "\" />"
+            done = 1
         }
         { print }
     ' "$manifest" > "$tmp/manifest"
