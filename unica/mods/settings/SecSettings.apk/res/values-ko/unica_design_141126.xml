@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_audio_tweaks_settings_title">오디오 설정</string>
+    <string name="unica_battery_performance_settings_title">배터리 및 성능 설정</string>
+    <string name="unica_design_141126_unica_top_settings_group_0">ROM 상태</string>
+    <string name="unica_design_141126_unica_top_settings_group_1">OTA</string>
+    <string name="unica_design_141126_unica_top_settings_group_2">기타 설정</string>
+    <string name="unica_design_141126_unica_top_settings_group_3">스푸핑 및 기타</string>
+    <string name="unica_design_141126_unica_top_settings_group_4">지원</string>
+    <string name="unica_design_141126_unica_spoof_settings_group_0">키박스</string>
+    <string name="unica_design_141126_unica_spoof_settings_group_1">PIF</string>
+    <string name="unica_design_141126_unica_spoof_settings_group_2">앱 숨기기</string>
+    <string name="unica_design_141126_unica_spoof_settings_group_3">AdGuard 시스템 인증서 변환</string>
+</resources>

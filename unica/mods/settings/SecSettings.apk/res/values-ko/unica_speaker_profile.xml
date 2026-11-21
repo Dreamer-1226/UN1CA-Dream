@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unica_speaker_profile_title">스피커 프로필</string>
+    <string name="unica_speaker_profile_off">기본 스피커 처리를 사용합니다. 이 옵션을 바꾸면 다시 시작해야 합니다.</string>
+    <string name="unica_speaker_profile_active">Adaptive26 스피커 프로필이 적용되어 있습니다.</string>
+    <string name="unica_speaker_profile_pending_on">스피커 프로필을 선택했습니다. 다시 시작하면 적용됩니다. 이미 다시 시작했다면 프로필이 완전히 불러와지지 않은 것입니다.</string>
+    <string name="unica_speaker_profile_pending_off">기본 스피커 처리를 선택했습니다. 다시 시작하면 되돌아갑니다.</string>
+    <string name="unica_speaker_profile_error">스피커 프로필 선택을 저장하지 못했습니다.</string>
+    <string name="unica_speaker_profile_reboot_title">다시 시작 필요</string>
+    <string name="unica_speaker_profile_reboot_message">선택한 스피커 처리를 적용하려면 휴대전화를 다시 시작하세요.</string>
+    <string name="unica_speaker_profile_reboot_now">지금 다시 시작</string>
+    <string name="unica_speaker_profile_reboot_later">나중에</string>
+    <string name="unica_speaker_profile_reboot_error">다시 시작하지 못했습니다. 선택은 저장되었으니 직접 다시 시작하세요.</string>
+</resources>
