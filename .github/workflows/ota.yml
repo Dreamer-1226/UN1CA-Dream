@@ -15,11 +15,38 @@ name: OTA
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: Device
-        required: true
-        type: choice
-        options: [dm1q, b5q, gts7lwifi, z3q, x1q, y2q, c1q, c2q]
+      dm1q:
+        description: dm1q
+        type: boolean
+        default: false
+      b5q:
+        description: b5q
+        type: boolean
+        default: false
+      gts7lwifi:
+        description: gts7lwifi
+        type: boolean
+        default: false
+      z3q:
+        description: z3q
+        type: boolean
+        default: false
+      x1q:
+        description: x1q
+        type: boolean
+        default: false
+      y2q:
+        description: y2q
+        type: boolean
+        default: false
+      c1q:
+        description: c1q
+        type: boolean
+        default: false
+      c2q:
+        description: c2q
+        type: boolean
+        default: false
       mode:
         description: Package
         required: true
@@ -30,10 +57,6 @@ on:
         required: false
         type: string
 
-concurrency:
-  group: ota-${{ inputs.target }}
-  cancel-in-progress: false
-
 permissions:
   contents: write
 
@@ -41,9 +64,34 @@ env:
   OTA_BRANCH: ota
 
 jobs:
-  build:
-    name: ${{ inputs.target }} (${{ inputs.mode }})
+  targets:
+    name: Select devices
     runs-on: ubuntu-24.04
+    outputs:
+      list: ${{ steps.pick.outputs.list }}
+    steps:
+      - name: Collect the ticked devices
+        id: pick
+        env:
+          INPUTS: ${{ toJSON(inputs) }}
+        run: |
+          LIST="$(jq -c '[to_entries[] | select(.value == true or .value == "true") | .key]' <<< "$INPUTS")"
+          [ "$LIST" != "[]" ] || { echo "::error::Tick at least one device"; exit 1; }
+          echo "Devices: $LIST"
+          echo "list=$LIST" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.target }} (${{ inputs.mode }})
+    needs: targets
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.targets.outputs.list) }}
+    # One OTA build per device at a time; the devices build side by side.
+    concurrency:
+      group: ota-${{ matrix.target }}
+      cancel-in-progress: false
 
     steps:
       - name: Checkout repo
@@ -105,7 +153,7 @@ jobs:
 
       - name: Generate build config
         run: |
-          source ./buildenv.sh ${{ inputs.target }}
+          source ./buildenv.sh ${{ matrix.target }}
           {
             echo "DEBUG=$DEBUG"
             echo "SRC_DIR=$SRC_DIR"
@@ -133,9 +181,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          STATE="updates/state/${{ inputs.target }}"
+          STATE="updates/state/${{ matrix.target }}"
           if [ "${{ inputs.mode }}" = incremental ]; then
-            [ -f "$STATE" ] || { echo "::error::No previous OTA build for ${{ inputs.target }}. Run a base build first."; exit 1; }
+            [ -f "$STATE" ] || { echo "::error::No previous OTA build for ${{ matrix.target }}. Run a base build first."; exit 1; }
             # shellcheck disable=SC1090
             source "$STATE"
             echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -193,7 +241,7 @@ jobs:
           echo "tf=$TF" >> "$GITHUB_OUTPUT"
           echo "full=out/release/$(basename "$FULL")" >> "$GITHUB_OUTPUT"
           echo "timestamp=$TS" >> "$GITHUB_OUTPUT"
-          echo "tag=ota-${{ inputs.target }}-$TS" >> "$GITHUB_OUTPUT"
+          echo "tag=ota-${{ matrix.target }}-$TS" >> "$GITHUB_OUTPUT"
           # The incremental step only needs the two target-files zips.
           rm -rf "$ODIN_DIR" "$FW_DIR" "$WORK_DIR" "$APKTOOL_DIR"
           df -h .
@@ -250,7 +298,7 @@ jobs:
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SF_SSH_KEY" > ~/.ssh/sf && chmod 600 ~/.ssh/sf
           ssh-keyscan -t ed25519,rsa frs.sourceforge.net >> ~/.ssh/known_hosts 2> /dev/null
-          DIR="/home/frs/project/$SF_PROJECT/${{ inputs.target }}"
+          DIR="/home/frs/project/$SF_PROJECT/${{ matrix.target }}"
           printf -- '-mkdir %s\n' "$DIR" | sftp -i ~/.ssh/sf -b - "$SF_USER@frs.sourceforge.net"
           FILES=("$FULL_ZIP")
           for f in out/release/*INCREMENTAL*.zip; do
@@ -262,7 +310,7 @@ jobs:
           done
           rm -f ~/.ssh/sf
           # downloads.sourceforge.net redirects to a mirror; UN1CA Updates follows it.
-          echo "base=https://downloads.sourceforge.net/project/$SF_PROJECT/${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+          echo "base=https://downloads.sourceforge.net/project/$SF_PROJECT/${{ matrix.target }}" >> "$GITHUB_OUTPUT"
 
       - name: Upload full package to GoFile
         id: gofile
@@ -295,7 +343,7 @@ jobs:
           FULL="$FULL_ZIP"
           FILES=(out/release/target_files.zip.part*)
           {
-            echo "${{ inputs.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
+            echo "${{ matrix.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
             echo
             echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
             if [ -n "$SF_BASE" ]; then
@@ -332,31 +380,39 @@ jobs:
             [ "$big" = 1 ] || echo "$BASE_URL/$(basename "$f")"
             [ -z "$SF_BASE" ] || echo "$SF_BASE/$(basename "$f")"
           }
-          BIG=0
-          [ "$(stat -c %s "$FULL")" -lt 2147483648 ] || BIG=1
-          mapfile -t U < <(urls "$FULL" "$BIG")
-          if [ "${#U[@]}" -gt 0 ]; then
-            python3 scripts/ota/manifest.py add updates/manifest.json "$FULL" "${U[@]}"
-          else
-            echo "::warning::Full package is over 2 GiB and SourceForge is not configured, so it is not in the manifest"
-          fi
-          for f in out/release/*INCREMENTAL*.zip; do
-            [ -f "$f" ] || continue
-            mapfile -t U < <(urls "$f" 0)
-            python3 scripts/ota/manifest.py add updates/manifest.json "$f" "${U[@]}"
-          done
-          [ -f updates/manifest.json ] || echo '{"response": []}' > updates/manifest.json
-          python3 scripts/ota/manifest.py check updates/manifest.json
-          VERSION="$(unzip -p "$FULL" build_info.txt | sed -n 's/^version=//p')"
-          if [ -n "$CHANGELOG" ]; then
-            printf '%s\n' "$CHANGELOG" > "updates/$VERSION.txt"
-          fi
-          mkdir -p updates/state
-          printf 'TAG=%s\nTIMESTAMP=%s\n' "$TAG" "${{ steps.out.outputs.timestamp }}" > "updates/state/${{ inputs.target }}"
-          git add updates
-          git commit -m "ota: ${{ inputs.target }}: Publish ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
-          for _ in 1 2 3; do
-            git pull --rebase origin "$OTA_BRANCH" && git push origin "HEAD:$OTA_BRANCH" && exit 0
-            sleep 10
+          publish()
+          {
+            BIG=0
+            [ "$(stat -c %s "$FULL")" -lt 2147483648 ] || BIG=1
+            mapfile -t U < <(urls "$FULL" "$BIG")
+            if [ "${#U[@]}" -gt 0 ]; then
+              python3 scripts/ota/manifest.py add updates/manifest.json "$FULL" "${U[@]}" || return 1
+            else
+              echo "::warning::Full package is over 2 GiB and SourceForge is not configured, so it is not in the manifest"
+            fi
+            for f in out/release/*INCREMENTAL*.zip; do
+              [ -f "$f" ] || continue
+              mapfile -t U < <(urls "$f" 0)
+              python3 scripts/ota/manifest.py add updates/manifest.json "$f" "${U[@]}" || return 1
+            done
+            [ -f updates/manifest.json ] || echo '{"response": []}' > updates/manifest.json
+            python3 scripts/ota/manifest.py check updates/manifest.json || return 1
+            VERSION="$(unzip -p "$FULL" build_info.txt | sed -n 's/^version=//p')"
+            if [ -n "$CHANGELOG" ]; then
+              printf '%s\n' "$CHANGELOG" > "updates/$VERSION.txt"
+            fi
+            mkdir -p updates/state
+            printf 'TAG=%s\nTIMESTAMP=%s\n' "$TAG" "${{ steps.out.outputs.timestamp }}" > "updates/state/${{ matrix.target }}"
+            git add updates
+            git commit -m "ota: ${{ matrix.target }}: Publish ${{ steps.out.outputs.timestamp }} (${{ inputs.mode }})"
+          }
+          # Devices built side by side all edit manifest.json: on a rejected push,
+          # start again from the branch as the other device left it.
+          for _ in 1 2 3 4 5; do
+            git fetch origin "$OTA_BRANCH"
+            git reset -q --hard "origin/$OTA_BRANCH"
+            publish || exit 1
+            git push origin "HEAD:$OTA_BRANCH" && exit 0
+            sleep $((RANDOM % 20 + 5))
           done
           exit 1
