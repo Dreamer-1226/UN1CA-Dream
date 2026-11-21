@@ -320,7 +320,7 @@ if [ -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ] && \
         ! grep -q 'android:key="unica_updates"' "$_UNICA_PAGE"; then
     LOG "- Adding UN1CA Updates to UN1CA Settings"
     [ "$(grep -c '</PreferenceScreen>' "$_UNICA_PAGE")" = "1" ] || ABORT "Unexpected UN1CA Settings page"
-    EVAL "sed -i 's|</PreferenceScreen>|    <io.mesalabs.unica.settings.preference.IconPreference android:icon=\"@drawable/ic_unica_settings_update\" android:title=\"@string/unica_updates_title\" android:key=\"unica_updates\" android:summary=\"@string/unica_updates_summary\">\\n        <intent android:targetPackage=\"io.mesalabs.choidujour\" android:targetClass=\"io.mesalabs.choidujour.activity.HomeActivity\" />\\n    </io.mesalabs.unica.settings.preference.IconPreference>\\n</PreferenceScreen>|' \"$_UNICA_PAGE\""
+    EVAL "sed -i 's|</PreferenceScreen>|    <io.mesalabs.unica.settings.preference.IconPreference android:icon=\"@drawable/ic_unica_settings_update\" android:title=\"@string/unica_updates_title\" android:key=\"unica_updates\">\\n        <intent android:targetPackage=\"io.mesalabs.choidujour\" android:targetClass=\"io.mesalabs.choidujour.activity.HomeActivity\" />\\n    </io.mesalabs.unica.settings.preference.IconPreference>\\n</PreferenceScreen>|' \"$_UNICA_PAGE\""
 fi
 unset _UNICA_PAGE
 
