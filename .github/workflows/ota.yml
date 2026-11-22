@@ -9,9 +9,8 @@ name: OTA
 # Each build keeps its target-files zip in its release (split into <2 GiB parts)
 # until the next build has been diffed against it.
 #
-# The CI workflows call this for the OTA devices on every push, so every build
-# of those devices is an OTA build and phones never leave the chain. It can also
-# be run by hand, for several devices at once.
+# Run it by hand, for one or several devices at once. The regular CI builds
+# are not OTA builds: only builds made here enter the channel.
 #
 # Needs the OTA_KEY_PK8 secret (base64 of security/ssch71_ota.pk8)
 # and the donor firmwares pinned (scripts/pin_firmware.sh), or Samsung updates

@@ -12,16 +12,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ota:
-    name: OTA
-    if: github.event_name != 'pull_request'
-    permissions:
-      contents: write
-    uses: ./.github/workflows/ota.yml
-    with:
-      targets: '["dm1q"]'
-    secrets: inherit
-
   build:
     name: Build
     runs-on: ubuntu-24.04
@@ -29,8 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # dm1q builds as OTA packages (ota.yml) except on pull requests.
-        target: ${{ fromJSON(github.event_name == 'pull_request' && '["dm1q","x1q","y2q","z3q","c1q","c2q"]' || '["x1q","y2q","z3q","c1q","c2q"]') }}
+        target: [dm1q,x1q,y2q,z3q,c1q,c2q]
 
     steps:
       - name: Checkout repo

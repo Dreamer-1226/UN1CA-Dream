@@ -12,20 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ota:
-    name: OTA
-    if: github.event_name != 'pull_request'
-    permissions:
-      contents: write
-    uses: ./.github/workflows/ota.yml
-    with:
-      targets: '["gts7lwifi"]'
-    secrets: inherit
-
   build:
     name: Build
-    # gts7lwifi builds as OTA packages (ota.yml) except on pull requests.
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
 
     strategy:
