@@ -10,6 +10,10 @@ ChoiDujour offers an entry when device == ro.unica.device, datetime is not older
 than ro.unica.timestamp, and incremental is 0 (full package) or equal to
 ro.unica.timestamp (incremental built from the installed build). The values come
 from the package's build_info.txt, which the UN1CA zip builders write.
+
+The urls of an entry are the parts of one file: ChoiDujour downloads all of them
+in order and appends them into the package. They are not mirrors, so a package
+kept in one piece gets exactly one URL.
 """
 import hashlib
 import json
@@ -65,6 +69,8 @@ def check(data):
 
 
 def add(path, package, *urls):
+    if len(urls) != 1:
+        raise SystemExit('add takes one URL: the URLs of an entry are parts of one file, not mirrors')
     info = build_info(package)
     sha = hashlib.sha256()
     with open(package, 'rb') as f:

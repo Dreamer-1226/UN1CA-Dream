@@ -497,13 +497,19 @@ jobs:
           MANIFEST_PY="$PWD/scripts/ota/manifest.py"
           RELEASE_DIR="$PWD/out/release"
           OTA="$RUNNER_TEMP/ota"
-          # UN1CA Updates tries the URLs of an entry in order.
+          # UN1CA Updates downloads every URL of an entry and joins them: they are
+          # the parts of one file, not mirrors. List a single URL per package.
           urls()
           {
-            local f="$1" big="$2"
-            [ "$big" = 1 ] || echo "$BASE_URL/$(basename "$f")"
-            [ -z "$HF_BASE" ] || echo "$HF_BASE/$(basename "$f")"
-            [ -z "$SF_BASE" ] || echo "$SF_BASE/$(basename "$f")"
+            local f="$1" big="$2" n
+            n="$(basename "$f")"
+            if [ "$big" != 1 ]; then
+              echo "$BASE_URL/$n"
+            elif [ -n "$HF_BASE" ]; then
+              echo "$HF_BASE/$n"
+            elif [ -n "$SF_BASE" ]; then
+              echo "$SF_BASE/$n"
+            fi
           }
           publish()
           {
