@@ -589,7 +589,21 @@ for p in $PARTITIONS_LIST; do
             else
                 _CHECK_NON_EMPTY_PARAM "TARGET_CACHE_PARTITION_SIZE" "${TARGET_CACHE_PARTITION_SIZE//none/}" || exit 1
                 LOG "- Generating $p.img block diff"
-                EVAL "img2sdat -o \"$TMP_DIR\" -c \"$TARGET_CACHE_PARTITION_SIZE\" --src-image \"$TMP_DIR/source/$p.img\" --src-block-map \"$TMP_DIR/source/$p.map\" --tgt-block-map \"$TMP_DIR/target/$p.map\" \"$TMP_DIR/target/$p.img\"" || exit 1
+                if ! EVAL "img2sdat -o \"$TMP_DIR\" -c \"$TARGET_CACHE_PARTITION_SIZE\" --src-image \"$TMP_DIR/source/$p.img\" --src-block-map \"$TMP_DIR/source/$p.map\" --tgt-block-map \"$TMP_DIR/target/$p.map\" \"$TMP_DIR/target/$p.img\""; then
+                    # img2sdat can abort in rangelib (assert self.data) when the diff
+                    # reads no source blocks. Drop its partial output and ship the
+                    # whole partition instead; the updater patches it unconditionally.
+                    LOG "- $p.img block diff failed, falling back to full $p payload"
+                    rm -f "$TMP_DIR/$p.transfer.list" "$TMP_DIR/$p.new.dat" \
+                        "$TMP_DIR/$p.patch.dat" "$TMP_DIR/$p.max_stashed_size" \
+                        "$TMP_DIR/$p.touched_src_sha1" "$TMP_DIR/$p.touched_src_ranges"
+                    EVAL "img2sdat -o \"$TMP_DIR\" --tgt-block-map \"$TMP_DIR/target/$p.map\" \"$TMP_DIR/target/$p.img\"" || exit 1
+                    if ! $DEBUG; then
+                        LOG "- Compressing $p.new.dat"
+                        EVAL "brotli --quality=6 --output=\"$TMP_DIR/$p.new.dat.br\" \"$TMP_DIR/$p.new.dat\"" || exit 1
+                        rm -f "$TMP_DIR/$p.new.dat"
+                    fi
+                fi
             fi
         fi
         rm -f "$TMP_DIR/source/$p.img" "$TMP_DIR/source/$p.map" \
