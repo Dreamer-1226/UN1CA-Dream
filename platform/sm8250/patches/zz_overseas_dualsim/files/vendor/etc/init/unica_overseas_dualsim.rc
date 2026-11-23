@@ -1,0 +1,30 @@
+# The Korean /vendor/bin/secril_config_svc ("sim_config") writes
+# ro.multisim.simslotcount / ro.vendor.multisim.simslotcount = 1 and
+# persist.radio.multisim.config = ss. The dual-SIM Hong Kong, China and Taiwan
+# models need 2 and dsds (what their stock TGY build of the same service
+# writes). The counts are first-writer-wins, so exactly one of the two paths
+# below runs; init.vendor.rilcommon.rc no longer starts sim_config itself.
+on init
+    setprop vendor.unica.sim_config ss
+
+on init && property:ro.boot.em.model=SM-G9810
+    setprop vendor.unica.sim_config ds
+
+on init && property:ro.boot.em.model=SM-G9860
+    setprop vendor.unica.sim_config ds
+
+on init && property:ro.boot.em.model=SM-G9880
+    setprop vendor.unica.sim_config ds
+
+on fs && property:vendor.unica.sim_config=ss
+    exec_start sim_config
+
+on fs && property:vendor.unica.sim_config=ds
+    setprop ro.multisim.simslotcount 2
+    setprop ro.vendor.multisim.simslotcount 2
+    setprop persist.radio.multisim.config dsds
+
+# Persistent properties are loaded from /data after "on fs"; a value left by
+# another build must not undo the dual-SIM mode.
+on post-fs-data && property:vendor.unica.sim_config=ds
+    setprop persist.radio.multisim.config dsds

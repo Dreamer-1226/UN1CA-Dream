@@ -1,0 +1,4 @@
+id=overseas_dualsim
+name=Second SIM on the Hong Kong, China and Taiwan S20 models
+author=ssch71
+description=The S20 targets ship the Korean vendor, whose SIM configuration service always sets one slot ("1", "ss"). On SM-G9810/G9860/G9880 set two slots and DSDS instead, so RILD serves slot 2 and the phone process stops timing out while it waits for IRadio/slot2.
