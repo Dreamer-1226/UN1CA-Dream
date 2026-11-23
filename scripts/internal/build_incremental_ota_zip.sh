@@ -442,6 +442,78 @@ VERIFY_SOURCE_COMPATIBILITY()
         exit 1
     fi
 }
+
+# Returns 0 only if the blocks listed in the source/target block maps are the
+# same set and hold identical data. The raw image can differ (free blocks,
+# padding) while the mapped content is unchanged; img2sdat then has nothing to
+# diff and aborts in rangelib (assert self.data). Any doubt returns non-zero,
+# which falls back to the normal img2sdat path.
+IS_MAPPED_CONTENT_IDENTICAL()
+{
+    local P="$1"
+
+    python3 -I - \
+        "$TMP_DIR/source/$P.img" "$TMP_DIR/source/$P.map" \
+        "$TMP_DIR/target/$P.img" "$TMP_DIR/target/$P.map" << 'PY' 2> /dev/null
+import hashlib
+import os
+import sys
+
+BLOCK = 4096
+
+
+def load_ranges(map_path):
+    spans = []
+    with open(map_path) as f:
+        for line in f:
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            nums = [int(x) for x in parts[1].split(",")]
+            if nums[0] != len(nums) - 1 or nums[0] % 2:
+                raise ValueError("bad range set")
+            for i in range(1, len(nums), 2):
+                spans.append((nums[i], nums[i + 1]))
+    spans.sort()
+    merged = []
+    for s, e in spans:
+        if merged and s <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], e)
+        else:
+            merged.append([s, e])
+    return merged
+
+
+def digest(img_path, spans):
+    h = hashlib.sha256()
+    with open(img_path, "rb") as f:
+        for s, e in spans:
+            f.seek(s * BLOCK)
+            left = (e - s) * BLOCK
+            while left > 0:
+                buf = f.read(min(left, 1 << 22))
+                if not buf:
+                    raise ValueError("short read")
+                h.update(buf)
+                left -= len(buf)
+    return h.hexdigest()
+
+
+try:
+    src_img, src_map, tgt_img, tgt_map = sys.argv[1:5]
+    if os.path.getsize(src_img) != os.path.getsize(tgt_img):
+        sys.exit(1)
+    src_spans = load_ranges(src_map)
+    tgt_spans = load_ranges(tgt_map)
+    if not src_spans or src_spans != tgt_spans:
+        sys.exit(1)
+    sys.exit(0 if digest(src_img, src_spans) == digest(tgt_img, tgt_spans) else 1)
+except SystemExit:
+    raise
+except Exception:
+    sys.exit(2)
+PY
+}
 # ]
 
 if [ "$#" != "3" ]; then
@@ -512,9 +584,13 @@ for p in $PARTITIONS_LIST; do
 
     if [ -f "$TMP_DIR/source/$p.img" ]; then
         if [[ "$(sha1sum "$TMP_DIR/source/$p.img" | cut -d " " -f 1)" != "$(sha1sum "$TMP_DIR/target/$p.img" | cut -d " " -f 1)" ]]; then
-            _CHECK_NON_EMPTY_PARAM "TARGET_CACHE_PARTITION_SIZE" "${TARGET_CACHE_PARTITION_SIZE//none/}" || exit 1
-            LOG "- Generating $p.img block diff"
-            EVAL "img2sdat -o \"$TMP_DIR\" -c \"$TARGET_CACHE_PARTITION_SIZE\" --src-image \"$TMP_DIR/source/$p.img\" --src-block-map \"$TMP_DIR/source/$p.map\" --tgt-block-map \"$TMP_DIR/target/$p.map\" \"$TMP_DIR/target/$p.img\"" || exit 1
+            if IS_MAPPED_CONTENT_IDENTICAL "$p"; then
+                LOG "- $p.img mapped blocks are unchanged, skipping block diff"
+            else
+                _CHECK_NON_EMPTY_PARAM "TARGET_CACHE_PARTITION_SIZE" "${TARGET_CACHE_PARTITION_SIZE//none/}" || exit 1
+                LOG "- Generating $p.img block diff"
+                EVAL "img2sdat -o \"$TMP_DIR\" -c \"$TARGET_CACHE_PARTITION_SIZE\" --src-image \"$TMP_DIR/source/$p.img\" --src-block-map \"$TMP_DIR/source/$p.map\" --tgt-block-map \"$TMP_DIR/target/$p.map\" \"$TMP_DIR/target/$p.img\"" || exit 1
+            fi
         fi
         rm -f "$TMP_DIR/source/$p.img" "$TMP_DIR/source/$p.map" \
             "$TMP_DIR/target/$p.img" "$TMP_DIR/target/$p.map"
