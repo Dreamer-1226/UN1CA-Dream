@@ -53,6 +53,12 @@ if [[ "$_OTA_KEY" == "ssch71_ota" ]]; then
     python3 "$MODPATH/point_manifest.py" "$_SMALI" "$_METHOD" "$_OTA_URL" \
         || ABORT "ChoiDujour: could not patch the update URLs"
 
+    # Install through TWRP's OpenRecoveryScript instead of the framework's
+    # block-map command, which TWRP cannot use for a package under /data.
+    LOG "- Making UN1CA Updates install through TWRP"
+    python3 "$MODPATH/twrp_install.py" "$_DIR" \
+        || ABORT "ChoiDujour: could not patch the recovery install"
+
     unset _OTA_URL _APK _DIR _CALL _CLASS _METHOD _SMALI
 fi
 
