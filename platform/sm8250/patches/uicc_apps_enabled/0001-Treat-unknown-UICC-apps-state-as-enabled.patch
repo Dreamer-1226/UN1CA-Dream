@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000001 Mon Sep 17 00:00:00 2001
+From: MinsOS <minsos@local>
+Date: Mon, 5 Oct 2026 12:00:00 +0900
+Subject: [PATCH] Treat an unknown UICC apps state as enabled (One UI 9, y2q)
+
+GsmCdmaPhone.isUiccApplicationsEnabled() returned false while
+mUiccApplicationsEnabled is null, that is, while no successful answer to
+GET_UICC_APPLICATIONS_ENABLEMENT has arrived. The query is sent once, at radio
+available. When the S20+ boots without a SIM the A13 RIL answers SIM_ABSENT,
+nothing asks again when a SIM is inserted, and the RIL sends no
+UNSOL_UICC_APPLICATIONS_ENABLEMENT_CHANGED. SubscriptionManagerService
+.isSubscriptionEnabled() then stays false for the active SIM and PhoneSwitcher
+on a KOR build never picks a data phone, so mobile data never connects.
+Unknown now reads as enabled, as the donor's own
+reapplyUiccAppsEnablementIfNeeded() already treats it ("do nothing"), and the
+stock A13 framework has no such gate. An explicit false from the RIL still
+disables, and the user's per-SIM switch is still checked through
+SubscriptionInfoInternal.areUiccApplicationsEnabled().
+---
+diff --git a/smali/com/android/internal/telephony/GsmCdmaPhone.smali b/smali/com/android/internal/telephony/GsmCdmaPhone.smali
+--- a/smali/com/android/internal/telephony/GsmCdmaPhone.smali
++++ b/smali/com/android/internal/telephony/GsmCdmaPhone.smali
+@@ -15837,15 +15837,15 @@
+ .method public blacklist isUiccApplicationsEnabled()Z
+     .locals 0
+ 
+     iget-object p0, p0, Lcom/android/internal/telephony/GsmCdmaPhone;->mUiccApplicationsEnabled:Ljava/lang/Boolean;
+ 
+     if-nez p0, :cond_0
+ 
+-    const/4 p0, 0x0
++    const/4 p0, 0x1
+ 
+     return p0
+ 
+     :cond_0
+     invoke-virtual {p0}, Ljava/lang/Boolean;->booleanValue()Z
+ 
+     move-result p0

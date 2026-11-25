@@ -1,0 +1,4 @@
+id=uicc_oem_guard
+name=Guard the empty perso status answer from the A13 RIL
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=With a Korean SIM, com.android.phone crash-looped every ~10 s and RescueParty warm-rebooted the S20+: UiccProfile event 110 (EVENT_GET_PERSO_STATUS_COMPLETE) reads two bytes from the answer to the KOR USIM perso query, and the SM-G986N A13 RIL answers it with zero bytes. A short answer now takes the existing null-result exit (log, perso lock unchanged).

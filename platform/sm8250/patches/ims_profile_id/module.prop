@@ -1,0 +1,4 @@
+id=ims_profile_id
+name=AP-assigned data context IDs for the vendor RIL
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Preserves the CID encoded in the data profile ID, as the bundled Korean A13 RIL requires, so mobile data and IMS requests do not fail with CID 0 ("Unavailable cid(0)"). Ported from GoRhanHee-World/UN1CA.

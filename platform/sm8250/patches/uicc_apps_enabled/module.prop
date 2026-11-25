@@ -1,0 +1,4 @@
+id=uicc_apps_enabled
+name=Unknown UICC apps state counts as enabled
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=With an SK Telecom SIM inserted after a boot without SIM, calls and SMS worked but mobile data never connected: GsmCdmaPhone.isUiccApplicationsEnabled() read a never-learned state (null, the A13 RIL answered SIM_ABSENT at boot and is not asked again) as disabled, so isSubscriptionEnabled() stayed false and PhoneSwitcher on a KOR build never chose a data phone. Unknown now counts as enabled; an explicit false from the RIL still disables.

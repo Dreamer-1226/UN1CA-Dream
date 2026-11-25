@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000001 Mon Sep 17 00:00:00 2001
+From: MinsOS <minsos@local>
+Date: Mon, 5 Oct 2026 01:00:00 +0900
+Subject: [PATCH] Guard a short perso status response (One UI 9, y2q)
+
+UiccProfile event 110 (EVENT_GET_PERSO_STATUS_COMPLETE) answers the OEM_HOOK_RAW
+04 01 000A 01 02 "0000" query that getIccUsimPersoStatus() sends on a Korean sales
+code. It reads data[0] and data[1] with no length check. The SM-G986N A13 RIL
+answers it with success and zero bytes, so com.android.phone threw
+ArrayIndexOutOfBoundsException length=0 at every SIM load and RescueParty warm
+rebooted the phone. A result shorter than two bytes now takes the same exit as a
+null result: log and leave mPersoSimLock unchanged (the exception path also
+leaves it unchanged; event 111, the other perso query, already rejects an empty
+array as "Bogus").
+---
+diff --git a/smali/com/android/internal/telephony/uicc/UiccProfile$5.smali b/smali/com/android/internal/telephony/uicc/UiccProfile$5.smali
+--- a/smali/com/android/internal/telephony/uicc/UiccProfile$5.smali
++++ b/smali/com/android/internal/telephony/uicc/UiccProfile$5.smali
+@@ -445,6 +445,12 @@
+ 
+     check-cast p1, [B
+ 
++    array-length v0, p1
++
++    const/4 v1, 0x2
++
++    if-lt v0, v1, :minsos_perso_short
++
+     iget-object v0, p0, Lcom/android/internal/telephony/uicc/UiccProfile$5;->this$0:Lcom/android/internal/telephony/uicc/UiccProfile;
+ 
+     new-instance v1, Ljava/lang/StringBuilder;
+@@ -495,6 +501,15 @@
+ 
+     return-void
+ 
++    :minsos_perso_short
++    iget-object p0, p0, Lcom/android/internal/telephony/uicc/UiccProfile$5;->this$0:Lcom/android/internal/telephony/uicc/UiccProfile;
++
++    const-string p1, "EVENT_GET_PERSO_STATUS_COMPLETE short result, perso lock unchanged"
++
++    invoke-static {p0, p1}, Lcom/android/internal/telephony/uicc/UiccProfile;->-$$Nest$mloge(Lcom/android/internal/telephony/uicc/UiccProfile;Ljava/lang/String;)V
++
++    return-void
++
+     :pswitch_6
+     iget-object p1, p0, Lcom/android/internal/telephony/uicc/UiccProfile$5;->this$0:Lcom/android/internal/telephony/uicc/UiccProfile;
+ 

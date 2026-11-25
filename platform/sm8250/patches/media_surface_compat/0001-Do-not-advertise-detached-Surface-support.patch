@@ -1,0 +1,28 @@
+Subject: [PATCH] Do not advertise detached Surface support on legacy OMX
+
+--- a/smali_classes3/android/media/MediaCodecInfo$CodecCapabilities.smali
++++ b/smali_classes3/android/media/MediaCodecInfo$CodecCapabilities.smali
+@@ -392,7 +392,22 @@
+ .end method
+ 
+ .method public final whitelist isFeatureSupported(Ljava/lang/String;)Z
+-    .locals 0
++    .locals 1
++
++    # The SM8250 OMX vendor cannot run with a detached output Surface.
++    const-string v0, "detached-surface"
++
++    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :unica_supported_feature
++
++    const/4 v0, 0x0
++
++    return v0
++
++    :unica_supported_feature
+ 
+     iget-object p0, p0, Landroid/media/MediaCodecInfo$CodecCapabilities;->mImpl:Landroid/media/MediaCodecInfo$CodecCapabilities$CodecCapsIntf;
+ 

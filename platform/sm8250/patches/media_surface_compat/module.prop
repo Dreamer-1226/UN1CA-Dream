@@ -1,0 +1,4 @@
+id=media_surface_compat
+name=No detached output Surface on the legacy OMX codecs
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS), GoRhanHee
+description=MediaCodecInfo.CodecCapabilities.isFeatureSupported("detached-surface") answers false, so Media3/ExoPlayer keeps a placeholder Surface instead of the detached-output path that fails on the SM8250 Qualcomm OMX decoders. Ported from GoRhanHee-World/UN1CA.
