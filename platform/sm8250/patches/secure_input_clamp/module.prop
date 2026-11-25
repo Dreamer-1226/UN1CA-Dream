@@ -1,0 +1,4 @@
+id=secure_input_clamp
+name=Protected playback secure-input clamp (I-09)
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Clamps the secure OMX input filledLen to the real access-unit size (subsample sum) in lib64/libstagefright.so, so the secure hardware decoder stops parsing the stale buffer tail and protected playback (Netflix, Coupang, Disney+) no longer breaks up. Re-derived for the S911N donor.

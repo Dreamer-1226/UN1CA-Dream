@@ -1,0 +1,4 @@
+id=drm_requires_secure_decoder
+name=Fix MediaDrm.requiresSecureDecoder for HIDL 1.3 Widevine (I-172)
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Adds HIDL <=1.3 fallback to DrmHalHidl::requiresSecureDecoder in lib64/libmediadrm.so when mPluginV1_4 is null, preventing L1 video apps (YouTube) from selecting a non-secure decoder and failing with OEMCryptoResult 13 / ERROR_DRM_CANNOT_HANDLE.
