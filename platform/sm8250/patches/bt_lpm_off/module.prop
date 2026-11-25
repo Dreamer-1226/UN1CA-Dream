@@ -1,0 +1,4 @@
+id=bt_lpm_off
+name=Keep the Bluetooth UART awake
+author=ssch71
+description=Turns off Bluetooth low power mode in the vendor HCI HAL. With it on, the host UART clock is switched off about once a second and bytes from the controller get lost on wake, so HCI packets lose their framing ("Unimplemented packet type") and events and ACL data are dropped.
