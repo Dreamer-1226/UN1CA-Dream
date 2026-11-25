@@ -44,7 +44,20 @@ static int h_exec(void *self,void *vin,void *vout){
     LOG("Execute %s %dx%d ok %.0f ms",t==1?"Optical":"Fusion",w,h,(nowt()-t0)*1000);
     return 0;
 }
-static void init(void){ if(!real) real=dlopen("libsnap_aidl.snap.samsung.so",2); }
+// ArcSoft's internal logger (Cur Fusion Score, mask validity, error paths) prints only through a
+// callback pointer that the Best Face engine never sets. With debug.bfsw.arclog=1, point it at
+// logcat (tag ArcSoftPB). Offsets are for the One UI 9 S911N libgallery_pic_best.arcsoft.so and
+// are checked against the relocated GOT slot first, so any other build is left alone.
+int __system_property_get(const char*,char*);
+static void arclog(const char *m){ __android_log_print(4,"ArcSoftPB","%s",m); }
+static void hook_arclog(void){ static int done; char v[92]; if(done) return; done=1;
+    v[0]=0; __system_property_get("debug.bfsw.arclog",v); if(v[0]!='1') return;
+    void *h=dlopen("libgallery_pic_best.arcsoft.so",2|4); if(!h){ LOG("arclog: engine not loaded"); return; }
+    char *f=(char*)dlsym(h,"ARC_GPB_SetLogLevel"); if(!f) return; char *base=f-0x3245b30;
+    void **got=(void**)(base+0x3586b58);
+    if(*got!=(void*)(base+0xda088a8)){ LOG("arclog: unknown engine build"); return; }
+    *(void**)(base+0xda088a8)=(void*)arclog; LOG("arclog: ArcSoft log -> ArcSoftPB"); }
+static void init(void){ if(!real) real=dlopen("libsnap_aidl.snap.samsung.so",2); hook_arclog(); }
 typedef void *(*cs_fn)(void*,void*,void*,void*,void*,void*,void*,void*);
 static void *wrap(void *o){ if(!o) return o; void **vt=*(void***)o;
     pthread_mutex_lock(mtx);
