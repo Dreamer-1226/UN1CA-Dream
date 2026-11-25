@@ -1,0 +1,6 @@
+id=pkgcache_invalidate
+name=MinsOS package cache invalidation
+version=v1
+versionCode=1
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Throws away PackageManager's parsed-package cache on the first boot after a MinsOS update. This ROM keeps the donor's build fingerprint across releases, so PM never notices an update and keeps reading system APKs from entries parsed by an older build - which crash-looped Smart suggestions and mislabelled its widget on v1.1.1. Only affects people who update; a clean flash was never exposed.

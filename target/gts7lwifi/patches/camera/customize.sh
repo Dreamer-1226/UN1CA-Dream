@@ -14,7 +14,6 @@ if ! grep -q "Camera End" "$WORK_DIR/vendor/ueventd.rc"; then
 fi
 
 BLOBS_LIST="
-system/lib/libFrucPSVTLib.so
 system/lib/libSemanticMap_v1.camera.samsung.so
 system/lib/libaifrc.aidl.quram.so
 system/lib/libaifrcInterface.camera.samsung.so
@@ -24,13 +23,11 @@ system/lib64/libAIQSolution_MPISingleRGB40.camera.samsung.so
 system/lib64/libDocDeblur.camera.samsung.so
 system/lib64/libDocObjectRemoval.camera.samsung.so
 system/lib64/libDocObjectRemoval.enhanceX.samsung.so
-system/lib64/libFrucPSVTLib.so
 system/lib64/libMPISingleRGB40.camera.samsung.so
 system/lib64/libMPISingleRGB40Tuning.camera.samsung.so
 system/lib64/libPetClustering.camera.samsung.so
 system/lib64/libRelighting_API.camera.samsung.so
 system/lib64/libSemanticMap_v1.camera.samsung.so
-system/lib64/libSlowShutter-core.so
 system/lib64/libWideDistortionCorrection.camera.samsung.so
 system/lib64/libae_bracket_hdr.arcsoft.so
 system/lib64/libaifrc.aidl.quram.so

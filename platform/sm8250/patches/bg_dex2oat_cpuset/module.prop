@@ -1,0 +1,6 @@
+id=bg_dex2oat_cpuset
+name=dex2oat: background work on little cores, SystemUI compiled at boot
+version=v2
+versionCode=2
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Sets dalvik.vm.background-dex2oat-cpu-set=0,1,2,3 (SM8250 Kryo little cluster) so artd background compilation limits thermal throttling and avoids THERMAL_STATUS_MODERATE cancellation while charging. Sets dalvik.vm.systemuicompilerfilter=speed: the ROM ships no app oat (unica/patches/_debloat drops it), so the first-boot and boot-after-ota pass left SystemUI at verify, and it never restarts to pick up a later compile. ART's PrimaryDexopter uses this filter for SystemUI in that pass, so it starts fully compiled. Measured on a T970 (2.0.0 build 5, 11-17): with the prop a boot-after-ota compile gives SystemUI status=speed, a package it does not name stays verify; compiled SystemUI cut janky frames 13.09 to 10.25 percent (p99 65 to 53 ms) in the same scripted shade run.

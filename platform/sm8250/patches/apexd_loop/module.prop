@@ -1,0 +1,6 @@
+id=apexd_loop
+name=apexd uses loop devices (Google Play system updates)
+version=v1
+versionCode=1
+author=MinsOS by kmu1757 (https://xdaforums.com/m/kmu1757.13119493/, https://gitlab.com/minsos1/MinsOS)
+description=Sets apexd.config.use_fiemap=false so apexd mounts updated APEX files through loop devices. The Android 17 default maps an APEX's extents with a dm-linear target on /dev/block/by-name/userdata, which the 4.19 kernel refuses while /data is mounted ("linear: Device lookup failed", DM_TABLE_LOAD EBUSY), so every Google Play system update failed with "Couldn't create dm-device" (I-170).

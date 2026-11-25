@@ -1,0 +1,27 @@
+# MinsOS: invalidate PackageManager's parsed-package cache when the ROM version changes.
+# See /system/bin/minsos_pkgcache for why, and unica/patches/pkgcache_invalidate/customize.sh for
+# the sepolicy domain this seclabel names.
+#
+# Deliberate choices. Each is the difference between "the cache was not cleared" and "the tablet
+# does not boot":
+#   - `post-fs-data`, not `sys.boot_completed`. /data/system is device-encrypted and is already
+#     available here, and system_server has not started, so PackageManager reads the fresh state
+#     on THIS boot. Running it at boot_completed would only help the boot after next.
+#   - `disabled` + an explicit `start`, so it runs only on the trigger below.
+#   - NOT `critical`. A critical service that fails reboots the device into recovery, and this is
+#     a cache cleaner - the worst honest outcome is that nothing gets cleaned.
+#   - `oneshot`, and every exit path in the script is 0.
+#   - seclabel is load-bearing: the script carries plain u:object_r:system_file:s0 and init cannot
+#     derive a domain from that. Without it the service dies before fork with status 127 and no
+#     AVC of its own - which reads exactly like a clean exit. That shipped once already, on
+#     minsos_batt_soh, and went unnoticed through every release up to v1.1.0.
+service minsos_pkgcache /system/bin/minsos_pkgcache
+    class core
+    user root
+    group root system
+    oneshot
+    disabled
+    seclabel u:r:minsos_pkgcache:s0
+
+on post-fs-data
+    start minsos_pkgcache

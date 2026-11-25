@@ -1,0 +1,89 @@
+#!/system/bin/sh
+# MinsOS: throw away PackageManager's parsed-package cache when the ROM version changes.
+#
+# WHY THIS EXISTS (measured on a real T970, 2026-08-23):
+#   PackageManager caches the parsed manifest of every APK under /data/system/package_cache and
+#   only throws that cache away when the build fingerprint changes. This ROM keeps the donor's
+#   fingerprint (X810XXS6EZF1) across every MinsOS release, so from PM's point of view an update
+#   never happened. Any system APK whose contents we changed between releases keeps being read
+#   from a cache entry parsed by an older build.
+#
+#   What that looked like: SamsungSmartSuggestions on disk was versionCode 723100000 (7.2.31.0)
+#   while PM reported 711100100 (7.1.05.0) from a cache entry dated 2026-08-09. PM therefore kept
+#   registering a provider that only existed in the older APK, the new one has no such class, and
+#   the app crash-looped with ClassNotFoundException. Its labels resolved through the old resource
+#   ids too, so the app showed up as "Bottom sheet" and its widget carried an unrelated string.
+#   Deleting the cache fixed both, immediately, with nothing else changed. 804 entries were stale.
+#
+#   Only people who update hit this. A clean flash writes the cache from the APKs it ships with.
+#
+# SAFETY. This runs in the boot path, so every exit here is 0 and nothing is `critical`:
+#   - if /data is not ready, do nothing and leave the marker alone, so the next boot retries
+#   - if the marker already matches this build, do nothing (the cost of a wipe is a slow boot
+#     while PM re-parses ~800 packages; that is worth paying once per update, not every boot)
+#   - if the remove fails, say so and exit 0 - a slow boot beats a boot loop
+#
+# Log:  adb logcat -s MinsOS-PkgCache
+#   A boot-time run happens at post-fs-data, before logd accepts messages, so it usually leaves no
+#   line at all. Read the marker instead: adb shell su -c 'cat /data/system/minsos_pkgcache_ver'
+set -u
+
+TAG=MinsOS-PkgCache
+# Overridable only so tools/test_pkgcache_key.sh can run this against a scratch directory. init
+# passes no environment, so on a device these are always the /data/system paths.
+CACHE=${MINSOS_PKGCACHE_DIR:-/data/system/package_cache}
+MARKER=${MINSOS_PKGCACHE_MARKER:-/data/system/minsos_pkgcache_ver}
+
+say() { log -t "$TAG" "$@" 2>/dev/null; }
+
+# What identifies a build. ro.build.fingerprint cannot: this ROM keeps the donor's across releases,
+# which is the whole reason this script exists. ro.build.display.id carries the MinsOS version
+# (BP4A.251205.006.MinsOS-1.1.2) but not the build. v1.1.2 was built on 09-05, 09-06, 09-11 and
+# 09-12 under that one string, and on the owner's tablet the marker stayed at the 09-05 value
+# through all of them, so the cache was never cleared again (I-40). ro.unica.timestamp is the
+# build's own timestamp, written on every build and already required for OTA delta matching, so
+# the key is both together. It is labelled default_prop, which this domain can already read.
+# If the timestamp is ever missing, fall back to the version alone rather than doing nothing.
+ID=$(getprop ro.build.display.id 2>/dev/null)
+STAMP=$(getprop ro.unica.timestamp 2>/dev/null)
+if [ -z "$ID" ]; then
+    say "ro.build.display.id is empty - doing nothing"
+    exit 0
+fi
+WANT=$ID
+[ -n "$STAMP" ] && WANT="$ID@$STAMP"
+
+# Parameter expansion rather than dirname: no extra exec, so nothing new for the sepolicy domain.
+if [ ! -d "${MARKER%/*}" ]; then
+    say "${MARKER%/*} is not there yet - doing nothing, next boot will retry"
+    exit 0
+fi
+
+HAVE=""
+[ -f "$MARKER" ] && HAVE=$(cat "$MARKER" 2>/dev/null)
+
+if [ "$HAVE" = "$WANT" ]; then
+    say "already invalidated for $WANT - nothing to do"
+    exit 0
+fi
+
+if [ -d "$CACHE" ]; then
+    N=$(ls "$CACHE" 2>/dev/null | wc -l)
+    if rm -rf "$CACHE" 2>/dev/null; then
+        say "removed $CACHE ($N cache dir(s)) because the build changed: '$HAVE' -> '$WANT'"
+    else
+        # Do not write the marker: we want the next boot to try again rather than silently
+        # believing the job is done.
+        say "could not remove $CACHE - leaving the marker alone so the next boot retries"
+        exit 0
+    fi
+else
+    say "no $CACHE to remove; recording $WANT anyway"
+fi
+
+# Marker last. If anything above failed we must not claim this build was handled.
+printf '%s' "$WANT" > "$MARKER" 2>/dev/null \
+    && say "marker set to $WANT" \
+    || say "could not write $MARKER - this will run again next boot"
+
+exit 0
