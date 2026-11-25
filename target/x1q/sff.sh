@@ -28,3 +28,7 @@ SEC_FLOATING_FEATURE_GALLERY_CONFIG_BEST_FACE_MODE=GENIMAGE
 SEC_FLOATING_FEATURE_CAMERA_SUPPORT_GALLERY_LR=TRUE
 SEC_FLOATING_FEATURE_CAMERA_SUPPORT_PRO_RGB_CONVERSION=TRUE
 
+
+# Gallery long exposure for motion photos (libSlowShutter_jni -> libSlowShutter-core -> libFrucPSVTLib,
+# all three in the system image). The donor only sets the _10BIT variant, so the menu never showed.
+SEC_FLOATING_FEATURE_MMFW_SUPPORT_LONGEXPOSURE_EFFECT=TRUE

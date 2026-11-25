@@ -36,3 +36,7 @@ SEC_FLOATING_FEATURE_CAMERA_SUPPORT_PRO_RGB_CONVERSION=TRUE
 # for HDR and the FRUC is 8-bit.
 SEC_FLOATING_FEATURE_CAMERA_SUPPORT_AIFRC=TRUE
 SEC_FLOATING_FEATURE_CAMERA_CONFIG_AIFRC_SPEC=720,1,3840,2160,24,60
+
+# Gallery long exposure for motion photos (libSlowShutter_jni -> libSlowShutter-core -> libFrucPSVTLib,
+# all three in the system image). The donor only sets the _10BIT variant, so the menu never showed.
+SEC_FLOATING_FEATURE_MMFW_SUPPORT_LONGEXPOSURE_EFFECT=TRUE
