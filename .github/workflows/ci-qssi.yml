@@ -143,7 +143,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 40
         run: |
-          ZIP_FILE=$(find out -maxdepth 1 -type f -name "*sign_GZIF.zip" | head -n 1)
+          ZIP_FILE=$(find out -maxdepth 1 -type f -name "*sign_GZK3.zip" | head -n 1)
           [ -n "$ZIP_FILE" ] || { echo "::error::No signed zip found"; exit 1; }
           echo "Uploading $ZIP_FILE ($(du -h "$ZIP_FILE" | cut -f1))"
           for SERVER in upload upload-eu-par upload-na-phx upload-ap-sgp; do
