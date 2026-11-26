@@ -1,5 +1,5 @@
 // Best Face face-swap replacement for SM8250 (no HTP). ssch71
-// Optical: dense pyramidal Lucas-Kanade flow + bilinear warp. Fusion: Poisson membrane blend + feather.
+// Optical: dense pyramidal Lucas-Kanade flow (contrast-normalised, scale-relative regularisation) + bilinear warp. Fusion: Poisson membrane blend + feather.
 static float *fa(long n){ return (float*)malloc(n*sizeof(float)); }
 static void fz(float *p,long n){ for(long i=0;i<n;i++) p[i]=0; }
 static int clampi(int v,int lo,int hi){ return v<lo?lo:(v>hi?hi:v); }
@@ -21,9 +21,14 @@ static float bil(const float *img,int w,int h,int c,int ch,float x,float y,int r
 }
 static void down2(const float *s,int w,int h,float *d){ int W=w/2,H=h/2;
     for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)2*y*w+2*x; d[(long)y*W+x]=0.25f*(s[i]+s[i+1]+s[i+w]+s[i+w+1]); } }
+
 static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *fy){
-    enum{ LV=5, IT=4, R=7 };
-    const float *P0[LV],*P1[LV]; int PW[LV],PH[LV]; P0[0]=g0;P1[0]=g1;PW[0]=w;PH[0]=h;
+    enum{ LV=6, IT=5, R=7 };
+    long NN=(long)w*h; float *n0=fa(NN),*n1=fa(NN);
+    { double m0=0,m1=0,s0=0,s1=0; for(long i=0;i<NN;i++){ m0+=g0[i]; m1+=g1[i]; } m0/=NN; m1/=NN;
+      for(long i=0;i<NN;i++){ s0+=(g0[i]-m0)*(g0[i]-m0); s1+=(g1[i]-m1)*(g1[i]-m1); } s0=__builtin_sqrt(s0/NN)+1e-6; s1=__builtin_sqrt(s1/NN)+1e-6;
+      for(long i=0;i<NN;i++){ n0[i]=(g0[i]-m0)/s0; n1[i]=(g1[i]-m1)/s1; } }
+    const float *P0[LV],*P1[LV]; int PW[LV],PH[LV]; P0[0]=n0;P1[0]=n1;PW[0]=w;PH[0]=h;
     for(int l=1;l<LV;l++){ PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
         down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; }
     long N=(long)w*h; float *u=fa(N),*v=fa(N),*nu=fa(N),*nv=fa(N),*bw=fa(N),*A=fa(N),*B=fa(N),*C=fa(N),*D=fa(N),*E=fa(N),*T=fa(N);
@@ -40,13 +45,17 @@ static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *
                 float iy=0.5f*(bw[(long)clampi(y+1,0,H-1)*W+x]-bw[(long)clampi(y-1,0,H-1)*W+x]);
                 float itt=bw[i]-a[i]; A[i]=ix*ix; B[i]=ix*iy; C[i]=iy*iy; D[i]=ix*itt; E[i]=iy*itt; }
             boxf(A,T,W,H,R,1); boxf(B,T,W,H,R,1); boxf(C,T,W,H,R,1); boxf(D,T,W,H,R,1); boxf(E,T,W,H,R,1);
-            for(long i=0;i<n;i++){ float det=A[i]*C[i]-B[i]*B[i]+1e-4f; u[i]+=-(C[i]*D[i]-B[i]*E[i])/det; v[i]+=-(A[i]*E[i]-B[i]*D[i])/det; }
+            float lim=0.25f*(W<H?W:H);
+            for(long i=0;i<n;i++){ float reg=1e-2f*(A[i]+C[i])+1e-9f, a=A[i]+reg, c=C[i]+reg, det=a*c-B[i]*B[i];
+                float du=-(c*D[i]-B[i]*E[i])/det, dv=-(a*E[i]-B[i]*D[i])/det; if(!(du==du)) du=0; if(!(dv==dv)) dv=0;
+                if(du>2)du=2; if(du<-2)du=-2; if(dv>2)dv=2; if(dv<-2)dv=-2; u[i]+=du; v[i]+=dv;
+                if(u[i]>lim)u[i]=lim; if(u[i]<-lim)u[i]=-lim; if(v[i]>lim)v[i]=lim; if(v[i]<-lim)v[i]=-lim; }
             boxf(u,T,W,H,1,1); boxf(v,T,W,H,1,1);
         }
     }
     for(long i=0;i<N;i++){ fx[i]=u[i]; fy[i]=v[i]; }
     for(int l=1;l<LV;l++){ free((void*)P0[l]); free((void*)P1[l]); }
-    free(u);free(v);free(nu);free(nv);free(bw);free(A);free(B);free(C);free(D);free(E);free(T);
+    free(n0);free(n1);free(u);free(v);free(nu);free(nv);free(bw);free(A);free(B);free(C);free(D);free(E);free(T);
 }
 // in: i0,i1 HxWx3, m2,e2,m1 HxWx1 ; out HxWx8
 static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,int w,int h,float *out){
