@@ -12,9 +12,10 @@ name: OTA
 # Run it by hand, for one or several devices at once. The regular CI builds
 # are not OTA builds: only builds made here enter the channel.
 #
-# Needs the OTA_KEY_PK8 secret (base64 of security/ssch71_ota.pk8)
-# and the donor firmwares pinned (scripts/pin_firmware.sh), or Samsung updates
-# would turn every incremental into a full image.
+# Needs the OTA_KEY_PK8 secret (base64 of security/ssch71_ota.pk8).
+# The firmwares are not pinned: builds follow what FUS serves, so a Samsung
+# update makes the next incremental much bigger. Pin them again with
+# scripts/pin_firmware.sh when the channel needs small incrementals.
 
 on:
   workflow_call:
@@ -199,10 +200,12 @@ jobs:
       - name: Check pinned firmware
         run: |
           if [ -z "$SOURCE_FIRMWARE_VERSION" ]; then
-            echo "::error::$SOURCE_FIRMWARE is not pinned. Run scripts/pin_firmware.sh first."
-            exit 1
+            # Not pinned: the build follows whatever FUS serves. A Samsung update between two OTA
+            # builds makes the incremental much bigger (or the auto mode falls back to a full one).
+            echo "::warning::$SOURCE_FIRMWARE is not pinned, using the latest build from FUS"
+          else
+            echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
           fi
-          echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
 
       - name: Find the previous OTA build
         id: prev
@@ -467,7 +470,7 @@ jobs:
           {
             echo "${{ matrix.target }} OTA build ${{ steps.out.outputs.timestamp }} (${{ steps.prev.outputs.mode }})"
             echo
-            echo "Source firmware: $SOURCE_FIRMWARE_VERSION"
+            echo "Source firmware: ${SOURCE_FIRMWARE_VERSION:-latest from FUS}"
             [ -n "$LINK" ] && echo "Full package: $LINK"
             [ -n "${{ steps.prev.outputs.tag }}" ] && echo "Incremental from: ${{ steps.prev.outputs.tag }}"
             [ -n "$CHANGELOG" ] && { echo; echo "$CHANGELOG"; }
