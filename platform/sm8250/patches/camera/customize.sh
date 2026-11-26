@@ -58,7 +58,8 @@ do
 done
 
 LOG_STEP_IN "- Fixing MIDAS, AI and camera"
-ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libSlowShutter_jni.media.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
+# libSlowShutter_jni stays the donor's: the a73xqxx one is an empty stub (no JNI_OnLoad, no exports), and the
+# Gallery long exposure (MMFW_SUPPORT_LONGEXPOSURE_EFFECT) crashes on it with UnsatisfiedLinkError startSSFromJNI.
 ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/lib_nativeJni.dk.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libsamsung_videoengine_9_0.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libtensorflowLite.camera.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"

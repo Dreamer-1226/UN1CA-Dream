@@ -127,7 +127,7 @@ _SB_ADD "a73xqxx" "system" "system/lib64/libSwIsp_wrapper_v1.camera.samsung.so" 
 LOG_STEP_OUT
 
 LOG_STEP_IN "- Fixing MIDAS, AI and camera"
-_SB_ADD "a73xqxx" "system" "system/lib64/libSlowShutter_jni.media.samsung.so"
+# libSlowShutter_jni: keep the donor's, the a73xqxx one is an empty stub (see patches/camera).
 _SB_ADD "a73xqxx" "system" "system/lib64/lib_nativeJni.dk.samsung.so"
 # TEST: use source midas libs (match libRemasterEngine) # ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libmidas_DNNInterface.camera.samsung.so"
 # TEST: use source midas libs (match libRemasterEngine) # ADD_TO_WORK_DIR "a73xqxx" "system" "system/lib64/libmidas_core.camera.samsung.so"
