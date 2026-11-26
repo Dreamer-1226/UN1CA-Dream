@@ -56,6 +56,12 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           echo -n "${{ secrets.PLATFORM_KEY_PK8 }}" | base64 --decode > security/unica_platform.pk8
           echo -n "${{ secrets.PLATFORM_KEY_PEM }}" | base64 --decode > security/unica_platform.x509.pem
+          # Sign the flashable zip with our OTA key, so UN1CA Updates' "Local update" accepts it
+          # (otacerts.zip only carries security/ssch71_ota.x509.pem). Without the secret the zip
+          # stays signed with the AOSP test key.
+          if [ -n "${{ secrets.OTA_KEY_PK8 }}" ]; then
+            echo -n "${{ secrets.OTA_KEY_PK8 }}" | base64 --decode > security/ssch71_ota.pk8
+          fi
 
       - name: Set up JDK 21 and 17
         uses: actions/setup-java@v6
