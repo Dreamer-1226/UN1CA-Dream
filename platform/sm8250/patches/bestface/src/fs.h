@@ -200,15 +200,119 @@ static int eye_similarity(const float *g0,const float *g1,const float *e2,int w,
     double cs=scos(bt)*bs, sn=ssin(bt)*bs;
     SA[0]=cs; SA[1]=-sn; SA[2]=cx-cs*bx+sn*by; SA[3]=sn; SA[4]=cs; SA[5]=cy-sn*bx-cs*by;
 #ifdef BF_TEST
-    fprintf(stderr,"eye sim ncc %.3f s %.3f th %.2f base (%.1f,%.1f) cand (%.1f,%.1f)\n",best,bs,bt/D,bx,by,cx,cy);
+    fprintf(stderr,"eye sim ncc %.3f s %.3f th %.2f base (%.1f,%.1f) cand (%.1f,%.1f)\n",best,bs,bt/D,bx,by,cx,cy); { double cs_=scos(bt)*bs, sn_=ssin(bt)*bs; fprintf(stderr,"SA %f %f %f %f %f %f\n",cs_,-sn_,cx-cs_*bx+sn_*by,sn_,cs_,cy-sn_*bx-cs_*by); }
 #endif
     return 1; }
+// Free-form refinement. The eye-anchored similarity puts the candidate's eyes on the base's, but a head
+// that is pitched or turned differently still leaves the jaw, cheeks and glasses rims off by 10-30 px,
+// and every base feature outside the warped candidate mask (a second jaw line, a second rim) stays
+// visible. Refine with a smooth bilinear control grid (FG x FG over the face) by Gauss-Newton on
+//  - the candidate face mask against the base face mask (outline), and
+//  - mean-normalised intensity over the inner face, Huber-weighted (features, rims),
+// with the two eye centres pinned to the similarity and a membrane penalty between control points.
+// Stage 1 leans on the masks; stage 2 trusts intensity, but only when stage 1 already explains the
+// face well, since a large pose change pulls an intensity fit into reshaping the expression.
+enum{ FG=8 };
+#define FP (FG*FG)
+static int cholsolve(double *A,double *b,int n){
+    for(int j=0;j<n;j++){ double s=A[j*n+j]; for(int k=0;k<j;k++) s-=A[j*n+k]*A[j*n+k]; if(s<=1e-12) return 0; s=__builtin_sqrt(s); A[j*n+j]=s;
+        for(int i=j+1;i<n;i++){ double t=A[i*n+j]; for(int k=0;k<j;k++) t-=A[i*n+k]*A[j*n+k]; A[i*n+j]=t/s; } }
+    for(int i=0;i<n;i++){ double t=b[i]; for(int k=0;k<i;k++) t-=A[i*n+k]*b[k]; b[i]=t/A[i*n+i]; }
+    for(int i=n-1;i>=0;i--){ double t=b[i]; for(int k=i+1;k<n;k++) t-=A[k*n+i]*b[k]; b[i]=t/A[i*n+i]; }
+    return 1; }
+typedef struct { float gx0,gdx,gy0,gdy; } grid_t;
+// bilinear hat weights of a point: up to 4 controls
+static int hats(const grid_t *g,float x,float y,int *id,float *wt){
+    float u=(x-g->gx0)/g->gdx, v=(y-g->gy0)/g->gdy; if(u<0||v<0||u>FG-1||v>FG-1) return 0;
+    int i=(int)u, j=(int)v; if(i>FG-2) i=FG-2; if(j>FG-2) j=FG-2; float a=u-i, b=v-j; int n=0;
+    id[n]=j*FG+i; wt[n++]=(1-a)*(1-b); id[n]=j*FG+i+1; wt[n++]=a*(1-b); id[n]=(j+1)*FG+i; wt[n++]=(1-a)*b; id[n]=(j+1)*FG+i+1; wt[n++]=a*b; return n; }
+static float ffd_stage(const float *g0,const float *g1,const float *m1,const float *m2,int w,int h,const double *SA,const grid_t *gr,
+        const float (*pins)[2],int npin,double *c,float alpha,float lam,float cap,const float *B0[3],const float *B1[3],const float *BM1,const float *BM2,const float *WI){
+    const int NP=2*FP; double *H=(double*)malloc(sizeof(double)*NP*NP), *gv=(double*)malloc(sizeof(double)*NP), c0[2*FP]; for(int k=0;k<NP;k++) c0[k]=c[k];
+    // membrane (grid neighbour differences) and pin rows, per coordinate
+    double *Rm=(double*)malloc(sizeof(double)*FP*FP); for(int k=0;k<FP*FP;k++) Rm[k]=0;
+    for(int j=0;j<FG;j++) for(int i=0;i<FG;i++){ int a=j*FG+i; if(i+1<FG){ int b=a+1; Rm[a*FP+a]+=1; Rm[b*FP+b]+=1; Rm[a*FP+b]-=1; Rm[b*FP+a]-=1; }
+        if(j+1<FG){ int b=a+FG; Rm[a*FP+a]+=1; Rm[b*FP+b]+=1; Rm[a*FP+b]-=1; Rm[b*FP+a]-=1; } }
+    double *Pm=(double*)malloc(sizeof(double)*FP*FP); for(int k=0;k<FP*FP;k++) Pm[k]=0;
+    for(int p=0;p<npin;p++){ int id[4]; float wt[4]; int n=hats(gr,pins[p][0],pins[p][1],id,wt); for(int a=0;a<n;a++) for(int b=0;b<n;b++) Pm[id[a]*FP+id[b]]+=wt[a]*wt[b]; }
+    const int scs[3]={8,4,2}, its[3]={40,25,10}; float res=0;
+    for(int L=0;L<3;L++){ int sc=scs[L], n=w/sc; const float *b1=B1[L], *a0=B0[L];
+        // gradients of the blurred candidate (central differences) are taken on the fly
+        // base statistics over the inner face
+        double sw=0,sa=0,saa=0; for(int y=0;y<h;y+=sc) for(int x=0;x<w;x+=sc){ long i=(long)y*w+x; double wv=WI[i]+1e-6; sw+=wv; sa+=wv*a0[i]; saa+=wv*a0[i]*a0[i]; }
+        double am=sa/sw, as=__builtin_sqrt(saa/sw-am*am)+1e-9; long NPt=(long)n*n;
+        for(int it=0;it<its[L];it++){
+            for(int k=0;k<NP*NP;k++) H[k]=0; for(int k=0;k<NP;k++) gv[k]=0;
+            // pass 1: intensity mean/std of the warped candidate over the inner face
+            double s0=0,s1=0,s2=0;
+            for(int y=0;y<h;y+=sc) for(int x=0;x<w;x+=sc){ long i=(long)y*w+x; if(WI[i]<=0) continue; int id[4]; float wt[4]; int nn=hats(gr,x,y,id,wt);
+                double qx=SA[0]*x+SA[1]*y+SA[2], qy=SA[3]*x+SA[4]*y+SA[5]; for(int a=0;a<nn;a++){ qx+=wt[a]*c[id[a]]; qy+=wt[a]*c[FP+id[a]]; }
+                double I=bil(b1,w,h,1,0,qx,qy,1); s0+=WI[i]; s1+=WI[i]*I; s2+=WI[i]*I*I; }
+            double im=s0>0?s1/s0:0, is=s0>0?__builtin_sqrt(s2/s0-im*im)+1e-9:1; double rsum=0;
+            for(int y=0;y<h;y+=sc) for(int x=0;x<w;x+=sc){ long i=(long)y*w+x; int id[4]; float wt[4]; int nn=hats(gr,x,y,id,wt);
+                double qx=SA[0]*x+SA[1]*y+SA[2], qy=SA[3]*x+SA[4]*y+SA[5]; for(int a=0;a<nn;a++){ qx+=wt[a]*c[id[a]]; qy+=wt[a]*c[FP+id[a]]; }
+                if(!nn) continue;
+                // mask term
+                double r1=bil(BM2,w,h,1,0,qx,qy,1)-BM1[i];
+                double mx=0.5*(bil(BM2,w,h,1,0,qx+1,qy,1)-bil(BM2,w,h,1,0,qx-1,qy,1)), my=0.5*(bil(BM2,w,h,1,0,qx,qy+1,1)-bil(BM2,w,h,1,0,qx,qy-1,1));
+                double ex[2]={mx,my}, wi=WI[i], r2=0, jx=0, jy=0, hw=0;
+                if(wi>0){ double I=bil(b1,w,h,1,0,qx,qy,1); double rr=(I-im)/is-(a0[i]-am)/as; double ar=rr<0?-rr:rr; hw=ar>0.3?0.3/ar:1; r2=rr;
+                    jx=0.5*(bil(b1,w,h,1,0,qx+1,qy,1)-bil(b1,w,h,1,0,qx-1,qy,1))/is; jy=0.5*(bil(b1,w,h,1,0,qx,qy+1,1)-bil(b1,w,h,1,0,qx,qy-1,1))/is;
+                    rsum+=(ar)*__builtin_sqrt(wi*hw); }
+                double ww=alpha*wi*hw; double ij[2]={jx,jy};
+                for(int da=0;da<2;da++) for(int a=0;a<nn;a++){ int ra=da*FP+id[a]; double ja=wt[a]*ex[da], ka=wt[a]*ij[da];
+                    gv[ra]+=(ja*r1+ww*ka*r2)/NPt;
+                    for(int db=0;db<2;db++) for(int b=0;b<nn;b++){ int rb=db*FP+id[b]; H[ra*NP+rb]+=(ja*wt[b]*ex[db]+ww*ka*wt[b]*ij[db])/NPt; } } }
+            res=(float)(rsum/NPt);
+            double tr=0; for(int k=0;k<NP;k++) tr+=H[k*NP+k];
+            for(int d=0;d<2;d++) for(int a=0;a<FP;a++) for(int b=0;b<FP;b++){ double v=lam*1e-4*Rm[a*FP+b]+100*1e-3*Pm[a*FP+b]; H[(d*FP+a)*NP+d*FP+b]+=v; gv[d*FP+a]+=v*c[d*FP+b]; }
+            for(int k=0;k<NP;k++) H[k*NP+k]+=1e-6*tr;
+            if(!cholsolve(H,gv,NP)) break;
+            double mx=0; for(int k=0;k<NP;k++){ c[k]-=gv[k]; float d=(float)(c[k]-c0[k]); if(d>cap) c[k]=c0[k]+cap; if(d<-cap) c[k]=c0[k]-cap; double a=gv[k]<0?-gv[k]:gv[k]; if(a>mx) mx=a; }
+            if(mx<0.02) break; } }
+    free(H); free(gv); free(Rm); free(Pm); return res; }
+static void ffd_refine(const float *g0,const float *g1,const float *m1,const float *m2,const float *e2,int w,int h,const double *SA,float *fx,float *fy){
+    long N=(long)w*h; float *t=fa(N);
+    float *BM1=fa(N),*BM2=fa(N),*WI=fa(N); for(long i=0;i<N;i++){ BM1[i]=m1[i]; BM2[i]=m2[i]; }
+    boxf(BM1,t,w,h,6,3); boxf(BM2,t,w,h,6,3);
+    // inner face: base mask eroded by 7 px
+    { float *b=fa(N); for(long i=0;i<N;i++) b[i]=m1[i]>0.5f?1.0f:0.0f; boxf(b,t,w,h,7,1); for(long i=0;i<N;i++) WI[i]=b[i]>0.999f?1.0f:0.0f; free(b); }
+    const float *B0[3],*B1[3]; const int rr[3]={4,2,1};
+    for(int L=0;L<3;L++){ float *a=fa(N),*b=fa(N); for(long i=0;i<N;i++){ a[i]=g0[i]; b[i]=g1[i]; } boxf(a,t,w,h,rr[L],3); boxf(b,t,w,h,rr[L],3); B0[L]=a; B1[L]=b; }
+    // grid over the union of the base mask and the similarity-placed candidate mask
+    int x0=w,y0=h,x1=-1,y1=-1; double iv=SA[0]*SA[4]-SA[1]*SA[3];
+    for(int y=0;y<h;y+=2) for(int x=0;x<w;x+=2){ long i=(long)y*w+x; int in=m1[i]>0.5f;
+        if(!in){ float qx=(float)(SA[0]*x+SA[1]*y+SA[2]), qy=(float)(SA[3]*x+SA[4]*y+SA[5]); in=bil(m2,w,h,1,0,qx,qy,0)>0.5f; }
+        if(in){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+    if(x1<0||iv==0){ goto out; }
+    { grid_t gr={x0-30.0f,(x1-x0+60.0f)/(FG-1),y0-30.0f,(y1-y0+60.0f)/(FG-1)};
+      // eye pins: candidate eye-blob centres, mapped back to the base through the similarity
+      float pins[4][2]; int np=0; int *lab=(int*)malloc(N*sizeof(int)), *stk=(int*)malloc(N*sizeof(int));
+      for(long i=0;i<N;i++) lab[i]=e2[i]>0.5f?-1:0;
+      for(long s0=0;s0<N&&np<4;s0++){ if(lab[s0]!=-1) continue; long sp=0; stk[sp++]=(int)s0; lab[s0]=1; long ar=0; double sx=0,sy=0;
+          while(sp){ long i=stk[--sp]; int x=i%w,y=i/w; ar++; sx+=x; sy+=y; const int dx[4]={1,-1,0,0},dy[4]={0,0,1,-1};
+              for(int k=0;k<4;k++){ int xx=x+dx[k],yy=y+dy[k]; if(xx<0||yy<0||xx>=w||yy>=h) continue; long j=(long)yy*w+xx; if(lab[j]==-1){ lab[j]=1; stk[sp++]=(int)j; } } }
+          if(ar<40) continue; double cx=sx/ar-SA[2], cy=sy/ar-SA[5];
+          pins[np][0]=(float)(( SA[4]*cx-SA[1]*cy)/iv); pins[np][1]=(float)((-SA[3]*cx+SA[0]*cy)/iv); np++; }
+      free(lab); free(stk);
+      double c[2*FP]; for(int k=0;k<2*FP;k++) c[k]=0;
+      float r=ffd_stage(g0,g1,m1,m2,w,h,SA,&gr,(const float(*)[2])pins,np,c,0.5f,0.05f,30.0f,B0,B1,BM1,BM2,WI);
+      if(r<0.04f) ffd_stage(g0,g1,m1,m2,w,h,SA,&gr,(const float(*)[2])pins,np,c,50.0f,0.05f,8.0f,B0,B1,BM1,BM2,WI);
+#ifdef BF_TEST
+      fprintf(stderr,"ffd stage1 res %.3f%s\n",r,r<0.04f?" -> stage2":"");
+#endif
+      for(int y=0;y<h;y++) for(int x=0;x<w;x++){ int id[4]; float wt[4]; int nn=hats(&gr,x,y,id,wt); long i=(long)y*w+x;
+          for(int a=0;a<nn;a++){ fx[i]+=(float)(wt[a]*c[id[a]]); fy[i]+=(float)(wt[a]*c[FP+id[a]]); } } }
+out:
+    for(int L=0;L<3;L++){ free((void*)B0[L]); free((void*)B1[L]); }
+    free(t); free(BM1); free(BM2); free(WI); }
 static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,const float *m1,int w,int h,float *out){
     long N=(long)w*h; float *g0=fa(N),*g1=fa(N),*fx=fa(N),*fy=fa(N);
     for(long i=0;i<N;i++){ g0[i]=0.114f*i0[3*i]+0.587f*i0[3*i+1]+0.299f*i0[3*i+2]; g1[i]=0.114f*i1[3*i]+0.587f*i1[3*i+1]+0.299f*i1[3*i+2]; }
     double SA[6]; int ok=eye_similarity(g0,g1,e2,w,h,SA);
     if(ok){ // a rigid placement keeps the candidate's own expression intact; Fusion blends the seam
-        for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; fx[i]=(float)(SA[0]*x+SA[1]*y+SA[2]-x); fy[i]=(float)(SA[3]*x+SA[4]*y+SA[5]-y); } }
+        for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; fx[i]=(float)(SA[0]*x+SA[1]*y+SA[2]-x); fy[i]=(float)(SA[3]*x+SA[4]*y+SA[5]-y); }
+        ffd_refine(g0,g1,m1,m2,e2,w,h,SA,fx,fy); }
     else { disflow(g0,g1,m1,w,h,fx,fy,0,0,0); unfold(fx,fy,w,h); }
     for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; float sx=x+fx[i], sy=y+fy[i]; float *o=out+8*i;
         o[0]=i0[3*i]; o[1]=i0[3*i+1]; o[2]=i0[3*i+2];
