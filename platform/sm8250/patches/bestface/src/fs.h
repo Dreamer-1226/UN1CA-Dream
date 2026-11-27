@@ -1,5 +1,5 @@
 // Best Face face-swap replacement for SM8250 (no HTP). ssch71
-// Optical: pyramidal Lucas-Kanade flow held to a robust affine fit plus a small smooth residual, + bilinear warp. Fusion: Poisson membrane blend + feather.
+// Optical: pyramidal Lucas-Kanade flow held to a robust affine fit plus a texture-capped, texture-weighted residual, + bilinear warp. Fusion: Poisson membrane blend + feather.
 static float *fa(long n){ return (float*)malloc(n*sizeof(float)); }
 static void fz(float *p,long n){ for(long i=0;i<n;i++) p[i]=0; }
 static int clampi(int v,int lo,int hi){ return v<lo?lo:(v>hi?hi:v); }
@@ -81,12 +81,19 @@ static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *
         { double pa[3],pb[3]; float *cf=nu;
           for(long i=0;i<n;i++){ float tr=A[i]+C[i], df=A[i]-C[i]; float me=0.5f*(tr-__builtin_sqrtf(df*df+4*B[i]*B[i])); cf[i]=me>0?me:0; }
           affine_fit(u,v,cf,W,H,2.0f,pa,pb);
-          float k=l==0?3.0f:1.5f;
+          // The cap follows the texture: eyes, brows and lips track reliably and may move further from the
+          // affine fit (a different head pitch shifts them by 10+ px); flat skin stays near it.
+          float cref=0; { double sc=0; long nc=0; for(long i=0;i<n;i+=7){ sc+=cf[i]; nc++; } cref=(float)(4*sc/(nc?nc:1))+1e-12f; }
+          float k0=l==0?3.0f:1.5f, k1=(l==0?14.0f:14.0f*0.5f)*(1.0f/(1<<(l>1?l-1:0)));
+          if(k1<k0) k1=k0;
           for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float au=pa[0]+pa[1]*x+pa[2]*y, av=pb[0]+pb[1]*x+pb[2]*y;
+              float t=cf[i]/cref; if(t>1) t=1; float k=k0+(k1-k0)*t;
               float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>k){ ru*=k/r; rv*=k/r; }
-              A[i]=ru; C[i]=rv; D[i]=au; E[i]=av; }
-          boxf(A,T,W,H,4,2); boxf(C,T,W,H,4,2);
-          for(long i=0;i<n;i++){ u[i]=D[i]+A[i]; v[i]=E[i]+C[i]; } }
+              float wt=t*t+0.02f; A[i]=ru*wt; C[i]=rv*wt; B[i]=wt; D[i]=au; E[i]=av; }
+          // Texture-weighted smoothing (normalised convolution): flat skin takes the residual of the eyes,
+          // brows and lips around it instead of its own noise.
+          boxf(A,T,W,H,6,2); boxf(C,T,W,H,6,2); boxf(B,T,W,H,6,2);
+          for(long i=0;i<n;i++){ u[i]=D[i]+A[i]/B[i]; v[i]=E[i]+C[i]/B[i]; } }
     }
     for(long i=0;i<N;i++){ fx[i]=u[i]; fy[i]=v[i]; }
     for(int l=1;l<LV;l++){ free((void*)P0[l]); free((void*)P1[l]); }
