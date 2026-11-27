@@ -232,9 +232,16 @@ static void fs_fusion(const float *in,int w,int h,float *out){
     for(long i=0;i<N;i++) wo[i]=1.0f-e[i];
     { float *ow=fa(N); for(long i=0;i<N;i++) ow[i]=wo[i]; boxf(ow,T,w,h,12,3);
       for(int c=0;c<3;c++){
-        for(long i=0;i<N;i++) cc[i]=(in[8*i+c]-w2[3*i+c])*wo[i];
+        // The seam often crosses structure that differs between the frames (bangs over a brow, a cheek
+        // against the background), and a plain membrane carries those differences far into the face:
+        // a washed-out eye under a fringe. Use only the colour shift: clamp boundary differences to a
+        // narrow band around their median along the seam.
+        float med=0; { int hist[256]={0}; long nb=0;
+            for(long i=0;i<N;i++) if(e[i]<=0 && m[i]>0.5f){ float d=in[8*i+c]-w2[3*i+c]; int b=(int)((d+0.5f)*255); b=b<0?0:(b>255?255:b); hist[b]++; nb++; }
+            long acc=0; for(int b=0;b<256;b++){ acc+=hist[b]; if(acc*2>=nb){ med=b/255.0f-0.5f; break; } } }
+        for(long i=0;i<N;i++){ float d=in[8*i+c]-w2[3*i+c]; if(d>med+0.04f) d=med+0.04f; if(d<med-0.04f) d=med-0.04f; cc[i]=d*wo[i]; }
         boxf(cc,T,w,h,12,3);
-        for(long i=0;i<N;i++){ float d=in[8*i+c]-w2[3*i+c]; cc[i]= e[i]>0 ? cc[i]/(ow[i]+1e-6f) : d; }
+        for(long i=0;i<N;i++){ float d=in[8*i+c]-w2[3*i+c]; if(d>med+0.04f) d=med+0.04f; if(d<med-0.04f) d=med-0.04f; cc[i]= e[i]>0 ? cc[i]/(ow[i]+1e-6f) : d; }
         int X0=clampi(x0-1,1,w-2),X1=clampi(x1+1,1,w-2),Y0=clampi(y0-1,1,h-2),Y1=clampi(y1+1,1,h-2);
         for(int k=0;k<300;k++) for(int par=0;par<2;par++)
             for(int y=Y0;y<=Y1;y++) for(int x=X0+((y+X0+par)&1);x<=X1;x+=2){ long i=(long)y*w+x; if(e[i]<=0) continue;
