@@ -27,6 +27,18 @@ static int h_open(void *self,void *opt){
     if(t){ LOG("Open %s: CPU replacement",nm); return 0; }
     return ((open_fn)realvt[7])(self,opt);
 }
+// debug.bfsw.dump=1: write every faceswap model input and output as raw float32 tensors to the app's
+// cache dir (/data/user/0/<package>/cache/bfsw), to tune the replacement against real frames.
+int __system_property_get(const char*,char*);
+int open(const char*,int,...); long write(int,const void*,size_t); long read(int,void*,size_t); int close(int);
+int mkdir(const char*,unsigned); int snprintf(char*,size_t,const char*,...);
+static int dumpn;
+static int dump_dir(char *d,int max){ char v[92]; v[0]=0; __system_property_get("debug.bfsw.dump",v); if(v[0]!='1') return 0;
+    char pk[128]; int fd=open("/proc/self/cmdline",0); if(fd<0) return 0; long r=read(fd,pk,sizeof(pk)-1); close(fd); if(r<=0) return 0; pk[r]=0;
+    snprintf(d,max,"/data/user/0/%s/cache/bfsw",pk); mkdir(d,0700); return 1; }
+static void dump_buf(const char *d,int n,const char *tag,int k,const float *p,int h,int w,int c){ char f[256];
+    snprintf(f,sizeof(f),"%s/%03d_%s_%d_%dx%dx%d.f32",d,n,tag,k,h,w,c); int fd=open(f,0x241,0600); if(fd<0){ LOG("dump: cannot write %s",f); return; }
+    long len=(long)h*w*c*4; const char *q=(const char*)p; while(len>0){ long r=write(fd,q,len>(1<<20)?(1<<20):len); if(r<=0) break; q+=r; len-=r; } close(fd); }
 static int dims(struct dbuf *b,int *h,int *w,int *c){ int n=(int)(b->se-b->sb); if(n!=4) return 0; *h=b->sb[1]; *w=b->sb[2]; *c=b->sb[3]; return 1; }
 static int h_exec(void *self,void *vin,void *vout){
     pthread_mutex_lock(mtx); int i=find(self); int t= i>=0?stype[i]:0; pthread_mutex_unlock(mtx);
@@ -37,6 +49,9 @@ static int h_exec(void *self,void *vin,void *vout){
     if(t==1){ if(n<4){ LOG("Optical: %d inputs",n); free(o); return -1; }
         fs_optical((float*)in->b[0].data,(float*)in->b[1].data,(float*)in->b[2].data,(float*)in->b[3].data,w,h,o); }
     else { if(c!=8){ LOG("Fusion: %d channels",c); free(o); return -1; } fs_fusion((float*)in->b[0].data,w,h,o); }
+    { char d[200]; if(dump_dir(d,sizeof(d))){ int dn=__atomic_fetch_add(&dumpn,1,0); const char *tg=t==1?"opt":"fus";
+        for(int k=0;k<n;k++){ int hh,ww,cc; if(dims(&in->b[k],&hh,&ww,&cc)) dump_buf(d,dn,tg,k,(float*)in->b[k].data,hh,ww,cc); }
+        dump_buf(d,dn,tg,9,o,h,w,oc); LOG("dump: %s/%03d_%s_*",d,dn,tg); } }
     struct dbuf *db=(struct dbuf*)malloc(sizeof(struct dbuf)); int *sh=(int*)malloc(4*sizeof(int));
     sh[0]=1; sh[1]=h; sh[2]=w; sh[3]=oc; db->data=o; db->sb=sh; db->se=sh+4; db->sc=sh+4; db->extra=0x100000000UL;
     out->b=db; out->e=db+1; out->c=db+1;
