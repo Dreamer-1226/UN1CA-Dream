@@ -1,5 +1,5 @@
 // Best Face face-swap replacement for SM8250 (no HTP). ssch71
-// Optical: dense pyramidal Lucas-Kanade flow (contrast-normalised, scale-relative regularisation) + bilinear warp. Fusion: Poisson membrane blend + feather.
+// Optical: pyramidal Lucas-Kanade flow held to a robust affine fit plus a small smooth residual, + bilinear warp. Fusion: Poisson membrane blend + feather.
 static float *fa(long n){ return (float*)malloc(n*sizeof(float)); }
 static void fz(float *p,long n){ for(long i=0;i<n;i++) p[i]=0; }
 static int clampi(int v,int lo,int hi){ return v<lo?lo:(v>hi?hi:v); }
@@ -22,8 +22,23 @@ static float bil(const float *img,int w,int h,int c,int ch,float x,float y,int r
 static void down2(const float *s,int w,int h,float *d){ int W=w/2,H=h/2;
     for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)2*y*w+2*x; d[(long)y*W+x]=0.25f*(s[i]+s[i+1]+s[i+w]+s[i+w+1]); } }
 
+// Robust affine fit u = a0+a1 x+a2 y (same for v), weighted by local texture and Huber-reweighted.
+static void solve3(double M[3][4],double *x){
+    for(int c=0;c<3;c++){ int p=c; for(int r=c+1;r<3;r++) if((M[r][c]<0?-M[r][c]:M[r][c])>(M[p][c]<0?-M[p][c]:M[p][c])) p=r;
+        for(int k=0;k<4;k++){ double t=M[c][k]; M[c][k]=M[p][k]; M[p][k]=t; }
+        if(M[c][c]<1e-12&&M[c][c]>-1e-12){ x[0]=x[1]=x[2]=0; return; }
+        for(int r=0;r<3;r++) if(r!=c){ double f=M[r][c]/M[c][c]; for(int k=c;k<4;k++) M[r][k]-=f*M[c][k]; } }
+    for(int i=0;i<3;i++) x[i]=M[i][3]/M[i][i]; }
+static void affine_fit(const float *u,const float *v,const float *wt,int W,int H,float hub,double *pa,double *pb){
+    pa[0]=pa[1]=pa[2]=pb[0]=pb[1]=pb[2]=0;
+    for(int it=0;it<5;it++){ double Ma[3][4]={{0}},Mb[3][4]={{0}};
+        for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; double w=wt[i]; if(w<=0) continue;
+            if(it){ double ru=u[i]-(pa[0]+pa[1]*x+pa[2]*y), rv=v[i]-(pb[0]+pb[1]*x+pb[2]*y), r=__builtin_sqrt(ru*ru+rv*rv); if(r>hub) w*=hub/r; }
+            double f[3]={1,(double)x,(double)y};
+            for(int a=0;a<3;a++){ for(int b=0;b<3;b++){ Ma[a][b]+=w*f[a]*f[b]; Mb[a][b]+=w*f[a]*f[b]; } Ma[a][3]+=w*f[a]*u[i]; Mb[a][3]+=w*f[a]*v[i]; } }
+        solve3(Ma,pa); solve3(Mb,pb); } }
 static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *fy){
-    enum{ LV=6, IT=5, R=7 };
+    enum{ LV=5, IT=8, R=7, SR=6 };
     long NN=(long)w*h; float *n0=fa(NN),*n1=fa(NN);
     { double m0=0,m1=0,s0=0,s1=0; for(long i=0;i<NN;i++){ m0+=g0[i]; m1+=g1[i]; } m0/=NN; m1/=NN;
       for(long i=0;i<NN;i++){ s0+=(g0[i]-m0)*(g0[i]-m0); s1+=(g1[i]-m1)*(g1[i]-m1); } s0=__builtin_sqrt(s0/NN)+1e-6; s1=__builtin_sqrt(s1/NN)+1e-6;
@@ -32,7 +47,15 @@ static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *
     for(int l=1;l<LV;l++){ PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
         down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; }
     long N=(long)w*h; float *u=fa(N),*v=fa(N),*nu=fa(N),*nv=fa(N),*bw=fa(N),*A=fa(N),*B=fa(N),*C=fa(N),*D=fa(N),*E=fa(N),*T=fa(N);
-    int cw=PW[LV-1],chh=PH[LV-1]; fz(u,(long)cw*chh); fz(v,(long)cw*chh);
+    int cw=PW[LV-1],chh=PH[LV-1];
+    // Start from the best global shift on the coarsest level (exhaustive, +-SR pixels there), so a face
+    // that moved further than the pyramid can follow still converges.
+    { const float *a=P0[LV-1],*b=P1[LV-1]; double best=1e30; int bx=0,by=0, m=cw/8;
+      for(int dy=-SR;dy<=SR;dy++) for(int dx=-SR;dx<=SR;dx++){ double e=0; long c=0;
+          for(int y=m;y<chh-m;y++){ int yy=y+dy; if(yy<0||yy>=chh) continue;
+              for(int x=m;x<cw-m;x++){ int xx=x+dx; if(xx<0||xx>=cw) continue; double d=b[(long)yy*cw+xx]-a[(long)y*cw+x]; e+=d*d; c++; } }
+          if(c>(long)(cw-2*m)*(chh-2*m)/3){ e/=c; if(e<best){ best=e; bx=dx; by=dy; } } }
+      for(long i=0;i<(long)cw*chh;i++){ u[i]=bx; v[i]=by; } }
     for(int l=LV-1;l>=0;l--){ int W=PW[l],H=PH[l]; long n=(long)W*H;
         if(l!=LV-1){ for(int y=0;y<H;y++) for(int x=0;x<W;x++){ int sx=clampi(x/2,0,cw-1), sy=clampi(y/2,0,chh-1);
                 nu[(long)y*W+x]=2*u[(long)sy*cw+sx]; nv[(long)y*W+x]=2*v[(long)sy*cw+sx]; }
@@ -52,6 +75,18 @@ static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *
                 if(u[i]>lim)u[i]=lim; if(u[i]<-lim)u[i]=-lim; if(v[i]>lim)v[i]=lim; if(v[i]<-lim)v[i]=-lim; }
             boxf(u,T,W,H,1,1); boxf(v,T,W,H,1,1);
         }
+        // The swap must move the candidate face as a whole onto the reference, not morph its expression:
+        // keep a robust affine fit of the flow plus a small, smooth residual. Flat skin has no texture to
+        // track, and unconstrained flow there wanders off and smears the lips over the chin.
+        { double pa[3],pb[3]; float *cf=nu;
+          for(long i=0;i<n;i++){ float tr=A[i]+C[i], df=A[i]-C[i]; float me=0.5f*(tr-__builtin_sqrtf(df*df+4*B[i]*B[i])); cf[i]=me>0?me:0; }
+          affine_fit(u,v,cf,W,H,2.0f,pa,pb);
+          float k=l==0?3.0f:1.5f;
+          for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float au=pa[0]+pa[1]*x+pa[2]*y, av=pb[0]+pb[1]*x+pb[2]*y;
+              float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>k){ ru*=k/r; rv*=k/r; }
+              A[i]=ru; C[i]=rv; D[i]=au; E[i]=av; }
+          boxf(A,T,W,H,4,2); boxf(C,T,W,H,4,2);
+          for(long i=0;i<n;i++){ u[i]=D[i]+A[i]; v[i]=E[i]+C[i]; } }
     }
     for(long i=0;i<N;i++){ fx[i]=u[i]; fy[i]=v[i]; }
     for(int l=1;l<LV;l++){ free((void*)P0[l]); free((void*)P1[l]); }
