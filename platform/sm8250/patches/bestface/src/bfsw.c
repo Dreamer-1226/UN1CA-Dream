@@ -47,7 +47,9 @@ static int h_exec(void *self,void *vin,void *vout){
 // ArcSoft's internal logger (Cur Fusion Score, mask validity, error paths) prints only through a
 // callback pointer that the Best Face engine never sets. With debug.bfsw.arclog=1, point it at
 // logcat (tag ArcSoftPB). Offsets are for the One UI 9 S911N libgallery_pic_best.arcsoft.so and
-// are checked against the relocated GOT slot first, so any other build is left alone.
+// are checked against the relocated GOT slot first, so any other build is left alone. The engine
+// dlcloses this library after every model run while the callback stays set, so it is linked with
+// -z nodelete and never unmapped.
 int __system_property_get(const char*,char*);
 static void arclog(const char *m){ __android_log_print(4,"ArcSoftPB","%s",m); }
 static void hook_arclog(void){ static int done; char v[92]; if(done) return; done=1;
