@@ -1,5 +1,5 @@
 // Best Face face-swap replacement for SM8250 (no HTP). ssch71
-// Optical: pyramidal Lucas-Kanade flow held to a robust affine fit plus a texture-capped, texture-weighted residual, + bilinear warp. Fusion: Poisson membrane blend + feather.
+// Optical: dense inverse search (patch flow, coarse to fine) with Horn-Schunck refinement, held near a robust affine fit over the face, + bilinear warp. Fusion: Poisson membrane blend + feather.
 static float *fa(long n){ return (float*)malloc(n*sizeof(float)); }
 static void fz(float *p,long n){ for(long i=0;i<n;i++) p[i]=0; }
 static int clampi(int v,int lo,int hi){ return v<lo?lo:(v>hi?hi:v); }
@@ -37,73 +37,91 @@ static void affine_fit(const float *u,const float *v,const float *wt,int W,int H
             double f[3]={1,(double)x,(double)y};
             for(int a=0;a<3;a++){ for(int b=0;b<3;b++){ Ma[a][b]+=w*f[a]*f[b]; Mb[a][b]+=w*f[a]*f[b]; } Ma[a][3]+=w*f[a]*u[i]; Mb[a][3]+=w*f[a]*v[i]; } }
         solve3(Ma,pa); solve3(Mb,pb); } }
-static void lkflow(const float *g0,const float *g1,int w,int h,float *fx,float *fy){
-    enum{ LV=5, IT=8, R=7, SR=6 };
-    long NN=(long)w*h; float *n0=fa(NN),*n1=fa(NN);
-    { double m0=0,m1=0,s0=0,s1=0; for(long i=0;i<NN;i++){ m0+=g0[i]; m1+=g1[i]; } m0/=NN; m1/=NN;
-      for(long i=0;i<NN;i++){ s0+=(g0[i]-m0)*(g0[i]-m0); s1+=(g1[i]-m1)*(g1[i]-m1); } s0=__builtin_sqrt(s0/NN)+1e-6; s1=__builtin_sqrt(s1/NN)+1e-6;
-      for(long i=0;i<NN;i++){ n0[i]=(g0[i]-m0)/s0; n1[i]=(g1[i]-m1)/s1; } }
-    const float *P0[LV],*P1[LV]; int PW[LV],PH[LV]; P0[0]=n0;P1[0]=n1;PW[0]=w;PH[0]=h;
-    for(int l=1;l<LV;l++){ PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
-        down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; }
-    long N=(long)w*h; float *u=fa(N),*v=fa(N),*nu=fa(N),*nv=fa(N),*bw=fa(N),*A=fa(N),*B=fa(N),*C=fa(N),*D=fa(N),*E=fa(N),*T=fa(N);
-    int cw=PW[LV-1],chh=PH[LV-1];
-    // Start from the best global shift on the coarsest level (exhaustive, +-SR pixels there), so a face
-    // that moved further than the pyramid can follow still converges.
-    { const float *a=P0[LV-1],*b=P1[LV-1]; double best=1e30; int bx=0,by=0, m=cw/8;
-      for(int dy=-SR;dy<=SR;dy++) for(int dx=-SR;dx<=SR;dx++){ double e=0; long c=0;
-          for(int y=m;y<chh-m;y++){ int yy=y+dy; if(yy<0||yy>=chh) continue;
-              for(int x=m;x<cw-m;x++){ int xx=x+dx; if(xx<0||xx>=cw) continue; double d=b[(long)yy*cw+xx]-a[(long)y*cw+x]; e+=d*d; c++; } }
-          if(c>(long)(cw-2*m)*(chh-2*m)/3){ e/=c; if(e<best){ best=e; bx=dx; by=dy; } } }
-      for(long i=0;i<(long)cw*chh;i++){ u[i]=bx; v[i]=by; } }
-    for(int l=LV-1;l>=0;l--){ int W=PW[l],H=PH[l]; long n=(long)W*H;
-        if(l!=LV-1){ for(int y=0;y<H;y++) for(int x=0;x<W;x++){ int sx=clampi(x/2,0,cw-1), sy=clampi(y/2,0,chh-1);
-                nu[(long)y*W+x]=2*u[(long)sy*cw+sx]; nv[(long)y*W+x]=2*v[(long)sy*cw+sx]; }
-            for(long i=0;i<n;i++){ u[i]=nu[i]; v[i]=nv[i]; } cw=W; chh=H; }
-        const float *a=P0[l],*b=P1[l];
-        for(int it=0;it<IT;it++){
-            for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; bw[i]=bil(b,W,H,1,0,x+u[i],y+v[i],1); }
-            for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
-                float ix=0.5f*(bw[(long)y*W+clampi(x+1,0,W-1)]-bw[(long)y*W+clampi(x-1,0,W-1)]);
-                float iy=0.5f*(bw[(long)clampi(y+1,0,H-1)*W+x]-bw[(long)clampi(y-1,0,H-1)*W+x]);
-                float itt=bw[i]-a[i]; A[i]=ix*ix; B[i]=ix*iy; C[i]=iy*iy; D[i]=ix*itt; E[i]=iy*itt; }
-            boxf(A,T,W,H,R,1); boxf(B,T,W,H,R,1); boxf(C,T,W,H,R,1); boxf(D,T,W,H,R,1); boxf(E,T,W,H,R,1);
-            float lim=0.25f*(W<H?W:H);
-            for(long i=0;i<n;i++){ float reg=1e-2f*(A[i]+C[i])+1e-9f, a=A[i]+reg, c=C[i]+reg, det=a*c-B[i]*B[i];
-                float du=-(c*D[i]-B[i]*E[i])/det, dv=-(a*E[i]-B[i]*D[i])/det; if(!(du==du)) du=0; if(!(dv==dv)) dv=0;
-                if(du>2)du=2; if(du<-2)du=-2; if(dv>2)dv=2; if(dv<-2)dv=-2; u[i]+=du; v[i]+=dv;
-                if(u[i]>lim)u[i]=lim; if(u[i]<-lim)u[i]=-lim; if(v[i]>lim)v[i]=lim; if(v[i]<-lim)v[i]=-lim; }
-            boxf(u,T,W,H,1,1); boxf(v,T,W,H,1,1);
-        }
-        // The swap must move the candidate face as a whole onto the reference, not morph its expression:
-        // keep a robust affine fit of the flow plus a small, smooth residual. Flat skin has no texture to
-        // track, and unconstrained flow there wanders off and smears the lips over the chin.
-        { double pa[3],pb[3]; float *cf=nu;
-          for(long i=0;i<n;i++){ float tr=A[i]+C[i], df=A[i]-C[i]; float me=0.5f*(tr-__builtin_sqrtf(df*df+4*B[i]*B[i])); cf[i]=me>0?me:0; }
-          affine_fit(u,v,cf,W,H,2.0f,pa,pb);
-          // The cap follows the texture: eyes, brows and lips track reliably and may move further from the
-          // affine fit (a different head pitch shifts them by 10+ px); flat skin stays near it.
-          float cref=0; { double sc=0; long nc=0; for(long i=0;i<n;i+=7){ sc+=cf[i]; nc++; } cref=(float)(4*sc/(nc?nc:1))+1e-12f; }
-          float k0=l==0?3.0f:1.5f, k1=(l==0?14.0f:14.0f*0.5f)*(1.0f/(1<<(l>1?l-1:0)));
-          if(k1<k0) k1=k0;
-          for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float au=pa[0]+pa[1]*x+pa[2]*y, av=pb[0]+pb[1]*x+pb[2]*y;
-              float t=cf[i]/cref; if(t>1) t=1; float k=k0+(k1-k0)*t;
-              float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>k){ ru*=k/r; rv*=k/r; }
-              float wt=t*t+0.02f; A[i]=ru*wt; C[i]=rv*wt; B[i]=wt; D[i]=au; E[i]=av; }
-          // Texture-weighted smoothing (normalised convolution): flat skin takes the residual of the eyes,
-          // brows and lips around it instead of its own noise.
-          boxf(A,T,W,H,6,2); boxf(C,T,W,H,6,2); boxf(B,T,W,H,6,2);
-          for(long i=0;i<n;i++){ u[i]=D[i]+A[i]/B[i]; v[i]=E[i]+C[i]/B[i]; } }
-    }
-    for(long i=0;i<N;i++){ fx[i]=u[i]; fy[i]=v[i]; }
-    for(int l=1;l<LV;l++){ free((void*)P0[l]); free((void*)P1[l]); }
-    free(n0);free(n1);free(u);free(v);free(nu);free(nv);free(bw);free(A);free(B);free(C);free(D);free(E);free(T);
-}
 // in: i0,i1 HxWx3, m2,e2,m1 HxWx1 ; out HxWx8
-static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,int w,int h,float *out){
+// Variational refinement (Horn-Schunck on the warped residual), as DIS does after densification: it
+// spreads the reliable patch motion over weakly textured areas such as the lips instead of letting
+// single patches smear them.
+static void hsrefine(const float *a,const float *b,int W,int H,float *u,float *v,float al2,int iters,float *t1,float *t2,float *t3,float *t4,float *t5,float *t6){
+    long n=(long)W*H; float *ix=t1,*iy=t2,*it=t3,*du=t4,*dv=t5,*bw=t6;
+    for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; bw[i]=bil(b,W,H,1,0,x+u[i],y+v[i],1); }
+    for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
+        ix[i]=0.5f*(bw[(long)y*W+clampi(x+1,0,W-1)]-bw[(long)y*W+clampi(x-1,0,W-1)]);
+        iy[i]=0.5f*(bw[(long)clampi(y+1,0,H-1)*W+x]-bw[(long)clampi(y-1,0,H-1)*W+x]);
+        it[i]=bw[i]-a[i]; du[i]=0; dv[i]=0; }
+    for(int k=0;k<iters;k++){
+        for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
+            long l=(long)y*W+clampi(x-1,0,W-1), r=(long)y*W+clampi(x+1,0,W-1), up=(long)clampi(y-1,0,H-1)*W+x, dn=(long)clampi(y+1,0,H-1)*W+x;
+            // smoothness on the total flow u+du
+            float mu=0.25f*(u[l]+du[l]+u[r]+du[r]+u[up]+du[up]+u[dn]+du[dn])-u[i];
+            float mv=0.25f*(v[l]+dv[l]+v[r]+dv[r]+v[up]+dv[up]+v[dn]+dv[dn])-v[i];
+            float num=ix[i]*mu+iy[i]*mv+it[i], den=al2+ix[i]*ix[i]+iy[i]*iy[i];
+            du[i]=mu-ix[i]*num/den; dv[i]=mv-iy[i]*num/den; } }
+    for(long i=0;i<n;i++){ u[i]+=du[i]; v[i]+=dv[i]; } }
+// face weight of a level-l pixel, sampled from the full-resolution mask
+static float WMs(const float *wm,int w,int W,long i){ int sc=w/W; int x=(int)(i%W)*sc, y=(int)(i/W)*sc; return wm[(long)y*w+x]>0.5f?1.0f:0.05f; }
+// Dense inverse search (Kroeger et al. 2016, without the variational step): per pyramid level, every
+// 8x8 patch on a 4 px grid is aligned to the candidate by inverse-compositional Gauss-Newton on
+// mean-normalised intensities, starting from the coarser level's flow, and the patches are blended into
+// a dense field weighted by how well each one explains each pixel. Robust to the softer focus and the
+// exposure difference between burst frames, where pixel-wise Lucas-Kanade wandered.
+static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,float *fx,float *fy){
+    enum{ LV=6, PS=8, ST=3, IT=16 };
+    long NN=(long)w*h; float *n0=fa(NN),*n1=fa(NN);
+    // match the two frames' brightness and contrast over the face (whole frame without a mask)
+    { double s0=0,s1=0,q0=0,q1=0,ws=0; for(long i=0;i<NN;i++){ double wt=wm?(wm[i]>0.5f?1:0):1; s0+=wt*g0[i]; s1+=wt*g1[i]; q0+=wt*g0[i]*g0[i]; q1+=wt*g1[i]*g1[i]; ws+=wt; }
+      if(ws<16) ws=1; double m0=s0/ws,m1=s1/ws, d0=__builtin_sqrt(q0/ws-m0*m0)+1e-6, d1=__builtin_sqrt(q1/ws-m1*m1)+1e-6;
+      for(long i=0;i<NN;i++){ n0[i]=(float)((g0[i]-m0)/d0*0.2); n1[i]=(float)((g1[i]-m1)/d1*0.2); } }
+    const float *P0[LV],*P1[LV]; int PW[LV],PH[LV]; P0[0]=n0;P1[0]=n1;PW[0]=w;PH[0]=h; int nl=1;
+    for(int l=1;l<LV;l++){ if(PW[l-1]/2<24||PH[l-1]/2<24) break; PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
+        down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; nl++; }
+    float *u=fa(NN),*v=fa(NN),*nu=fa(NN),*nv=fa(NN),*su=fa(NN),*sv=fa(NN),*sw=fa(NN),*gx=fa(NN),*gy=fa(NN);
+    int cw=PW[nl-1],chh=PH[nl-1]; fz(u,(long)cw*chh); fz(v,(long)cw*chh);
+    for(int l=nl-1;l>=0;l--){ int W=PW[l],H=PH[l]; long n=(long)W*H; const float *a=P0[l],*b=P1[l];
+        if(l!=nl-1){ for(int y=0;y<H;y++) for(int x=0;x<W;x++){
+                float sx=x*0.5f-0.25f, sy=y*0.5f-0.25f; nu[(long)y*W+x]=2*bil(u,cw,chh,1,0,sx,sy,1); nv[(long)y*W+x]=2*bil(v,cw,chh,1,0,sx,sy,1); }
+            for(long i=0;i<n;i++){ u[i]=nu[i]; v[i]=nv[i]; } cw=W; chh=H; }
+        for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
+            gx[i]=0.5f*(a[(long)y*W+clampi(x+1,0,W-1)]-a[(long)y*W+clampi(x-1,0,W-1)]);
+            gy[i]=0.5f*(a[(long)clampi(y+1,0,H-1)*W+x]-a[(long)clampi(y-1,0,H-1)*W+x]); }
+        fz(su,n); fz(sv,n); fz(sw,n);
+        for(int py=0;;py+=ST){ if(py>H-PS) py=H-PS; for(int px=0;;px+=ST){ if(px>W-PS) px=W-PS;
+            // template statistics and Hessian
+            double h11=0,h12=0,h22=0, ma=0; for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++){ long i=(long)y*W+x; ma+=a[i]; double gxx=gx[i],gyy=gy[i]; h11+=gxx*gxx; h12+=gxx*gyy; h22+=gyy*gyy; }
+            ma/=PS*PS; double gmx=0,gmy=0; for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++){ long i=(long)y*W+x; gmx+=gx[i]; gmy+=gy[i]; } gmx/=PS*PS; gmy/=PS*PS;
+            // mean normalisation removes the patch mean, so the gradients do too
+            h11-=PS*PS*gmx*gmx; h12-=PS*PS*gmx*gmy; h22-=PS*PS*gmy*gmy;
+            double tr=h11+h22, det=h11*h22-h12*h12; double reg=1e-3*tr+1e-6; det=(h11+reg)*(h22+reg)-h12*h12;
+            long ci=(long)(py+PS/2)*W+(px+PS/2); float u0=u[ci],v0=v[ci], pu=u0,pv=v0;
+            if(det>1e-12){ for(int it=0;it<IT;it++){ double mb=0; for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++) mb+=bil(b,W,H,1,0,x+pu,y+pv,1); mb/=PS*PS;
+                    double b1=0,b2=0; for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++){ long i=(long)y*W+x; double r=(bil(b,W,H,1,0,x+pu,y+pv,1)-mb)-(a[i]-ma); b1+=(gx[i]-gmx)*r; b2+=(gy[i]-gmy)*r; }
+                    double du=((h22+reg)*b1-h12*b2)/det, dv=((h11+reg)*b2-h12*b1)/det; pu-=du; pv-=dv;
+                    if(du*du+dv*dv<1e-4) break; }
+                if((pu-u0)*(pu-u0)+(pv-v0)*(pv-v0)>PS*PS){ pu=u0; pv=v0; } }
+            // densify: weight each pixel by how well this patch's motion explains it
+            double mb=0; for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++) mb+=bil(b,W,H,1,0,x+pu,y+pv,1); mb/=PS*PS;
+            for(int y=py;y<py+PS;y++) for(int x=px;x<px+PS;x++){ long i=(long)y*W+x; float r=(bil(b,W,H,1,0,x+pu,y+pv,1)-mb)-(a[i]-ma); r=r<0?-r:r; float wt=1.0f/(r>0.02f?r:0.02f);
+                su[i]+=wt*pu; sv[i]+=wt*pv; sw[i]+=wt; }
+            if(px==W-PS) break; }
+          if(py==H-PS) break; }
+        for(long i=0;i<n;i++) if(sw[i]>0){ u[i]=su[i]/sw[i]; v[i]=sv[i]/sw[i]; }
+        // light smoothing in place of the variational refinement
+        
+        boxf(u,nu,W,H,1,1); boxf(v,nu,W,H,1,1);
+        { float *t=fa(n*6); hsrefine(a,b,W,H,u,v,1e-2f,30,t,t+n,t+2*n,t+3*n,t+4*n,t+5*n); free(t); }
+        // Outliers: hold the field within 24.0f px (level scale) of a robust affine fit over the face.
+        { double pa[3],pb[3]; float *wt=su; for(long i=0;i<n;i++) wt[i]=wm?(WMs(wm,w,W,i)):1.0f;
+          affine_fit(u,v,wt,W,H,2.0f,pa,pb); float cap=24.0f/(float)(1<<l); if(cap<2) cap=2;
+          for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float au=pa[0]+pa[1]*x+pa[2]*y, av=pb[0]+pb[1]*x+pb[2]*y;
+              float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>cap){ u[i]=au+ru*cap/r; v[i]=av+rv*cap/r; } } }
+    }
+    for(long i=0;i<NN;i++){ fx[i]=u[i]==u[i]?u[i]:0; fy[i]=v[i]==v[i]?v[i]:0; }
+    for(int l=1;l<nl;l++){ free((void*)P0[l]); free((void*)P1[l]); }
+    free(n0);free(n1);free(u);free(v);free(nu);free(nv);free(su);free(sv);free(sw);free(gx);free(gy);
+}
+static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,const float *m1,int w,int h,float *out){
     long N=(long)w*h; float *g0=fa(N),*g1=fa(N),*fx=fa(N),*fy=fa(N);
     for(long i=0;i<N;i++){ g0[i]=0.114f*i0[3*i]+0.587f*i0[3*i+1]+0.299f*i0[3*i+2]; g1[i]=0.114f*i1[3*i]+0.587f*i1[3*i+1]+0.299f*i1[3*i+2]; }
-    lkflow(g0,g1,w,h,fx,fy);
+    disflow(g0,g1,m1,w,h,fx,fy);
     for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; float sx=x+fx[i], sy=y+fy[i]; float *o=out+8*i;
         o[0]=i0[3*i]; o[1]=i0[3*i+1]; o[2]=i0[3*i+2];
         for(int c=0;c<3;c++) o[3+c]=bil(i1,w,h,3,c,sx,sy,0);

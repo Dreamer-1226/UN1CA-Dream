@@ -47,7 +47,7 @@ static int h_exec(void *self,void *vin,void *vout){
     if(!dims(&in->b[0],&h,&w,&c)){ LOG("bad input rank"); return -1; }
     int oc= t==1?8:3; float *o=fa((long)h*w*oc); double t0=nowt();
     if(t==1){ if(n<4){ LOG("Optical: %d inputs",n); free(o); return -1; }
-        fs_optical((float*)in->b[0].data,(float*)in->b[1].data,(float*)in->b[2].data,(float*)in->b[3].data,w,h,o); }
+        fs_optical((float*)in->b[0].data,(float*)in->b[1].data,(float*)in->b[2].data,(float*)in->b[3].data,n>4?(float*)in->b[4].data:0,w,h,o); }
     else { if(c!=8){ LOG("Fusion: %d channels",c); free(o); return -1; } fs_fusion((float*)in->b[0].data,w,h,o); }
     { char d[200]; if(dump_dir(d,sizeof(d))){ int dn=__atomic_fetch_add(&dumpn,1,0); const char *tg=t==1?"opt":"fus";
         for(int k=0;k<n;k++){ int hh,ww,cc; if(dims(&in->b[k],&hh,&ww,&cc)) dump_buf(d,dn,tg,k,(float*)in->b[k].data,hh,ww,cc); }
