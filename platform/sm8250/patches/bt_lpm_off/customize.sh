@@ -11,3 +11,16 @@ if [ -f "$WORK_DIR/vendor/lib64/hw/android.hardware.bluetooth@1.0-impl.so" ]; th
         "28008052e80f00b9" "08008052e80f00b9" \
         || LOGW "lib64/hw/android.hardware.bluetooth@1.0-impl.so: LPM enable does not match, skipping"
 fi
+
+# That is not enough on its own: with LPM disabled the HAL still runs its idle watchdog, and
+# VendorInterface::OnTimeout() de-asserts BT_WAKE (BT_VND_OP_LPM_WAKE_SET_STATE) 1.5 s after the
+# last packet sent. Samsung's bt_upio forwards that to bluesleep, which still switches the UART
+# clock off ("hsuart_power off [BT]" every few seconds) and the same desync follows, ending in an
+# HCI timeout and a Bluetooth restart. Keep BT_WAKE asserted: drop the call in OnTimeout().
+# Send() still asserts before every packet, which is a no-op while it stays asserted.
+# OnTimeout(): [add x1, sp, #0xc; mov w0, #0x7; blr x20] -> [...; nop]
+if [ -f "$WORK_DIR/vendor/lib64/hw/android.hardware.bluetooth@1.0-impl.so" ]; then
+    HEX_PATCH "$WORK_DIR/vendor/lib64/hw/android.hardware.bluetooth@1.0-impl.so" \
+        "e1330091e000805280023fd6" "e1330091e00080521f2003d5" \
+        || LOGW "lib64/hw/android.hardware.bluetooth@1.0-impl.so: BT_WAKE de-assert does not match, skipping"
+fi
