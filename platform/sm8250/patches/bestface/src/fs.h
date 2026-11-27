@@ -64,7 +64,7 @@ static float WMs(const float *wm,int w,int W,long i){ int sc=w/W; int x=(int)(i%
 // mean-normalised intensities, starting from the coarser level's flow, and the patches are blended into
 // a dense field weighted by how well each one explains each pixel. Robust to the softer focus and the
 // exposure difference between burst frames, where pixel-wise Lucas-Kanade wandered.
-static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,float *fx,float *fy){
+static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,float *fx,float *fy,const double *SA,int lmin,float capfull){
     enum{ LV=6, PS=8, ST=3, IT=16 };
     long NN=(long)w*h; float *n0=fa(NN),*n1=fa(NN);
     // match the two frames' brightness and contrast over the face (whole frame without a mask)
@@ -75,11 +75,30 @@ static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,
     for(int l=1;l<LV;l++){ if(PW[l-1]/2<24||PH[l-1]/2<24) break; PW[l]=PW[l-1]/2; PH[l]=PH[l-1]/2; float *a=fa((long)PW[l]*PH[l]),*b=fa((long)PW[l]*PH[l]);
         down2(P0[l-1],PW[l-1],PH[l-1],a); down2(P1[l-1],PW[l-1],PH[l-1],b); P0[l]=a;P1[l]=b; nl++; }
     float *u=fa(NN),*v=fa(NN),*nu=fa(NN),*nv=fa(NN),*su=fa(NN),*sv=fa(NN),*sw=fa(NN),*gx=fa(NN),*gy=fa(NN);
-    int cw=PW[nl-1],chh=PH[nl-1]; fz(u,(long)cw*chh); fz(v,(long)cw*chh);
+    int cw=PW[nl-1],chh=PH[nl-1];
+    // Global start: the two crops differ in scale (0.85-1.2) and position, far beyond what the patches
+    // can find from zero. Search scale and shift exhaustively on the 1/8 level, over the base face only.
+    if(SA){ float fc=(float)(1<<(nl-1));
+      for(int y=0;y<chh;y++) for(int x=0;x<cw;x++){ float X=x*fc, Y=y*fc; u[(long)y*cw+x]=(float)((SA[0]*X+SA[1]*Y+SA[2]-X)/fc); v[(long)y*cw+x]=(float)((SA[3]*X+SA[4]*Y+SA[5]-Y)/fc); } }
+    else { int sl=nl-1<3?nl-1:3, SW=PW[sl], SH=PH[sl]; const float *a=P0[sl],*b=P1[sl]; float f=(float)(1<<sl);
+      float *mw=fa((long)SW*SH); for(int y=0;y<SH;y++) for(int x=0;x<SW;x++){ int X=x*(1<<sl), Y=y*(1<<sl); mw[(long)y*SW+x]=wm?(wm[(long)Y*w+X]>0.5f?1.0f:0.0f):1.0f; }
+      double best=1e30; float bs=1,btx=0,bty=0; float cx=SW*0.5f, cy=SH*0.5f;
+      for(int si=-10;si<=10;si++){ float sc=1.0f+0.025f*si;
+          for(int ty=-14;ty<=14;ty++) for(int tx=-14;tx<=14;tx++){ double e=0,ws=0;
+              for(int y=1;y<SH-1;y+=1) for(int x=1;x<SW-1;x+=1){ float wt=mw[(long)y*SW+x]; if(wt<=0) continue;
+                  float qx=cx+sc*(x-cx)+tx, qy=cy+sc*(y-cy)+ty; if(qx<0||qy<0||qx>SW-1||qy>SH-1){ e+=wt*1.0; ws+=wt; continue; }
+                  float d=bil(b,SW,SH,1,0,qx,qy,1)-a[(long)y*SW+x]; e+=wt*d*d; ws+=wt; }
+              if(ws>0){ e/=ws; e*=1.0+0.002*(tx*tx+ty*ty)+0.5*(sc-1)*(sc-1); if(e<best){ best=e; bs=sc; btx=tx; bty=ty; } } } }
+      free(mw);
+      // as a flow field on the coarsest level: q = c + s (p - c) + t, in full-resolution pixels
+      float fc=(float)(1<<(nl-1)); float CX=w*0.5f, CY=h*0.5f;
+      for(int y=0;y<chh;y++) for(int x=0;x<cw;x++){ float X=x*fc, Y=y*fc;
+          u[(long)y*cw+x]=((CX+bs*(X-CX)+btx*f)-X)/fc; v[(long)y*cw+x]=((CY+bs*(Y-CY)+bty*f)-Y)/fc; } }
     for(int l=nl-1;l>=0;l--){ int W=PW[l],H=PH[l]; long n=(long)W*H; const float *a=P0[l],*b=P1[l];
         if(l!=nl-1){ for(int y=0;y<H;y++) for(int x=0;x<W;x++){
                 float sx=x*0.5f-0.25f, sy=y*0.5f-0.25f; nu[(long)y*W+x]=2*bil(u,cw,chh,1,0,sx,sy,1); nv[(long)y*W+x]=2*bil(v,cw,chh,1,0,sx,sy,1); }
             for(long i=0;i<n;i++){ u[i]=nu[i]; v[i]=nv[i]; } cw=W; chh=H; }
+        if(l<lmin) continue;
         for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x;
             gx[i]=0.5f*(a[(long)y*W+clampi(x+1,0,W-1)]-a[(long)y*W+clampi(x-1,0,W-1)]);
             gy[i]=0.5f*(a[(long)clampi(y+1,0,H-1)*W+x]-a[(long)clampi(y-1,0,H-1)*W+x]); }
@@ -108,9 +127,13 @@ static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,
         
         boxf(u,nu,W,H,1,1); boxf(v,nu,W,H,1,1);
         { float *t=fa(n*6); hsrefine(a,b,W,H,u,v,1e-2f,30,t,t+n,t+2*n,t+3*n,t+4*n,t+5*n); free(t); }
-        // Outliers: hold the field within 24.0f px (level scale) of a robust affine fit over the face.
-        { double pa[3],pb[3]; float *wt=su; for(long i=0;i<n;i++) wt[i]=wm?(WMs(wm,w,W,i)):1.0f;
-          affine_fit(u,v,wt,W,H,2.0f,pa,pb); float cap=24.0f/(float)(1<<l); if(cap<2) cap=2;
+        if(SA){ // hold the field near the eye-anchored similarity
+          float sc=(float)(1<<l), cap=capfull/sc; if(cap<1) cap=1;
+          for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float X=x*sc, Y=y*sc;
+              float au=(float)((SA[0]*X+SA[1]*Y+SA[2]-X)/sc), av=(float)((SA[3]*X+SA[4]*Y+SA[5]-Y)/sc);
+              float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>cap){ u[i]=au+ru*cap/r; v[i]=av+rv*cap/r; } } }
+        else { double pa[3],pb[3]; float *wt=su; for(long i=0;i<n;i++) wt[i]=wm?(WMs(wm,w,W,i)):1.0f;
+          affine_fit(u,v,wt,W,H,2.0f,pa,pb); float cap=48.0f/(float)(1<<l); if(cap<2) cap=2;
           for(int y=0;y<H;y++) for(int x=0;x<W;x++){ long i=(long)y*W+x; float au=pa[0]+pa[1]*x+pa[2]*y, av=pb[0]+pb[1]*x+pb[2]*y;
               float ru=u[i]-au, rv=v[i]-av, r=__builtin_sqrtf(ru*ru+rv*rv); if(r>cap){ u[i]=au+ru*cap/r; v[i]=av+rv*cap/r; } } }
     }
@@ -118,10 +141,75 @@ static void disflow(const float *g0,const float *g1,const float *wm,int w,int h,
     for(int l=1;l<nl;l++){ free((void*)P0[l]); free((void*)P1[l]); }
     free(n0);free(n1);free(u);free(v);free(nu);free(nv);free(su);free(sv);free(sw);free(gx);free(gy);
 }
+static void unfold(float *u,float *v,int w,int h){
+    long NN=(long)w*h; float *sw=fa(NN),*su=fa(NN),*sv=fa(NN),*nu=fa(NN);
+    // Unfold: where the warp folds over itself (Jacobian determinant of p+f(p) below 0.5) one candidate
+    // feature gets copied twice and smeared, as on the lips and the neck. Relax the flow there toward its
+    // local average until the map is close to one-to-one.
+    for(int pass=0;pass<8;pass++){ long bad=0;
+        for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; int xl=clampi(x-1,0,w-1),xr=clampi(x+1,0,w-1),yu=clampi(y-1,0,h-1),yd=clampi(y+1,0,h-1);
+            float ux=(u[(long)y*w+xr]-u[(long)y*w+xl])/(xr-xl?xr-xl:1), uy=(u[(long)yd*w+x]-u[(long)yu*w+x])/(yd-yu?yd-yu:1);
+            float vx=(v[(long)y*w+xr]-v[(long)y*w+xl])/(xr-xl?xr-xl:1), vy=(v[(long)yd*w+x]-v[(long)yu*w+x])/(yd-yu?yd-yu:1);
+            float det=(1+ux)*(1+vy)-uy*vx; float t=(det-0.3f)/0.4f; t=t<0?0:(t>1?1:t); sw[i]=1-t; if(t<1) bad++; }
+        if(bad==0) break;
+        boxf(sw,nu,w,h,3,1);
+        for(long i=0;i<NN;i++){ su[i]=u[i]; sv[i]=v[i]; }
+        boxf(su,nu,w,h,6,2); boxf(sv,nu,w,h,6,2);
+        for(long i=0;i<NN;i++){ float k=sw[i]; if(k>1)k=1; u[i]+=k*(su[i]-u[i]); v[i]+=k*(sv[i]-v[i]); } }
+    free(sw);free(su);free(sv);free(nu); }
+// Head pose differs between burst frames (tilt, distance), and a dense matcher started from a plain
+// shift locks eyes onto brows and mouths onto chins. The eyes are the one region both frames reliably
+// share, and the candidate's eye mask tells us where they are: search a similarity transform (scale,
+// rotation, position) that maps the candidate's eye band onto the base by normalised cross-correlation,
+// coarse on a quarter-resolution grid, then refined at full resolution. SA: base -> candidate, 2x3.
+static void down4(const float *s,int w,int h,float *d){ int W=w/4,H=h/4; for(int y=0;y<H;y++) for(int x=0;x<W;x++){ float a=0; for(int j=0;j<4;j++) for(int i=0;i<4;i++) a+=s[(long)(4*y+j)*w+4*x+i]; d[(long)y*W+x]=a/16; } }
+// small angles only (|x| < 0.3): no libm in this library
+static float ssin(float x){ float x2=x*x; return x*(1-x2/6*(1-x2/20*(1-x2/42))); }
+static float scos(float x){ float x2=x*x; return 1-x2/2*(1-x2/12*(1-x2/30)); }
+static float ncc_at(const float *g0,const float *g1,int w,int h,int sc,int stp,float hw,float hh,float cx,float cy,float s,float th,float bx,float by){
+    // all coordinates in full-resolution pixels; images at 1/sc resolution
+    float cs=scos(th)*s, sn=ssin(th)*s; double sa=0,sb=0,saa=0,sbb=0,sab=0; int n=0; int W=w/sc,H=h/sc;
+    for(float dy=-hh;dy<=hh;dy+=stp) for(float dx=-hw;dx<=hw;dx+=stp){
+        float px=bx+dx, py=by+dy, qx=cx+cs*dx-sn*dy, qy=cy+sn*dx+cs*dy;
+        if(px<0||py<0||px>w-1||py>h-1||qx<0||qy<0||qx>w-1||qy>h-1) continue;
+        double a=bil(g0,W,H,1,0,px/sc,py/sc,1), b=bil(g1,W,H,1,0,qx/sc,qy/sc,1); sa+=a; sb+=b; saa+=a*a; sbb+=b*b; sab+=a*b; n++; }
+    if(n<24) return -2; double ma=sa/n, mb=sb/n, va=saa/n-ma*ma, vb=sbb/n-mb*mb; if(va<1e-9||vb<1e-9) return -2;
+    return (float)((sab/n-ma*mb)/__builtin_sqrt(va*vb)); }
+static int eye_similarity(const float *g0,const float *g1,const float *e2,int w,int h,double *SA){
+    long N=(long)w*h; int x0=w,y0=h,x1=-1,y1=-1; long cnt=0;
+    for(int y=0;y<h;y++) for(int x=0;x<w;x++) if(e2[(long)y*w+x]>0.5f){ cnt++; if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+    if(cnt<60 || x1-x0<24) return 0;
+    float cx=0.5f*(x0+x1), cy=0.5f*(y0+y1), hw=0.5f*(x1-x0)+22, hh=0.5f*(y1-y0)+28;
+    float *q0=fa(N/16),*q1=fa(N/16),*o0=fa(N/64),*o1=fa(N/64); down4(g0,w,h,q0); down4(g1,w,h,q1); down2(q0,w/4,h/4,o0); down2(q1,w/4,h/4,o1);
+    float best=-2,bs=1,bt=0,bx=cx,by=cy; const float D=0.01745329f;
+    // 1/8 resolution: scale 0.75-1.35, rotation +-12 deg, position +-80 px
+    for(int si=0;si<=12;si++){ float s=0.75f+0.05f*si; for(int ti=-4;ti<=4;ti++){ float th=ti*3*D;
+        for(int dy=-80;dy<=80;dy+=8) for(int dx=-80;dx<=80;dx+=8){ float c=ncc_at(o0,o1,w,h,8,8,hw,hh,cx,cy,s,th,cx+dx,cy+dy); if(c>best){ best=c; bs=s; bt=th; bx=cx+dx; by=cy+dy; } } } }
+    // 1/4 resolution around it
+    { float s0=bs,t0=bt,x0b=bx,y0b=by; best=-2;
+      for(int si=-2;si<=2;si++) for(int ti=-2;ti<=2;ti++) for(int dy=-8;dy<=8;dy+=4) for(int dx=-8;dx<=8;dx+=4){ float s=s0+0.025f*si, th=t0+1.5f*D*ti;
+          float c=ncc_at(q0,q1,w,h,4,4,hw,hh,cx,cy,s,th,x0b+dx,y0b+dy); if(c>best){ best=c; bs=s; bt=th; bx=x0b+dx; by=y0b+dy; } } }
+    free(q0); free(q1); free(o0); free(o1);
+    // refine at full resolution (sampled every 2 px), shrinking steps
+    float st_s=0.0125f, st_t=0.75f*D, st_p=2.0f; best=ncc_at(g0,g1,w,h,1,2,hw,hh,cx,cy,bs,bt,bx,by);
+    for(int r=0;r<3;r++){ int moved=1; while(moved){ moved=0; float cs=bs,ct=bt,cxx=bx,cyy=by;
+        for(int a=-1;a<=1;a++) for(int b=-1;b<=1;b++) for(int c=-1;c<=1;c++) for(int d=-1;d<=1;d++){
+            float c2=ncc_at(g0,g1,w,h,1,2,hw,hh,cx,cy,cs+a*st_s,ct+b*st_t,cxx+c*st_p,cyy+d*st_p); if(c2>best+1e-5f){ best=c2; bs=cs+a*st_s; bt=ct+b*st_t; bx=cxx+c*st_p; by=cyy+d*st_p; moved=1; } } }
+        st_s*=0.5f; st_t*=0.5f; st_p*=0.5f; }
+    if(best<0.5f) return 0;
+    double cs=scos(bt)*bs, sn=ssin(bt)*bs;
+    SA[0]=cs; SA[1]=-sn; SA[2]=cx-cs*bx+sn*by; SA[3]=sn; SA[4]=cs; SA[5]=cy-sn*bx-cs*by;
+#ifdef BF_TEST
+    fprintf(stderr,"eye sim ncc %.3f s %.3f th %.2f base (%.1f,%.1f) cand (%.1f,%.1f)\n",best,bs,bt/D,bx,by,cx,cy);
+#endif
+    return 1; }
 static void fs_optical(const float *i0,const float *i1,const float *m2,const float *e2,const float *m1,int w,int h,float *out){
     long N=(long)w*h; float *g0=fa(N),*g1=fa(N),*fx=fa(N),*fy=fa(N);
     for(long i=0;i<N;i++){ g0[i]=0.114f*i0[3*i]+0.587f*i0[3*i+1]+0.299f*i0[3*i+2]; g1[i]=0.114f*i1[3*i]+0.587f*i1[3*i+1]+0.299f*i1[3*i+2]; }
-    disflow(g0,g1,m1,w,h,fx,fy);
+    double SA[6]; int ok=eye_similarity(g0,g1,e2,w,h,SA);
+    if(ok){ // a rigid placement keeps the candidate's own expression intact; Fusion blends the seam
+        for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; fx[i]=(float)(SA[0]*x+SA[1]*y+SA[2]-x); fy[i]=(float)(SA[3]*x+SA[4]*y+SA[5]-y); } }
+    else { disflow(g0,g1,m1,w,h,fx,fy,0,0,0); unfold(fx,fy,w,h); }
     for(int y=0;y<h;y++) for(int x=0;x<w;x++){ long i=(long)y*w+x; float sx=x+fx[i], sy=y+fy[i]; float *o=out+8*i;
         o[0]=i0[3*i]; o[1]=i0[3*i+1]; o[2]=i0[3*i+2];
         for(int c=0;c<3;c++) o[3+c]=bil(i1,w,h,3,c,sx,sy,0);
