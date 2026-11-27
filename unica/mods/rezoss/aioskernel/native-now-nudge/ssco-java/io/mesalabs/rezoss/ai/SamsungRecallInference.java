@@ -12,11 +12,24 @@ import java.util.concurrent.atomic.*;
 public final class SamsungRecallInference {
     private static final String ENGINE="com.samsung.android.aioskernelservice";
     private SamsungRecallInference(){}
+    /** The boot script seeds this setting from ro.unica.now_nudge_v73, but it runs from init, whose
+     *  binder calls to the settings service can fail; then the setting stays absent and every request
+     *  fell back to the API-only engine. Read the build property when the setting was never written;
+     *  an explicit 0 still opts out. */
+    private static boolean aiosBackend(Context context) {
+        String value = Settings.Global.getString(context.getContentResolver(), "rezoss_aios_v73_backend");
+        if (value != null) return "1".equals(value.trim());
+        try {
+            Object prop = Class.forName("android.os.SystemProperties").getMethod("get", String.class, String.class)
+                    .invoke(null, "ro.unica.now_nudge_v73", "0");
+            return "1".equals(prop);
+        } catch (Exception | LinkageError unavailable) { return false; }
+    }
     public static String classify(String input){
         RecallSession.clear();
         try {
             Context context=(Context)Class.forName("android.app.ActivityThread").getMethod("currentApplication").invoke(null);
-            if(context==null||Settings.Global.getInt(context.getContentResolver(),"rezoss_aios_v73_backend",0)!=1||
+            if(context==null||!aiosBackend(context)||
                 Settings.Global.getInt(context.getContentResolver(),"rezoss_now_nudge_context_actions",0)!=1)return null;
             if(input==null||input.isEmpty()||input.length()>12000||Looper.myLooper()==Looper.getMainLooper())return "Unsafe";
             String output=request(context,input);

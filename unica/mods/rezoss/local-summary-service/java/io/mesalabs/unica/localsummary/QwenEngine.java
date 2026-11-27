@@ -23,7 +23,7 @@ public final class QwenEngine {
     public static String generate(String input, boolean summary, int budgetMs, boolean foreground) {
         if (app == null || Looper.myLooper() == Looper.getMainLooper()) return null;
         Context context = app;
-        boolean nativeV73 = Settings.Global.getInt(context.getContentResolver(), "rezoss_aios_v73_backend", 0) == 1;
+        boolean nativeV73 = aiosBackend(context);
         final String enginePackage = nativeV73 ? "com.samsung.android.aioskernelservice" : ENGINE;
         final String engineService = nativeV73 ? "io.mesalabs.rezoss.nudge.LocalInferenceService" : ENGINE + ".EngineService";
         try {
@@ -107,6 +107,20 @@ public final class QwenEngine {
                 }, completed ? 20000 : 0);
             } else thread.quitSafely();
         }
+    }
+
+    /** The boot script seeds this setting from ro.unica.now_nudge_v73, but it runs from init, whose
+     *  binder calls to the settings service can fail; then the setting stays absent and every request
+     *  fell back to the API-only engine. Read the build property when the setting was never written;
+     *  an explicit 0 still opts out. */
+    private static boolean aiosBackend(Context context) {
+        String value = Settings.Global.getString(context.getContentResolver(), "rezoss_aios_v73_backend");
+        if (value != null) return "1".equals(value.trim());
+        try {
+            Object prop = Class.forName("android.os.SystemProperties").getMethod("get", String.class, String.class)
+                    .invoke(null, "ro.unica.now_nudge_v73", "0");
+            return "1".equals(prop);
+        } catch (Exception | LinkageError unavailable) { return false; }
     }
 
     private static boolean trustedEngine(Context context, String enginePackage) {
