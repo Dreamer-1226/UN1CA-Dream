@@ -66,6 +66,14 @@ LOG_STEP_IN "- Enabling Vulkan"
 SET_PROP "vendor" "ro.hwui.use_vulkan" "true"
 LOG_STEP_OUT
 
+# Memory Guardian only offers "Speed up the app in use" when Chimera reports the Aggressive mode,
+# which ChimeraManager's PreferenceProvider gates on ro.slmk.use_bg_keeping_policy. The S911N donor
+# sets it; the kona vendor does not. It also lets the mode switch drive lmkd's background keeping
+# policy (lmkd parameter 19), which is userspace lmkd logic with no kernel dependency.
+LOG_STEP_IN "- Enabling the Memory Guardian app focus mode"
+SET_PROP "vendor" "ro.slmk.use_bg_keeping_policy" "true"
+LOG_STEP_OUT
+
 LOG_STEP_IN "- wifi+security Prop"
 SET_PROP "vendor" "wlan.wfd.hdcp" "disabled"
 SET_PROP "vendor" "wifi.interface" "wlan0"
